@@ -1,0 +1,20 @@
+# permissions for end users to view ansibleees.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ansibleee-viewer-role
+rules:
+- apiGroups:
+  - redhat.com
+  resources:
+  - ansibleees
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - redhat.com
+  resources:
+  - ansibleees/status
+  verbs:
+  - get

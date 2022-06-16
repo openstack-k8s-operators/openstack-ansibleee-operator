@@ -1,0 +1,24 @@
+# permissions for end users to edit ansibleees.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ansibleee-editor-role
+rules:
+- apiGroups:
+  - redhat.com
+  resources:
+  - ansibleees
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - redhat.com
+  resources:
+  - ansibleees/status
+  verbs:
+  - get
