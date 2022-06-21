@@ -35,13 +35,27 @@ spec:
           spec:
             description: AnsibleEESpec defines the desired state of AnsibleEE
             properties:
-              foo:
-                description: Foo is an example field of AnsibleEE. Edit ansibleee_types.go
-                  to remove/update
+              command:
                 type: string
+              size:
+                description: Size is the size of the ansibleee deployment
+                format: int32
+                minimum: 0
+                type: integer
+            required:
+            - command
+            - size
             type: object
           status:
             description: AnsibleEEStatus defines the observed state of AnsibleEE
+            properties:
+              nodes:
+                description: Nodes are the names of the ansibleee pods
+                items:
+                  type: string
+                type: array
+            required:
+            - nodes
             type: object
         type: object
     served: true
