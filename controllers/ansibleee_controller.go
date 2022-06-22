@@ -17,12 +17,14 @@ limitations under the License.
 package controllers
 
 import (
-	appsv1 "k8s.io/api/apps/v1"
+	"fmt"
+	"reflect"
+
+	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"reflect"
 
 	"context"
 
@@ -41,11 +43,12 @@ type AnsibleEEReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-//+kubebuilder:rbac:groups=redhat.com,resources=ansibleees,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=redhat.com,resources=ansibleees/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=redhat.com,resources=ansibleees/finalizers,verbs=update
-//+kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
+// +kubebuilder:rbac:groups=redhat.com,resources=ansibleees,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=redhat.com,resources=ansibleees/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=redhat.com,resources=ansibleees/finalizers,verbs=update
+// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
+// +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -77,44 +80,28 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	// Check if the deployment already exists, if not create a new one
-	found := &appsv1.Deployment{}
+	// Check if the job already exists, if not create a new one
+	found := &batchv1.Job{}
 	err = r.Get(ctx, types.NamespacedName{Name: ansibleee.Name, Namespace: ansibleee.Namespace}, found)
 	if err != nil && errors.IsNotFound(err) {
-		// Define a new deployment
-		dep := r.deploymentForAnsibleEE(ansibleee)
-		//fmt.Printf("Creating a new Deployment: Deployment.Namespace %s Deployment.Name %s\n", dep.Namespace, dep.Name)
-		//log.Info("Creating a new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
-		err = r.Create(ctx, dep)
+		// Define a new job
+		job := r.jobForAnsibleEE(ansibleee)
+		//fmt.Printf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name)
+		err = r.Create(ctx, job)
 		if err != nil {
-			//fmt.Printf(err.Error())
-			//log.Error(err, "Failed to create new Deployment", "Deployment.Namespace", dep.Namespace, "Deployment.Name", dep.Name)
+			//fmt.Println(err.Error())
 			return ctrl.Result{}, err
 		}
-		// Deployment created successfully - return and requeue
+		// job created successfully - return and requeue
 		return ctrl.Result{Requeue: true}, nil
 	} else if err != nil {
 		//fmt.Println(err.Error())
-		//log.Error(err, "Failed to get Deployment")
+		//log.Error(err, "Failed to get Job")
 		return ctrl.Result{}, err
 	}
 
-	// Ensure the deployment size is the same as the spec
-	size := ansibleee.Spec.Size
-	if *found.Spec.Replicas != size {
-		found.Spec.Replicas = &size
-		err = r.Update(ctx, found)
-		if err != nil {
-			//fmt.Println(err.Error())
-			//log.Error(err, "Failed to update Deployment", "Deployment.Namespace", found.Namespace, "Deployment.Name", found.Name)
-			return ctrl.Result{}, err
-		}
-		// Spec updated - return and requeue
-		return ctrl.Result{Requeue: true}, nil
-	}
-
 	// Update the AnsibleEE status with the pod names
-	// List the pods for this ansibleee's deployment
+	// List the pods for this ansibleee's job
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(ansibleee.Namespace),
@@ -141,19 +128,19 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
-// deploymentForAnsibleEE returns a ansibleee Deployment object
-func (r *AnsibleEEReconciler) deploymentForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *appsv1.Deployment {
+// jobForAnsibleEE returns a ansibleee Job object
+func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
 	ls := labelsForAnsibleEE(m.Name)
-	replicas := m.Spec.Size
-	command := m.Spec.Command
+	playbook := m.Spec.Playbook
 
-	dep := &appsv1.Deployment{
+	fmt.Println("Playbook: " + playbook)
+
+	dep := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.Name,
 			Namespace: m.Namespace,
 		},
-		Spec: appsv1.DeploymentSpec{
-			Replicas: &replicas,
+		Spec: batchv1.JobSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: ls,
 			},
@@ -163,9 +150,9 @@ func (r *AnsibleEEReconciler) deploymentForAnsibleEE(m *redhatcomv1alpha1.Ansibl
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{{
-						Image:   "quay.io/ansible/awx-ee:latest",
+						Image:   "quay.io/jlarriba/osp-ansible-runner",
 						Name:    "ansibleee",
-						Command: []string{command},
+						Command: []string{"ansible-runner", "run", "/runner", "-p", playbook},
 					}},
 				},
 			},
@@ -195,6 +182,6 @@ func getPodNames(pods []corev1.Pod) []string {
 func (r *AnsibleEEReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&redhatcomv1alpha1.AnsibleEE{}).
-		Owns(&appsv1.Deployment{}).
+		Owns(&batchv1.Job{}).
 		Complete(r)
 }

@@ -28,10 +28,8 @@ type AnsibleEESpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// +kubebuilder:validation:Minimum=0
-	// Size is the size of the ansibleee deployment
-	Size    int32  `json:"size"`
-	Command string `json:"command"`
+	// Playbook is the playbook that ansible will run on this execution
+	Playbook string `json:"playbook"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE

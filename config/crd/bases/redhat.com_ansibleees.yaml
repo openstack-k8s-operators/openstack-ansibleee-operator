@@ -35,16 +35,12 @@ spec:
           spec:
             description: AnsibleEESpec defines the desired state of AnsibleEE
             properties:
-              command:
+              playbook:
+                description: Playbook is the playbook that ansible will run on this
+                  execution
                 type: string
-              size:
-                description: Size is the size of the ansibleee deployment
-                format: int32
-                minimum: 0
-                type: integer
             required:
-            - command
-            - size
+            - playbook
             type: object
           status:
             description: AnsibleEEStatus defines the observed state of AnsibleEE
