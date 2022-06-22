@@ -70,12 +70,12 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			//fmt.Println("AnsibleEE resource not found. Ignoring since object must be deleted")
+			fmt.Println("AnsibleEE resource not found. Ignoring since object must be deleted")
 			//log.Info("AnsibleEE resource not found. Ignoring since object must be deleted")
 			return ctrl.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
-		//fmt.Println(err.Error())
+		fmt.Println(err.Error())
 		//log.Error(err, "Failed to get AnsibleEE")
 		return ctrl.Result{}, err
 	}
@@ -86,16 +86,16 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new job
 		job := r.jobForAnsibleEE(ansibleee)
-		//fmt.Printf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name)
+		fmt.Printf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name)
 		err = r.Create(ctx, job)
 		if err != nil {
-			//fmt.Println(err.Error())
+			fmt.Println(err.Error())
 			return ctrl.Result{}, err
 		}
-		// job created successfully - return and requeue
+		fmt.Println("job created successfully - return and requeue")
 		return ctrl.Result{Requeue: true}, nil
 	} else if err != nil {
-		//fmt.Println(err.Error())
+		fmt.Println(err.Error())
 		//log.Error(err, "Failed to get Job")
 		return ctrl.Result{}, err
 	}
@@ -135,20 +135,18 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 
 	fmt.Println("Playbook: " + playbook)
 
-	dep := &batchv1.Job{
+	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      m.Name,
 			Namespace: m.Namespace,
 		},
 		Spec: batchv1.JobSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: ls,
-			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
+					RestartPolicy: "OnFailure",
 					Containers: []corev1.Container{{
 						Image:   "quay.io/jlarriba/osp-ansible-runner",
 						Name:    "ansibleee",
@@ -159,8 +157,8 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 		},
 	}
 	// Set AnsibleEE instance as the owner and controller
-	ctrl.SetControllerReference(m, dep, r.Scheme)
-	return dep
+	ctrl.SetControllerReference(m, job, r.Scheme)
+	return job
 }
 
 // labelsForAnsibleEE returns the labels for selecting the resources

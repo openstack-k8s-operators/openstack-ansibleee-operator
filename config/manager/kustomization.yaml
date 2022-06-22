@@ -13,4 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: quay.io/jlarriba/ansibleee-operator
-  newTag: v0.0.17
+  newTag: v0.0.18
