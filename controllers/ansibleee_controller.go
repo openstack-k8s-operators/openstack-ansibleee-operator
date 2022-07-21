@@ -156,6 +156,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 			},
 		},
 	}
+
 	// Set AnsibleEE instance as the owner and controller
 	ctrl.SetControllerReference(m, job, r.Scheme)
 	return job
