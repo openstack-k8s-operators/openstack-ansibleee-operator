@@ -132,6 +132,14 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
 	ls := labelsForAnsibleEE(m.Name)
 	playbook := m.Spec.Playbook
+	image := m.Spec.Image
+	name := m.Spec.Name
+
+	command := m.Spec.Command
+
+	if len(command) == 0 {
+		command = []string{"ansible-runner", "run", "/runner", "-p", playbook}
+	}
 
 	fmt.Println("Playbook: " + playbook)
 
@@ -148,9 +156,9 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 				Spec: corev1.PodSpec{
 					RestartPolicy: "OnFailure",
 					Containers: []corev1.Container{{
-						Image:   "quay.io/jlarriba/osp-ansible-runner",
-						Name:    "ansibleee",
-						Command: []string{"ansible-runner", "run", "/runner", "-p", playbook},
+						Image:   image,
+						Name:    name,
+						Command: command,
 					}},
 				},
 			},
