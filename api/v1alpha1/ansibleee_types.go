@@ -38,6 +38,12 @@ type AnsibleEESpec struct {
 	// Name is the name of the internal container inside the pod
 	// +kubebuilder:default:="ansibleee"
 	Name string `json:"name,omitempty"`
+	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod
+	// +kubebuilder:default:="OnFailure"
+	RestartPolicy string `json:"restartPolicy,omitempty"`
+	// Uid is the userid that will be used to run the container
+	// +kubebuilder:default:=1001
+	Uid int64 `json:"uid,omitempty"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE

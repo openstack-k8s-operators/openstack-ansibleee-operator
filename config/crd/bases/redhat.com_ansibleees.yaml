@@ -54,6 +54,16 @@ spec:
                 description: Playbook is the playbook that ansible will run on this
                   execution
                 type: string
+              restartPolicy:
+                default: OnFailure
+                description: RestartPolicy is the policy applied to the Job on whether
+                  it needs to restart the Pod
+                type: string
+              uid:
+                default: 1001
+                description: Uid is the userid that will be used to run the container
+                format: int64
+                type: integer
             type: object
           status:
             description: AnsibleEEStatus defines the observed state of AnsibleEE

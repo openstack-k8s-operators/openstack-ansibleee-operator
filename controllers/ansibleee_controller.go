@@ -131,17 +131,12 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 // jobForAnsibleEE returns a ansibleee Job object
 func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
 	ls := labelsForAnsibleEE(m.Name)
-	playbook := m.Spec.Playbook
-	image := m.Spec.Image
-	name := m.Spec.Name
 
 	command := m.Spec.Command
 
 	if len(command) == 0 {
-		command = []string{"ansible-runner", "run", "/runner", "-p", playbook}
+		command = []string{"ansible-runner", "run", "/runner", "-p", m.Spec.Playbook}
 	}
-
-	fmt.Println("Playbook: " + playbook)
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -154,10 +149,13 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
-					RestartPolicy: "OnFailure",
+					SecurityContext: &corev1.PodSecurityContext{
+						RunAsUser: &m.Spec.Uid,
+					},
+					RestartPolicy: corev1.RestartPolicy(m.Spec.RestartPolicy),
 					Containers: []corev1.Container{{
-						Image:   image,
-						Name:    name,
+						Image:   m.Spec.Image,
+						Name:    m.Spec.Name,
 						Command: command,
 					}},
 				},
