@@ -1,0 +1,10 @@
+apiVersion: redhat.com/v1alpha1
+kind: AnsibleEE
+metadata:
+  name: ansibleee-jlarriba
+spec:
+  playbook: "test.yaml"
+  #image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
+  image: "quay.rdoproject.org/tripleowallabycentos8/openstack-tripleo-ansible-ee:29ea3eab2a25a68e5f5d3481a23b3671"
+  command: ["/usr/bin/sleep", "3600"]
+  #command: ["ansible-runner", "run", "/runner", "-p", "test.yaml", "-vvv"]
