@@ -33,8 +33,8 @@ type AnsibleEESpec struct {
 	// Image is the container image that will execute the ansible command
 	// +kubebuilder:default:="quay.io/jlarriba/openstack-tripleo-ansible-ee"
 	Image string `json:"image,omitempty"`
-	// Command is the command executed by the image
-	Command []string `json:"command,omitempty"`
+	// Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored.
+	Args []string `json:"args,omitempty"`
 	// Name is the name of the internal container inside the pod
 	// +kubebuilder:default:="ansibleee"
 	Name string `json:"name,omitempty"`

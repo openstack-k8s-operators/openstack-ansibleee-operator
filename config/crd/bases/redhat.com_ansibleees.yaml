@@ -35,8 +35,9 @@ spec:
           spec:
             description: AnsibleEESpec defines the desired state of AnsibleEE
             properties:
-              command:
-                description: Command is the command executed by the image
+              args:
+                description: Args are the command plus the playbook executed by the
+                  image. If args is passed, Playbook is ignored.
                 items:
                   type: string
                 type: array

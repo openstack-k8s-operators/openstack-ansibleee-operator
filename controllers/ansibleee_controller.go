@@ -132,10 +132,10 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
 	ls := labelsForAnsibleEE(m.Name)
 
-	command := m.Spec.Command
+	args := m.Spec.Args
 
-	if len(command) == 0 {
-		command = []string{"ansible-runner", "run", "/runner", "-p", m.Spec.Playbook}
+	if len(args) == 0 {
+		args = []string{"ansible-runner run /runner -p", m.Spec.Playbook}
 	}
 
 	job := &batchv1.Job{
@@ -149,14 +149,11 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
-					SecurityContext: &corev1.PodSecurityContext{
-						RunAsUser: &m.Spec.Uid,
-					},
 					RestartPolicy: corev1.RestartPolicy(m.Spec.RestartPolicy),
 					Containers: []corev1.Container{{
-						Image:   m.Spec.Image,
-						Name:    m.Spec.Name,
-						Command: command,
+						Image: m.Spec.Image,
+						Name:  m.Spec.Name,
+						Args:  args,
 					}},
 				},
 			},
