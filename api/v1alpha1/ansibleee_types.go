@@ -44,6 +44,8 @@ type AnsibleEESpec struct {
 	// Uid is the userid that will be used to run the container
 	// +kubebuilder:default:=1001
 	Uid int64 `json:"uid,omitempty"`
+	// Inventory is the inventory that the ansible playbook will use to launch the job
+	Inventory string `json:"inventory,omitempty"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE

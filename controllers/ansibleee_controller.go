@@ -26,11 +26,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
-	configmap "github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
-	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
-	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
-	util "github.com/openstack-k8s-operators/lib-common/modules/common/util"
-
 	"context"
 
 	"github.com/go-logr/logr"
@@ -77,6 +72,27 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	//configMapVars := make(map[string]env.Setter)
 	//r.configMapForAnsibleEE(ctx, instance, helper, &configMapVars)
 
+	if len(instance.Spec.Inventory) > 0 {
+		foundCM := &corev1.ConfigMap{}
+		err = r.Get(ctx, types.NamespacedName{Name: "inventory-configmap", Namespace: instance.Namespace}, foundCM)
+		if err != nil && errors.IsNotFound(err) {
+			// Define a new configmap
+			cm := r.createConfigMapInventory(instance)
+			fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "inventory-configmap")
+			err = r.Create(ctx, cm)
+			if err != nil {
+				fmt.Println(err.Error())
+				return ctrl.Result{}, err
+			}
+			fmt.Println("configmap created successfully - return and requeue")
+			return ctrl.Result{Requeue: true}, nil
+		} else if err != nil {
+			fmt.Println(err.Error())
+			//log.Error(err, "Failed to get Job")
+			return ctrl.Result{}, err
+		}
+	}
+
 	// Check if the job already exists, if not create a new one
 	foundJob := &batchv1.Job{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
@@ -90,25 +106,6 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 			return ctrl.Result{}, err
 		}
 		fmt.Println("job created successfully - return and requeue")
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		fmt.Println(err.Error())
-		//log.Error(err, "Failed to get Job")
-		return ctrl.Result{}, err
-	}
-
-	foundCM := &corev1.ConfigMap{}
-	err = r.Get(ctx, types.NamespacedName{Name: "inventory-configmap", Namespace: instance.Namespace}, foundCM)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new configmap
-		cm := r.createConfigMapInventory(instance)
-		fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "inventory-configmap")
-		err = r.Create(ctx, cm)
-		if err != nil {
-			fmt.Println(err.Error())
-			return ctrl.Result{}, err
-		}
-		fmt.Println("configmap created successfully - return and requeue")
 		return ctrl.Result{Requeue: true}, nil
 	} else if err != nil {
 		fmt.Println(err.Error())
@@ -176,41 +173,67 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 		args = []string{"ansible-runner run /runner -p", instance.Spec.Playbook}
 	}
 
-	job := &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
-		},
-		Spec: batchv1.JobSpec{
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: ls,
-				},
-				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
-					Containers: []corev1.Container{{
-						Image: instance.Spec.Image,
-						Name:  instance.Spec.Name,
-						Args:  args,
-						VolumeMounts: []corev1.VolumeMount{{
-							Name:      "inventory",
-							MountPath: "/runner/inventory/inventory.yaml",
-							SubPath:   "inventory.yaml",
+	var job *batchv1.Job
+
+	if len(instance.Spec.Inventory) > 0 {
+		job = &batchv1.Job{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name,
+				Namespace: instance.Namespace,
+			},
+			Spec: batchv1.JobSpec{
+				Template: corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: ls,
+					},
+					Spec: corev1.PodSpec{
+						RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
+						Containers: []corev1.Container{{
+							Image: instance.Spec.Image,
+							Name:  instance.Spec.Name,
+							Args:  args,
+							VolumeMounts: []corev1.VolumeMount{{
+								Name:      "inventory",
+								MountPath: "/runner/inventory/inventory.yaml",
+								SubPath:   "inventory.yaml",
+							}},
 						}},
-					}},
-					Volumes: []corev1.Volume{{
-						Name: "inventory",
-						VolumeSource: corev1.VolumeSource{
-							ConfigMap: &corev1.ConfigMapVolumeSource{
-								LocalObjectReference: corev1.LocalObjectReference{
-									Name: "inventory-configmap",
+						Volumes: []corev1.Volume{{
+							Name: "inventory",
+							VolumeSource: corev1.VolumeSource{
+								ConfigMap: &corev1.ConfigMapVolumeSource{
+									LocalObjectReference: corev1.LocalObjectReference{
+										Name: "inventory-configmap",
+									},
 								},
 							},
-						},
-					}},
+						}},
+					},
 				},
 			},
-		},
+		}
+	} else {
+		job = &batchv1.Job{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      instance.Name,
+				Namespace: instance.Namespace,
+			},
+			Spec: batchv1.JobSpec{
+				Template: corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: ls,
+					},
+					Spec: corev1.PodSpec{
+						RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
+						Containers: []corev1.Container{{
+							Image: instance.Spec.Image,
+							Name:  instance.Spec.Name,
+							Args:  args,
+						}},
+					},
+				},
+			},
+		}
 	}
 
 	// Set AnsibleEE instance as the owner and controller
@@ -220,7 +243,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 
 func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
 	data := map[string]string{
-		"inventory.yaml": "localhost",
+		"inventory.yaml": instance.Spec.Inventory,
 	}
 
 	cm := &corev1.ConfigMap{
@@ -232,36 +255,6 @@ func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alph
 	}
 
 	return cm
-}
-
-// configMapForAnsibleEE returns an empty ansibleee ConfigMap object
-func (r *AnsibleEEReconciler) configMapForAnsibleEE(
-	ctx context.Context,
-	instance *redhatcomv1alpha1.AnsibleEE,
-	h *helper.Helper,
-	envVars *map[string]env.Setter) {
-
-	customData := map[string]string{}
-
-	templateParameters := make(map[string]interface{})
-
-	cms := []util.Template{
-		{
-			//Name:          fmt.Sprintf("%s-inventory", instance.Name),
-			Name:          "inventory-configmap",
-			Namespace:     instance.Namespace,
-			Type:          util.TemplateTypeConfig,
-			InstanceType:  instance.Kind,
-			CustomData:    customData,
-			ConfigOptions: templateParameters,
-			Labels:        labelsForAnsibleEE(instance.Name),
-		},
-	}
-
-	err := configmap.EnsureConfigMaps(ctx, h, instance, cms, envVars)
-	if err != nil {
-		fmt.Println("Cannot create configmap")
-	}
 }
 
 // labelsForAnsibleEE returns the labels for selecting the resources
