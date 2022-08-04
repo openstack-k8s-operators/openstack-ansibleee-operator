@@ -26,10 +26,16 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 
+	configmap "github.com/openstack-k8s-operators/lib-common/modules/common/configmap"
+	env "github.com/openstack-k8s-operators/lib-common/modules/common/env"
+	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	util "github.com/openstack-k8s-operators/lib-common/modules/common/util"
+
 	"context"
 
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -39,14 +45,15 @@ import (
 // AnsibleEEReconciler reconciles a AnsibleEE object
 type AnsibleEEReconciler struct {
 	client.Client
-	Log    logr.Logger
-	Scheme *runtime.Scheme
+	Kclient kubernetes.Interface
+	Log     logr.Logger
+	Scheme  *runtime.Scheme
 }
 
 // +kubebuilder:rbac:groups=redhat.com,resources=ansibleees,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=redhat.com,resources=ansibleees/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=redhat.com,resources=ansibleees/finalizers,verbs=update
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
 
@@ -62,30 +69,20 @@ type AnsibleEEReconciler struct {
 func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	//log := r.Log.WithValues("ansibleee", req.NamespacedName)
 
-	// Fetch the AnsibleEE instance
-	ansibleee := &redhatcomv1alpha1.AnsibleEE{}
-	err := r.Get(ctx, req.NamespacedName, ansibleee)
+	instance, err := r.getAnsibleeeInstance(ctx, req)
 	if err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
-			fmt.Println("AnsibleEE resource not found. Ignoring since object must be deleted")
-			//log.Info("AnsibleEE resource not found. Ignoring since object must be deleted")
-			return ctrl.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
-		fmt.Println(err.Error())
-		//log.Error(err, "Failed to get AnsibleEE")
 		return ctrl.Result{}, err
 	}
 
+	//configMapVars := make(map[string]env.Setter)
+	//r.configMapForAnsibleEE(ctx, instance, helper, &configMapVars)
+
 	// Check if the job already exists, if not create a new one
-	found := &batchv1.Job{}
-	err = r.Get(ctx, types.NamespacedName{Name: ansibleee.Name, Namespace: ansibleee.Namespace}, found)
+	foundJob := &batchv1.Job{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new job
-		job := r.jobForAnsibleEE(ansibleee)
+		job := r.jobForAnsibleEE(instance)
 		fmt.Printf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name)
 		err = r.Create(ctx, job)
 		if err != nil {
@@ -100,12 +97,31 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
+	foundCM := &corev1.ConfigMap{}
+	err = r.Get(ctx, types.NamespacedName{Name: "inventory-configmap", Namespace: instance.Namespace}, foundCM)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new configmap
+		cm := r.createConfigMapInventory(instance)
+		fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "inventory-configmap")
+		err = r.Create(ctx, cm)
+		if err != nil {
+			fmt.Println(err.Error())
+			return ctrl.Result{}, err
+		}
+		fmt.Println("configmap created successfully - return and requeue")
+		return ctrl.Result{Requeue: true}, nil
+	} else if err != nil {
+		fmt.Println(err.Error())
+		//log.Error(err, "Failed to get Job")
+		return ctrl.Result{}, err
+	}
+
 	// Update the AnsibleEE status with the pod names
 	// List the pods for this ansibleee's job
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
-		client.InNamespace(ansibleee.Namespace),
-		client.MatchingLabels(labelsForAnsibleEE(ansibleee.Name)),
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels(labelsForAnsibleEE(instance.Name)),
 	}
 	if err = r.List(ctx, podList, listOpts...); err != nil {
 		//fmt.Println(err.Error())
@@ -115,9 +131,9 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	podNames := getPodNames(podList.Items)
 
 	// Update status.Nodes if needed
-	if !reflect.DeepEqual(podNames, ansibleee.Status.Nodes) {
-		ansibleee.Status.Nodes = podNames
-		err := r.Status().Update(ctx, ansibleee)
+	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
+		instance.Status.Nodes = podNames
+		err := r.Status().Update(ctx, instance)
 		if err != nil {
 			//fmt.Println(err.Error())
 			//log.Error(err, "Failed to update AnsibleEE status")
@@ -128,20 +144,42 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
-// jobForAnsibleEE returns a ansibleee Job object
-func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
-	ls := labelsForAnsibleEE(m.Name)
+func (r *AnsibleEEReconciler) getAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.AnsibleEE, error) {
+	// Fetch the AnsibleEE instance
+	instance := &redhatcomv1alpha1.AnsibleEE{}
+	err := r.Get(ctx, req.NamespacedName, instance)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			// Request object not found, could have been deleted after reconcile request.
+			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+			// Return and don't requeue
+			fmt.Println("AnsibleEE resource not found. Ignoring since object must be deleted")
+			//log.Info("AnsibleEE resource not found. Ignoring since object must be deleted")
+			return &redhatcomv1alpha1.AnsibleEE{}, nil
+		}
+		// Error reading the object - requeue the request.
+		fmt.Println(err.Error())
+		//log.Error(err, "Failed to get AnsibleEE")
+		return &redhatcomv1alpha1.AnsibleEE{}, err
+	}
 
-	args := m.Spec.Args
+	return instance, nil
+}
+
+// jobForAnsibleEE returns a ansibleee Job object
+func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
+	ls := labelsForAnsibleEE(instance.Name)
+
+	args := instance.Spec.Args
 
 	if len(args) == 0 {
-		args = []string{"ansible-runner run /runner -p", m.Spec.Playbook}
+		args = []string{"ansible-runner run /runner -p", instance.Spec.Playbook}
 	}
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      m.Name,
-			Namespace: m.Namespace,
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
 		},
 		Spec: batchv1.JobSpec{
 			Template: corev1.PodTemplateSpec{
@@ -149,11 +187,26 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 					Labels: ls,
 				},
 				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicy(m.Spec.RestartPolicy),
+					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 					Containers: []corev1.Container{{
-						Image: m.Spec.Image,
-						Name:  m.Spec.Name,
+						Image: instance.Spec.Image,
+						Name:  instance.Spec.Name,
 						Args:  args,
+						VolumeMounts: []corev1.VolumeMount{{
+							Name:      "inventory",
+							MountPath: "/runner/inventory/inventory.yaml",
+							SubPath:   "inventory.yaml",
+						}},
+					}},
+					Volumes: []corev1.Volume{{
+						Name: "inventory",
+						VolumeSource: corev1.VolumeSource{
+							ConfigMap: &corev1.ConfigMapVolumeSource{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: "inventory-configmap",
+								},
+							},
+						},
 					}},
 				},
 			},
@@ -161,8 +214,54 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(m *redhatcomv1alpha1.AnsibleEE) *b
 	}
 
 	// Set AnsibleEE instance as the owner and controller
-	ctrl.SetControllerReference(m, job, r.Scheme)
+	ctrl.SetControllerReference(instance, job, r.Scheme)
 	return job
+}
+
+func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
+	data := map[string]string{
+		"inventory.yaml": "localhost",
+	}
+
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "inventory-configmap",
+			Namespace: instance.Namespace,
+		},
+		Data: data,
+	}
+
+	return cm
+}
+
+// configMapForAnsibleEE returns an empty ansibleee ConfigMap object
+func (r *AnsibleEEReconciler) configMapForAnsibleEE(
+	ctx context.Context,
+	instance *redhatcomv1alpha1.AnsibleEE,
+	h *helper.Helper,
+	envVars *map[string]env.Setter) {
+
+	customData := map[string]string{}
+
+	templateParameters := make(map[string]interface{})
+
+	cms := []util.Template{
+		{
+			//Name:          fmt.Sprintf("%s-inventory", instance.Name),
+			Name:          "inventory-configmap",
+			Namespace:     instance.Namespace,
+			Type:          util.TemplateTypeConfig,
+			InstanceType:  instance.Kind,
+			CustomData:    customData,
+			ConfigOptions: templateParameters,
+			Labels:        labelsForAnsibleEE(instance.Name),
+		},
+	}
+
+	err := configmap.EnsureConfigMaps(ctx, h, instance, cms, envVars)
+	if err != nil {
+		fmt.Println("Cannot create configmap")
+	}
 }
 
 // labelsForAnsibleEE returns the labels for selecting the resources
@@ -185,5 +284,6 @@ func (r *AnsibleEEReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&redhatcomv1alpha1.AnsibleEE{}).
 		Owns(&batchv1.Job{}).
+		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
