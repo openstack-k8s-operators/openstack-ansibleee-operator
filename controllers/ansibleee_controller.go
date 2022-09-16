@@ -170,7 +170,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	args := instance.Spec.Args
 
 	if len(args) == 0 {
-		args = []string{"ansible-runner run /runner -p", instance.Spec.Playbook}
+		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
 
 	var job *batchv1.Job

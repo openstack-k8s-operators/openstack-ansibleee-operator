@@ -3,14 +3,12 @@ kind: AnsibleEE
 metadata:
   name: ansibleee-jlarriba
 spec:
+  # We can specify either playbook, which will run with default ansible-runner options,
+  # or args, which allows specify the whole command that we want to execute
   playbook: "test.yaml"
+  # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
   image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
   inventory: |
           all:
             hosts:
               localhost
-  #image: "quay.rdoproject.org/repository/tripleomastercentos9/openstack-tripleo-ansible-ee"
-  #image: "quay.rdoproject.org/tripleowallabycentos8/openstack-tripleo-ansible-ee:29ea3eab2a25a68e5f5d3481a23b3671"
-  #command: ["/usr/bin/sleep", "3600"]
-  #command: ["ansible-runner run /runner -vvv -p", "test.yaml"]
-  #command: 
