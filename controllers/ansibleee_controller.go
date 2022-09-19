@@ -19,6 +19,10 @@ package controllers
 import (
 	"fmt"
 	"reflect"
+	"io"
+	"os"
+	"bufio"
+	"path/filepath"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -255,6 +259,57 @@ func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alph
 	}
 
 	return cm
+}
+
+func lookupInventorySource(path string, file string) string {
+	ok, err := CheckEmpty(path)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	var source_bucket []string
+
+	if ok == false {
+		data, err := os.Open(filepath.Join(path, file))
+		if err != nil {
+			panic(err)
+		}
+		defer data.Close()
+
+		obj := bufio.NewScanner(data)
+		for obj.Scan() {
+			source_bucket = append(source_bucket, obj.Text())
+		}
+
+		Check(obj.Err())
+	}
+
+	for i := 0; i <= len(source_bucket); i++ {
+		fmt.Printf("%s \n", source_bucket[i])
+		// run some sort of initil mapping
+	}
+
+	return source_bucket
+}
+
+func CheckEmpty(name string) (bool, error) {
+	f, err := os.Open(name)
+
+	if err != nil {
+		return false, err
+	}
+
+	defer f.Close()
+
+	// read in ONLY one file
+	_, err = f.Readdir(1)
+
+	if err == io.EOF {
+		return true, nil
+	}
+
+	return false, err
 }
 
 // labelsForAnsibleEE returns the labels for selecting the resources
