@@ -12,3 +12,10 @@ spec:
           all:
             hosts:
               localhost
+  configs:
+    - name: swift-configmap
+      mountpath: /runner/configs/swift-configmap
+    - name: test-configmap-1
+      mountpath: /runner/configs/test-configmap-1
+    - name: test-configmap-2
+      mountpath: /runner/configs/test-configmap-2

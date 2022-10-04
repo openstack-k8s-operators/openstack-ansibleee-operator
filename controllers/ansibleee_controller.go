@@ -173,68 +173,29 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
 
-	var job *batchv1.Job
-
-	if len(instance.Spec.Inventory) > 0 {
-		job = &batchv1.Job{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      instance.Name,
-				Namespace: instance.Namespace,
-			},
-			Spec: batchv1.JobSpec{
-				Template: corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: ls,
-					},
-					Spec: corev1.PodSpec{
-						RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
-						Containers: []corev1.Container{{
-							Image: instance.Spec.Image,
-							Name:  instance.Spec.Name,
-							Args:  args,
-							VolumeMounts: []corev1.VolumeMount{{
-								Name:      "inventory",
-								MountPath: "/runner/inventory/inventory.yaml",
-								SubPath:   "inventory.yaml",
-							}},
-						}},
-						Volumes: []corev1.Volume{{
-							Name: "inventory",
-							VolumeSource: corev1.VolumeSource{
-								ConfigMap: &corev1.ConfigMapVolumeSource{
-									LocalObjectReference: corev1.LocalObjectReference{
-										Name: "inventory-configmap",
-									},
-								},
-							},
-						}},
-					},
+	job := &batchv1.Job{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
+		},
+		Spec: batchv1.JobSpec{
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: ls,
+				},
+				Spec: corev1.PodSpec{
+					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
+					Containers: []corev1.Container{{
+						Image: instance.Spec.Image,
+						Name:  instance.Spec.Name,
+						Args:  args,
+					}},
 				},
 			},
-		}
-	} else {
-		job = &batchv1.Job{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      instance.Name,
-				Namespace: instance.Namespace,
-			},
-			Spec: batchv1.JobSpec{
-				Template: corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: ls,
-					},
-					Spec: corev1.PodSpec{
-						RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
-						Containers: []corev1.Container{{
-							Image: instance.Spec.Image,
-							Name:  instance.Spec.Name,
-							Args:  args,
-						}},
-					},
-				},
-			},
-		}
+		},
 	}
+
+	addMounts(instance, job)
 
 	// Set AnsibleEE instance as the owner and controller
 	ctrl.SetControllerReference(instance, job, r.Scheme)
@@ -270,6 +231,48 @@ func getPodNames(pods []corev1.Pod) []string {
 		podNames = append(podNames, pod.Name)
 	}
 	return podNames
+}
+
+func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
+	var volumeMounts []corev1.VolumeMount
+	var volumes []corev1.Volume
+
+	if len(instance.Spec.Inventory) > 0 {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "inventory",
+			MountPath: "/runner/inventory/inventory.yaml",
+			SubPath:   "inventory.yaml",
+		})
+		volumes = append(volumes, corev1.Volume{
+			Name: "inventory",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "inventory-configmap",
+					},
+				},
+			},
+		})
+	}
+
+	for i := 0; i < len(instance.Spec.Configs); i++ {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      instance.Spec.Configs[i].Name,
+			MountPath: instance.Spec.Configs[i].MountPath,
+		})
+		volumes = append(volumes, corev1.Volume{
+			Name: instance.Spec.Configs[i].Name,
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: instance.Spec.Configs[i].Name,
+					},
+				},
+			},
+		})
+	}
+	job.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
+	job.Spec.Template.Spec.Volumes = volumes
 }
 
 // SetupWithManager sets up the controller with the Manager.

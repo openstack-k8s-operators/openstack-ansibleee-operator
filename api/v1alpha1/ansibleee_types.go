@@ -46,6 +46,8 @@ type AnsibleEESpec struct {
 	Uid int64 `json:"uid,omitempty"`
 	// Inventory is the inventory that the ansible playbook will use to launch the job
 	Inventory string `json:"inventory,omitempty"`
+	// Config allows to pass a list of Config
+	Configs []Config `json:"configs,omitempty"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE
@@ -76,6 +78,14 @@ type AnsibleEEList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	Items           []AnsibleEE `json:"items"`
+}
+
+// Config is a specification of where to mount a certain ConfigMap object
+type Config struct {
+	// Name is the name of the ConfigMap that we want to mount
+	Name string `json:"name"`
+	// MountPoint is the directory of the container where the ConfigMap will be mounted
+	MountPath string `json:"mountpath"`
 }
 
 func init() {
