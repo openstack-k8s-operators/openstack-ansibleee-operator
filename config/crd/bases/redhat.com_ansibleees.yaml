@@ -41,6 +41,12 @@ spec:
                 items:
                   type: string
                 type: array
+              backoffLimit:
+                default: 6
+                description: BackoffLimimt allows to define the maximum number of
+                  retried executions.
+                format: int32
+                type: integer
               configs:
                 description: Config allows to pass a list of Config
                 items:
@@ -67,7 +73,7 @@ spec:
                 type: string
               inventory:
                 description: Inventory is the inventory that the ansible playbook
-                  will use to launch the job
+                  will use to launch the job.
                 type: string
               name:
                 default: ansibleee
@@ -79,13 +85,19 @@ spec:
                   execution
                 type: string
               restartPolicy:
-                default: OnFailure
+                default: Never
                 description: RestartPolicy is the policy applied to the Job on whether
-                  it needs to restart the Pod
+                  it needs to restart the Pod. It can be "OnFailure" or "Never".
                 type: string
+              ttlSecondsAfterFinished:
+                default: 86400
+                description: TTLSecondsAfterFinished specified the number of seconds
+                  the job will be kept in Kubernetes after completion.
+                format: int32
+                type: integer
               uid:
                 default: 1001
-                description: Uid is the userid that will be used to run the container
+                description: Uid is the userid that will be used to run the container.
                 format: int64
                 type: integer
             type: object

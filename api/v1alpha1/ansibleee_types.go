@@ -38,16 +38,22 @@ type AnsibleEESpec struct {
 	// Name is the name of the internal container inside the pod
 	// +kubebuilder:default:="ansibleee"
 	Name string `json:"name,omitempty"`
-	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod
-	// +kubebuilder:default:="OnFailure"
+	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be "OnFailure" or "Never".
+	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
-	// Uid is the userid that will be used to run the container
+	// Uid is the userid that will be used to run the container.
 	// +kubebuilder:default:=1001
 	Uid int64 `json:"uid,omitempty"`
-	// Inventory is the inventory that the ansible playbook will use to launch the job
+	// Inventory is the inventory that the ansible playbook will use to launch the job.
 	Inventory string `json:"inventory,omitempty"`
 	// Config allows to pass a list of Config
 	Configs []Config `json:"configs,omitempty"`
+	// BackoffLimimt allows to define the maximum number of retried executions.
+	// +kubebuilder:default:=6
+	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
+	// TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion.
+	// +kubebuilder:default:=86400
+	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE

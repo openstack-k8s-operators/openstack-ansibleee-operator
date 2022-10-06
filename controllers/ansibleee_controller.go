@@ -179,6 +179,8 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 			Namespace: instance.Namespace,
 		},
 		Spec: batchv1.JobSpec{
+			TTLSecondsAfterFinished: instance.Spec.TTLSecondsAfterFinished,
+			BackoffLimit:            instance.Spec.BackoffLimit,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
 					Labels: ls,
