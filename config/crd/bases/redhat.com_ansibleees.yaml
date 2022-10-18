@@ -1855,6 +1855,10 @@ spec:
                 description: Playbook is the playbook that ansible will run on this
                   execution
                 type: string
+              plugin:
+                description: Plugin is the location for the source plugin that will
+                  build dynamic inventory if EnablePlugin is true.
+                type: string
               restartPolicy:
                 default: Never
                 description: RestartPolicy is the policy applied to the Job on whether
@@ -1922,6 +1926,8 @@ spec:
                 description: UID is the userid that will be used to run the container.
                 format: int64
                 type: integer
+            required:
+            - enablePlugin
             type: object
           status:
             description: AnsibleEEStatus defines the observed state of AnsibleEE

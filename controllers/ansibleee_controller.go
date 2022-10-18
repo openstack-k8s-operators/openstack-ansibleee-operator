@@ -96,6 +96,66 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	return ctrl.Result{}, nil
 }
 
+func lookupInventorySource(path string, file string) bool {
+	ok, err := check_path(path)
+
+	if err != nil {
+		// log err
+		fmt.Println(err)
+	}
+
+	var source_bucket []string
+
+	if ok == false {
+		data, err := os.Open(filepath.Join(path, file))
+		if err != nil {
+			panic(err)
+		}
+		defer data.Close()
+
+		obj := bufio.NewScanner(data)
+		for obj.Scan() {
+			source_bucket = append(source_bucket, obj.Text())
+		}
+
+		if obj.Err() != nil {
+			panic(obj.Err())
+		}
+	}
+
+	//for i := 0; i <= len(source_bucket); i++ {
+		//log something here
+	//	fmt.Printf("%s \n", source_bucket[i])
+	//}
+
+	if len(source_bucket) == 0 {
+		//log failure
+		// nothing listed in the file
+		return false
+	}
+
+	return true
+}
+
+func check_path(name string) (bool, error) {
+	f, err := os.Open(name)
+
+	if err != nil {
+		return false, err
+	}
+
+	defer f.Close()
+
+	// read in ONLY one file
+	_, err = f.Readdir(1)
+
+	if err == io.EOF {
+		return true, nil
+	}
+
+	return false, err
+}
+
 func (r *AnsibleEEReconciler) getAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.AnsibleEE, error) {
 	// Fetch the AnsibleEE instance
 	instance := &redhatcomv1alpha1.AnsibleEE{}
