@@ -35,6 +35,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	redhatcomv1alpha1 "github.com/openstack-k8s-operators/ansibleee-operator/api/v1alpha1"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 )
 
 // AnsibleEEReconciler reconciles a AnsibleEE object
@@ -182,6 +183,8 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	var volumeMounts []corev1.VolumeMount
 	var volumes []corev1.Volume
 
+	// (fpantano) Configs can be optional, but we can cleanup this part as long
+	// as we're able to extend these structures using ExtraMounts
 	for i := 0; i < len(instance.Spec.Configs); i++ {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      instance.Spec.Configs[i].Name,
@@ -198,6 +201,18 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 			},
 		})
 	}
+
+	// ExtraMounts propagation: for each volume defined in the top-level CR
+	// the propagation function provided by lib-common/modules/storage is
+	// called, and the resulting corev1.Volumes and corev1.Mounts are added
+	// to the main list defined by the ansible operator
+	for _, exv := range instance.Spec.ExtraMounts {
+		for _, vol := range exv.Propagate([]storage.PropagationType{storage.Compute}) {
+			volumes = append(volumes, vol.Volumes...)
+			volumeMounts = append(volumeMounts, vol.Mounts...)
+		}
+	}
+
 	job.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 	job.Spec.Template.Spec.Volumes = volumes
 }
