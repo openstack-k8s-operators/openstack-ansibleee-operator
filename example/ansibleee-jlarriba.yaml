@@ -12,6 +12,13 @@ spec:
           all:
             hosts:
               localhost
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_SSH_ARGS
+      value: "-C -o ControlMaster=auto -o ControlPersist=80s"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
   configs:
     - name: swift-configmap
       mountpath: /runner/configs/swift-configmap

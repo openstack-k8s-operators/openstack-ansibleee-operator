@@ -191,6 +191,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 						Image: instance.Spec.Image,
 						Name:  instance.Spec.Name,
 						Args:  args,
+						Env:   instance.Spec.Env,
 					}},
 				},
 			},
