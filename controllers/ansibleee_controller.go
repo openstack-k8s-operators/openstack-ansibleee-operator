@@ -34,7 +34,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	redhatcomv1alpha1 "github.com/jlarriba/ansibleee-operator/api/v1alpha1"
+	redhatcomv1alpha1 "github.com/openstack-k8s-operators/ansibleee-operator/api/v1alpha1"
 )
 
 // AnsibleEEReconciler reconciles a AnsibleEE object

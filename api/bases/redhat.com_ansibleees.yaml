@@ -173,7 +173,7 @@ spec:
                   type: object
                 type: array
               image:
-                default: quay.io/openstack-k8s-operators/openstack-ansible-ee
+                default: quay.io/openstack-k8s-openstack/openstack-ansible-ee
                 description: Image is the container image that will execute the ansible
                   command
                 type: string
