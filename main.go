@@ -31,8 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	redhatcomv1alpha1 "github.com/jlarriba/ansibleee-operator/api/v1alpha1"
-	"github.com/jlarriba/ansibleee-operator/controllers"
+	redhatcomv1alpha1 "github.com/openstack-k8s-operators/ansibleee-operator/api/v1alpha1"
+	"github.com/openstack-k8s-operators/ansibleee-operator/controllers"
 	//+kubebuilder:scaffold:imports
 )
 
