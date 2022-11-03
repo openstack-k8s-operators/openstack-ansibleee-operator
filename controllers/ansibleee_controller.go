@@ -65,7 +65,7 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	//log := r.Log.WithValues("ansibleee", req.NamespacedName)
 
 	instance, err := r.getAnsibleeeInstance(ctx, req)
-	if err != nil {
+	if err != nil || instance.Name == "" {
 		return ctrl.Result{}, err
 	}
 
