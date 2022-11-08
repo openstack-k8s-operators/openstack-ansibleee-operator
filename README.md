@@ -42,6 +42,10 @@ oc create -f example/swift-configmap.yaml
 oc create -f example/test-configmap-1.yaml
 oc create -f example/test-configmap-2.yaml
 ```
+Create the CRD managed by the operator.
+```
+oc create -f config/crd/bases/redhat.com_ansibleees.yaml
+```
 Build and run a local copy of the Ansible Execution Environment operator.
 ```
 make generate
