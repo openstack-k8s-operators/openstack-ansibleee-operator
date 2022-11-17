@@ -1,7 +1,6 @@
 # ansibleee-operator
 An operator to deploy and run an Ansible Execution Environment container on Openshit
 
-
 # Build and deploy
 It uses operator-sdk to build and run.
 
