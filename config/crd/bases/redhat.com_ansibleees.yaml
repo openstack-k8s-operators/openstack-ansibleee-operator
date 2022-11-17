@@ -1,0 +1,231 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.8.0
+  creationTimestamp: null
+  name: ansibleees.redhat.com
+spec:
+  group: redhat.com
+  names:
+    kind: AnsibleEE
+    listKind: AnsibleEEList
+    plural: ansibleees
+    singular: ansibleee
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: AnsibleEE is the Schema for the ansibleees API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: AnsibleEESpec defines the desired state of AnsibleEE
+            properties:
+              args:
+                description: Args are the command plus the playbook executed by the
+                  image. If args is passed, Playbook is ignored.
+                items:
+                  type: string
+                type: array
+              backoffLimit:
+                default: 6
+                description: BackoffLimimt allows to define the maximum number of
+                  retried executions.
+                format: int32
+                type: integer
+              configs:
+                description: Config allows to pass a list of Config
+                items:
+                  description: Config is a specification of where to mount a certain
+                    ConfigMap object
+                  properties:
+                    mountpath:
+                      description: MountPoint is the directory of the container where
+                        the ConfigMap will be mounted
+                      type: string
+                    name:
+                      description: Name is the name of the ConfigMap that we want
+                        to mount
+                      type: string
+                  required:
+                  - mountpath
+                  - name
+                  type: object
+                type: array
+              env:
+                description: Env is a list containing the environment variables to
+                  pass to the pod
+                items:
+                  description: EnvVar represents an environment variable present in
+                    a Container.
+                  properties:
+                    name:
+                      description: Name of the environment variable. Must be a C_IDENTIFIER.
+                      type: string
+                    value:
+                      description: 'Variable references $(VAR_NAME) are expanded using
+                        the previously defined environment variables in the container
+                        and any service environment variables. If a variable cannot
+                        be resolved, the reference in the input string will be unchanged.
+                        Double $$ are reduced to a single $, which allows for escaping
+                        the $(VAR_NAME) syntax: i.e. "$$(VAR_NAME)" will produce the
+                        string literal "$(VAR_NAME)". Escaped references will never
+                        be expanded, regardless of whether the variable exists or
+                        not. Defaults to "".'
+                      type: string
+                    valueFrom:
+                      description: Source for the environment variable's value. Cannot
+                        be used if value is not empty.
+                      properties:
+                        configMapKeyRef:
+                          description: Selects a key of a ConfigMap.
+                          properties:
+                            key:
+                              description: The key to select.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the ConfigMap or its key
+                                must be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                        fieldRef:
+                          description: 'Selects a field of the pod: supports metadata.name,
+                            metadata.namespace, `metadata.labels[''<KEY>'']`, `metadata.annotations[''<KEY>'']`,
+                            spec.nodeName, spec.serviceAccountName, status.hostIP,
+                            status.podIP, status.podIPs.'
+                          properties:
+                            apiVersion:
+                              description: Version of the schema the FieldPath is
+                                written in terms of, defaults to "v1".
+                              type: string
+                            fieldPath:
+                              description: Path of the field to select in the specified
+                                API version.
+                              type: string
+                          required:
+                          - fieldPath
+                          type: object
+                        resourceFieldRef:
+                          description: 'Selects a resource of the container: only
+                            resources limits and requests (limits.cpu, limits.memory,
+                            limits.ephemeral-storage, requests.cpu, requests.memory
+                            and requests.ephemeral-storage) are currently supported.'
+                          properties:
+                            containerName:
+                              description: 'Container name: required for volumes,
+                                optional for env vars'
+                              type: string
+                            divisor:
+                              anyOf:
+                              - type: integer
+                              - type: string
+                              description: Specifies the output format of the exposed
+                                resources, defaults to "1"
+                              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                              x-kubernetes-int-or-string: true
+                            resource:
+                              description: 'Required: resource to select'
+                              type: string
+                          required:
+                          - resource
+                          type: object
+                        secretKeyRef:
+                          description: Selects a key of a secret in the pod's namespace
+                          properties:
+                            key:
+                              description: The key of the secret to select from.  Must
+                                be a valid secret key.
+                              type: string
+                            name:
+                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              type: string
+                            optional:
+                              description: Specify whether the Secret or its key must
+                                be defined
+                              type: boolean
+                          required:
+                          - key
+                          type: object
+                      type: object
+                  required:
+                  - name
+                  type: object
+                type: array
+              image:
+                default: quay.io/openstack-k8s-operators/openstack-ansible-ee
+                description: Image is the container image that will execute the ansible
+                  command
+                type: string
+              inventory:
+                description: Inventory is the inventory that the ansible playbook
+                  will use to launch the job.
+                type: string
+              name:
+                default: ansibleee
+                description: Name is the name of the internal container inside the
+                  pod
+                type: string
+              playbook:
+                description: Playbook is the playbook that ansible will run on this
+                  execution
+                type: string
+              restartPolicy:
+                default: Never
+                description: RestartPolicy is the policy applied to the Job on whether
+                  it needs to restart the Pod. It can be "OnFailure" or "Never".
+                type: string
+              ttlSecondsAfterFinished:
+                default: 86400
+                description: TTLSecondsAfterFinished specified the number of seconds
+                  the job will be kept in Kubernetes after completion.
+                format: int32
+                type: integer
+              uid:
+                default: 1001
+                description: Uid is the userid that will be used to run the container.
+                format: int64
+                type: integer
+            type: object
+          status:
+            description: AnsibleEEStatus defines the observed state of AnsibleEE
+            properties:
+              nodes:
+                description: Nodes are the names of the ansibleee pods
+                items:
+                  type: string
+                type: array
+            required:
+            - nodes
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
