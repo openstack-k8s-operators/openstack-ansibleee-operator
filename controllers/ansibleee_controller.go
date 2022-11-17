@@ -92,6 +92,26 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		}
 	}
 
+	// set configmap for playbook resource
+	if len(instance.Spec.Playbook) > 0 {
+		foundCM := &corev1.ConfigMap{}
+		err = r.Get(ctx, types.NamespacedName{Name: "playbook-configmap", Namespace: instance.Namespace}, foundCM)
+		if err != nil && errors.IsNotFound(err) {
+			cm := r.createConfigMapPlaybook(instance)
+			fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "playbook-configmap")
+			err = r.Create(ctx, cm)
+			if err != nil {
+				fmt.Println(err.Error())
+				return ctrl.Result{}, err
+			}
+			fmt.Println("configmap created successfully - return and requeue")
+			return ctrl.Result{Requeue: true}, nil
+		} else if err != nil {
+			fmt.Println(err.Error())
+			return ctrl.Result{}, err
+		}
+	}
+
 	// Check if the job already exists, if not create a new one
 	foundJob := &batchv1.Job{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
@@ -206,6 +226,22 @@ func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alph
 	return cm
 }
 
+func (r *AnsibleEEReconciler) createConfigMapPlaybook(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
+	data := map[string]string{
+		"playbook.yaml": instance.Spec.Playbook,
+	}
+
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "playbook-configmap",
+			Namespace: instance.Namespace,
+		},
+		Data: data,
+	}
+
+	return cm
+}
+
 // labelsForAnsibleEE returns the labels for selecting the resources
 // belonging to the given ansibleee CR name.
 func labelsForAnsibleEE(name string) map[string]string {
@@ -228,6 +264,24 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 				ConfigMap: &corev1.ConfigMapVolumeSource{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: "inventory-configmap",
+					},
+				},
+			},
+		})
+	}
+
+	if len(instance.Spec.Playbook) > 0 {
+		volumeMounts = append(volumeMounts, corev1.VolumeMount{
+			Name:      "playbook",
+			MountPath: "/runner/projects/playbook.yaml",
+			SubPath:   "playbook.yaml",
+		})
+		volumes = append(volumes, corev1.Volume{
+			Name: "playbook",
+			VolumeSource: corev1.VolumeSource{
+				ConfigMap: &corev1.ConfigMapVolumeSource{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "playbook-configmap",
 					},
 				},
 			},

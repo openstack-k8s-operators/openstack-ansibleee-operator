@@ -29,6 +29,8 @@ type AnsibleEESpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
+	// PlaybookName is the name for the playbook that ansible will execute
+	PlaybookName string `json:"playbookname,omitempty"`
 	// Playbook is the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
 	// Image is the container image that will execute the ansible command
