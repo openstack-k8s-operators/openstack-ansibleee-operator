@@ -4,8 +4,11 @@ set -e
 echo "UNDEPLOY"
 make undeploy
 
-echo "BUILD & PUSH"
-make docker-build docker-push IMG="quay.io/openstack-k8s-operators/ansibleee-operator"
+echo "BUILD"
+make generate
+make manifests
+make build
 
 echo "DEPLOY"
-make deploy IMG="quay.io/openstack-k8s-operators/ansibleee-operator"
+kl create -f config/crd/bases/redhat.com_ansibleees.yaml
+./bin/manager
