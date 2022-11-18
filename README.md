@@ -31,7 +31,7 @@ oc apply -f examples/ansibleee-playbook-local.yaml
 
 The second one is ansibleee-playbook.yaml. This one has a more evolved playbook with an inventory that actually points to an external node. It is compatible with the libvirt development environment deployment described in [libvirt_podified_standalone](https://gitlab.cee.redhat.com/rhos-upgrades/data-plane-adoption-dev/-/blob/main/libvirt_podified_standalone.md).
 
-Remember that to access an external node, you need to provide the ssh private key so ansible can connect to the node. This is being provided by the "key-configmap" ConfigMap (it will be a secret once the lib-common mount system is integrated) with this format:
+Remember that to access an external node, you need to provide the ssh private key so ansible can connect to the node. This is being provided by the "key-configmap" ConfigMap (it will be a secret once the lib-common [extramounts system](https://github.com/openstack-k8s-operators/ansibleee-operator/pull/6) is integrated) with this format:
 ```
 apiVersion: v1
 kind: ConfigMap
