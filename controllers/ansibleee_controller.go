@@ -93,24 +93,24 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	}
 
 	// set configmap for playbook resource
-	if len(instance.Spec.Playbook) > 0 {
-		foundCM := &corev1.ConfigMap{}
-		err = r.Get(ctx, types.NamespacedName{Name: "playbook-configmap", Namespace: instance.Namespace}, foundCM)
-		if err != nil && errors.IsNotFound(err) {
-			cm := r.createConfigMapPlaybook(instance)
-			fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "playbook-configmap")
-			err = r.Create(ctx, cm)
-			if err != nil {
-				fmt.Println(err.Error())
-				return ctrl.Result{}, err
-			}
-			fmt.Println("configmap created successfully - return and requeue")
-			return ctrl.Result{Requeue: true}, nil
-		} else if err != nil {
-			fmt.Println(err.Error())
-			return ctrl.Result{}, err
-		}
-	}
+	// if len(instance.Spec.Playbook) > 0 {
+	// 	foundCM := &corev1.ConfigMap{}
+	// 	err = r.Get(ctx, types.NamespacedName{Name: "playbook-configmap", Namespace: instance.Namespace}, foundCM)
+	// 	if err != nil && errors.IsNotFound(err) {
+	// 		cm := r.createConfigMapPlaybook(instance)
+	// 		fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "playbook-configmap")
+	// 		err = r.Create(ctx, cm)
+	// 		if err != nil {
+	// 			fmt.Println(err.Error())
+	// 			return ctrl.Result{}, err
+	// 		}
+	// 		fmt.Println("configmap created successfully - return and requeue")
+	// 		return ctrl.Result{Requeue: true}, nil
+	// 	} else if err != nil {
+	// 		fmt.Println(err.Error())
+	// 		return ctrl.Result{}, err
+	// 	}
+	// }
 
 	// Check if the job already exists, if not create a new one
 	foundJob := &batchv1.Job{}
