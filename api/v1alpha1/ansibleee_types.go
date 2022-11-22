@@ -32,7 +32,7 @@ type AnsibleEESpec struct {
 	// Playbook is the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
 	// Image is the container image that will execute the ansible command
-	// +kubebuilder:default:="quay.io/openstack-k8s-openstack/openstack-ansible-ee"
+	// +kubebuilder:default:="quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:current-tripleo"
 	Image string `json:"image,omitempty"`
 	// Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored.
 	Args []string `json:"args,omitempty"`
@@ -57,6 +57,10 @@ type AnsibleEESpec struct {
 	// TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion.
 	// +kubebuilder:default:=86400
 	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
+	// RoleName is the name of the role to be executed.
+	RoleName string `json:"rolename,omitempty"`
+	// RoleTasks is the name of the tasks file inside the RoleName whose tasks are going to be executed.
+	RoleTasks string `json:"roletasks,omitempty"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE
