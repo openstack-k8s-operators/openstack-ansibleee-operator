@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"fmt"
-	"reflect"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -113,31 +112,6 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 		return ctrl.Result{}, err
 	}
 
-	// Update the AnsibleEE status with the pod names
-	// List the pods for this ansibleee's job
-	podList := &corev1.PodList{}
-	listOpts := []client.ListOption{
-		client.InNamespace(instance.Namespace),
-		client.MatchingLabels(labelsForAnsibleEE(instance.Name)),
-	}
-	if err = r.List(ctx, podList, listOpts...); err != nil {
-		//fmt.Println(err.Error())
-		//log.Error(err, "Failed to list pods", "AnsibleEE.Namespace", ansibleee.Namespace, "AnsibleEE.Name", ansibleee.Name)
-		return ctrl.Result{}, err
-	}
-	podNames := getPodNames(podList.Items)
-
-	// Update status.Nodes if needed
-	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
-		instance.Status.Nodes = podNames
-		err := r.Status().Update(ctx, instance)
-		if err != nil {
-			//fmt.Println(err.Error())
-			//log.Error(err, "Failed to update AnsibleEE status")
-			return ctrl.Result{}, err
-		}
-	}
-
 	return ctrl.Result{}, nil
 }
 
@@ -170,6 +144,9 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	args := instance.Spec.Args
 
 	if len(args) == 0 {
+		if len(instance.Spec.Playbook) == 0 {
+			instance.Spec.Playbook = "standalone-playbook.yaml"
+		}
 		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
 
@@ -188,16 +165,17 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 					Containers: []corev1.Container{{
-						Image: instance.Spec.Image,
-						Name:  instance.Spec.Name,
-						Args:  args,
-						Env:   instance.Spec.Env,
+						ImagePullPolicy: "Always",
+						Image:           instance.Spec.Image,
+						Name:            instance.Spec.Name,
+						Args:            args,
 					}},
 				},
 			},
 		},
 	}
 
+	addRoles(instance, job)
 	addMounts(instance, job)
 
 	// Set AnsibleEE instance as the owner and controller
@@ -225,15 +203,6 @@ func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alph
 // belonging to the given ansibleee CR name.
 func labelsForAnsibleEE(name string) map[string]string {
 	return map[string]string{"app": "ansibleee", "ansibleee_cr": name}
-}
-
-// getPodNames returns the pod names of the array of pods passed in
-func getPodNames(pods []corev1.Pod) []string {
-	var podNames []string
-	for _, pod := range pods {
-		podNames = append(podNames, pod.Name)
-	}
-	return podNames
 }
 
 func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
@@ -276,6 +245,23 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	}
 	job.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 	job.Spec.Template.Spec.Volumes = volumes
+}
+
+func addRoles(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
+	if len(instance.Spec.RoleName) > 0 {
+		var roleName corev1.EnvVar
+		roleName.Name = "RUNNER_STANDALONE_ROLE"
+		roleName.Value = instance.Spec.RoleName
+		instance.Spec.Env = append(instance.Spec.Env, roleName)
+	}
+	if len(instance.Spec.RoleTasks) > 0 {
+		var roleTasks corev1.EnvVar
+		roleTasks.Name = "RUNNER_STANDALONE_ROLE_TASKS"
+		roleTasks.Value = instance.Spec.RoleTasks
+		instance.Spec.Env = append(instance.Spec.Env, roleTasks)
+	}
+
+	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 
 // SetupWithManager sets up the controller with the Manager.

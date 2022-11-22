@@ -173,7 +173,7 @@ spec:
                   type: object
                 type: array
               image:
-                default: quay.io/openstack-k8s-openstack/openstack-ansible-ee
+                default: quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:current-tripleo
                 description: Image is the container image that will execute the ansible
                   command
                 type: string
@@ -194,6 +194,13 @@ spec:
                 default: Never
                 description: RestartPolicy is the policy applied to the Job on whether
                   it needs to restart the Pod. It can be "OnFailure" or "Never".
+                type: string
+              rolename:
+                description: RoleName is the name of the role to be executed.
+                type: string
+              roletasks:
+                description: RoleTasks is the name of the tasks file inside the
+                  RoleName whose tasks are going to be executed.
                 type: string
               ttlSecondsAfterFinished:
                 default: 86400
