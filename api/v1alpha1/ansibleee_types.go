@@ -44,9 +44,9 @@ type AnsibleEESpec struct {
 	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be "OnFailure" or "Never".
 	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
-	// Uid is the userid that will be used to run the container.
+	// UID is the userid that will be used to run the container.
 	// +kubebuilder:default:=1001
-	Uid int64 `json:"uid,omitempty"`
+	UID int64 `json:"uid,omitempty"`
 	// Inventory is the inventory that the ansible playbook will use to launch the job.
 	Inventory string `json:"inventory,omitempty"`
 	// Config allows to pass a list of Config

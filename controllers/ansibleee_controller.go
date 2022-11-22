@@ -97,7 +97,10 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new job
-		job := r.jobForAnsibleEE(instance)
+		job, err := r.jobForAnsibleEE(instance)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 		fmt.Printf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name)
 		err = r.Create(ctx, job)
 		if err != nil {
@@ -138,7 +141,7 @@ func (r *AnsibleEEReconciler) getAnsibleeeInstance(ctx context.Context, req ctrl
 }
 
 // jobForAnsibleEE returns a ansibleee Job object
-func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.AnsibleEE) *batchv1.Job {
+func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.AnsibleEE) (*batchv1.Job, error) {
 	ls := labelsForAnsibleEE(instance.Name)
 
 	args := instance.Spec.Args
@@ -179,8 +182,12 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	addMounts(instance, job)
 
 	// Set AnsibleEE instance as the owner and controller
-	ctrl.SetControllerReference(instance, job, r.Scheme)
-	return job
+	err := ctrl.SetControllerReference(instance, job, r.Scheme)
+	if err != nil {
+		return nil, err
+	}
+
+	return job, nil
 }
 
 func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
