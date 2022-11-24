@@ -36,5 +36,3 @@ spec:
       mountpath: /runner/configs/test-configmap-1
     - name: test-configmap-2
       mountpath: /runner/configs/test-configmap-2
-    - name: key-configmap
-      mountpath: /runner/env
