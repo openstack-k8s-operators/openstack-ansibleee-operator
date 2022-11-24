@@ -108,7 +108,7 @@ type Role struct {
 	// +kubebuilder:default:=tripleo_free
 	Strategy string `json:"strategy,omitempty"`
 	// +kubebuilder:default:=true
-	Any_Errors_Fatal bool `json:"any_errors_fatal,omitempty"`
+	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
 	// +kubebuilder:default:=true
 	Become bool `json:"become,omitempty"`
 	Tasks []Task `json:"tasks"`
@@ -117,14 +117,14 @@ type Role struct {
 // Task describes a task centered exclusively in running import_role
 type Task struct {
 	Name string `json:"name"`
-	Import_Role ImportRole `json:"import_role"`
+	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
 	Tags []string `json:"tags,omitempty"`
 }
 
 // ImportRole contains the actual rolename and tasks file name to execute
 type ImportRole struct {
 	Name string `json:"name"`
-	Tasks_From string `json:"tasks_from"`
+	TasksFrom string `json:"tasks_from" yaml:"tasks_from"`
 }
 
 func init() {
