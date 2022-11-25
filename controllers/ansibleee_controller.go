@@ -161,7 +161,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	}
 
 	addInventory(instance, job)
-  addPlay(instance, job)
+  	addPlay(instance, job)
 	addRoles(instance, job)
 	addMounts(instance, job)
 
@@ -224,6 +224,7 @@ func addPlay(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
   job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+}
 
 func addInventory(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	var invEnvVar corev1.EnvVar
