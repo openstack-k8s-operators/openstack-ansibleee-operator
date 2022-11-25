@@ -4,10 +4,25 @@ metadata:
   name: ansibleee-role
   namespace: openstack
 spec:
-  # We can specify either playbook, which will run with default ansible-runner options,
-  # or args, which allows specify the whole command that we want to execute
-  rolename: "tripleo_podman"
-  roletasks: "tripleo_podman_configure.yml"
+  # We can specify either 
+  # - playbook: which will run with default ansible-runner options
+  # - roles: which will run a list of tasks in files inside roles
+  # - args: which allows specify the whole command that we want to execute
+  roles:
+    strategy: tripleo_free
+    become: true
+    tasks:
+      - name: Generic standalone playbook running tripleo_podman | tripleo_podman_configure.yml | tripleo_podman
+        import_role:
+          name: tripleo_podman
+          tasks_from: tripleo_podman_configure.yml
+        tags:
+          - tripleo_podman
+      - name: Generic standalone playbook running tripleo_container_manage | shutdown.yml
+        import_role:
+          name: tripleo_container_manage
+          tasks_from: shutdown.yml
+      
   #args: ["ansible-runner", "run", "/runner", "-p", "standalone-playbook.yaml"]
   image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
   inventory: |

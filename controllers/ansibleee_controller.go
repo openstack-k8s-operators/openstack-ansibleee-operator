@@ -19,6 +19,7 @@ package controllers
 import (
 	"fmt"
 
+	yaml "gopkg.in/yaml.v3"
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -255,19 +256,17 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 }
 
 func addRoles(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
-	if len(instance.Spec.RoleName) > 0 {
-		var roleName corev1.EnvVar
-		roleName.Name = "RUNNER_STANDALONE_ROLE"
-		roleName.Value = instance.Spec.RoleName
-		instance.Spec.Env = append(instance.Spec.Env, roleName)
-	}
-	if len(instance.Spec.RoleTasks) > 0 {
-		var roleTasks corev1.EnvVar
-		roleTasks.Name = "RUNNER_STANDALONE_ROLE_TASKS"
-		roleTasks.Value = instance.Spec.RoleTasks
-		instance.Spec.Env = append(instance.Spec.Env, roleTasks)
+	var roles []*redhatcomv1alpha1.Role
+	roles = append(roles, &instance.Spec.Role)
+	d, err := yaml.Marshal(&roles)
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 
+	var roleEnvVar corev1.EnvVar
+	roleEnvVar.Name = "RUNNER_STANDALONE_ROLE"
+	roleEnvVar.Value = "\n" + string(d) + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 

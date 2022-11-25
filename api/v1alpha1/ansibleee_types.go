@@ -57,10 +57,8 @@ type AnsibleEESpec struct {
 	// TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion.
 	// +kubebuilder:default:=86400
 	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
-	// RoleName is the name of the role to be executed.
-	RoleName string `json:"rolename,omitempty"`
-	// RoleTasks is the name of the tasks file inside the RoleName whose tasks are going to be executed.
-	RoleTasks string `json:"roletasks,omitempty"`
+	// Role is the description of an Ansible Role
+	Role Role `json:"roles,omitempty"`
 }
 
 // AnsibleEEStatus defines the observed state of AnsibleEE
@@ -99,6 +97,34 @@ type Config struct {
 	Name string `json:"name"`
 	// MountPoint is the directory of the container where the ConfigMap will be mounted
 	MountPath string `json:"mountpath"`
+}
+
+// Role describes the format of an ansible playbook destinated to run roles
+type Role struct {
+	// +kubebuilder:default:="Run Standalone Role"
+	Name string `json:"name,omitempty"`
+	// +kubebuilder:default:="{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
+	Hosts string `json:"hosts,omitempty"`
+	// +kubebuilder:default:=tripleo_free
+	Strategy string `json:"strategy,omitempty"`
+	// +kubebuilder:default:=true
+	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
+	// +kubebuilder:default:=true
+	Become bool `json:"become,omitempty"`
+	Tasks []Task `json:"tasks"`
+}
+
+// Task describes a task centered exclusively in running import_role
+type Task struct {
+	Name string `json:"name"`
+	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
+	Tags []string `json:"tags,omitempty"`
+}
+
+// ImportRole contains the actual rolename and tasks file name to execute
+type ImportRole struct {
+	Name string `json:"name"`
+	TasksFrom string `json:"tasks_from" yaml:"tasks_from"`
 }
 
 func init() {
