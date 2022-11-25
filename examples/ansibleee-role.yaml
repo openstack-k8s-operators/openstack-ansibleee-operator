@@ -9,8 +9,8 @@ spec:
   # - roles: which will run a list of tasks in files inside roles
   # - args: which allows specify the whole command that we want to execute
   roles:
-    strategy: other_strategy
-    become: false
+    strategy: tripleo_free
+    become: true
     tasks:
       - name: Generic standalone playbook running tripleo_podman | tripleo_podman_configure.yml | tripleo_podman
         import_role:
