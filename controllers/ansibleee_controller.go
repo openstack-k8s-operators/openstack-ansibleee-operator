@@ -48,7 +48,7 @@ type AnsibleEEReconciler struct {
 // +kubebuilder:rbac:groups=redhat.com,resources=ansibleees,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=redhat.com,resources=ansibleees/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=redhat.com,resources=ansibleees/finalizers,verbs=update
-// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
 
@@ -67,30 +67,6 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	instance, err := r.getAnsibleeeInstance(ctx, req)
 	if err != nil || instance.Name == "" {
 		return ctrl.Result{}, err
-	}
-
-	//configMapVars := make(map[string]env.Setter)
-	//r.configMapForAnsibleEE(ctx, instance, helper, &configMapVars)
-
-	if len(instance.Spec.Inventory) > 0 {
-		foundCM := &corev1.ConfigMap{}
-		err = r.Get(ctx, types.NamespacedName{Name: "inventory-configmap", Namespace: instance.Namespace}, foundCM)
-		if err != nil && errors.IsNotFound(err) {
-			// Define a new configmap
-			cm := r.createConfigMapInventory(instance)
-			fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "inventory-configmap")
-			err = r.Create(ctx, cm)
-			if err != nil {
-				fmt.Println(err.Error())
-				return ctrl.Result{}, err
-			}
-			fmt.Println("configmap created successfully - return and requeue")
-			return ctrl.Result{Requeue: true}, nil
-		} else if err != nil {
-			fmt.Println(err.Error())
-			//log.Error(err, "Failed to get Job")
-			return ctrl.Result{}, err
-		}
 	}
 
 	// Check if the job already exists, if not create a new one
@@ -179,6 +155,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 		},
 	}
 
+	addInventory(instance, job)
 	addRoles(instance, job)
 	addMounts(instance, job)
 
@@ -191,22 +168,6 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	return job, nil
 }
 
-func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
-	data := map[string]string{
-		"inventory.yaml": instance.Spec.Inventory,
-	}
-
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "inventory-configmap",
-			Namespace: instance.Namespace,
-		},
-		Data: data,
-	}
-
-	return cm
-}
-
 // labelsForAnsibleEE returns the labels for selecting the resources
 // belonging to the given ansibleee CR name.
 func labelsForAnsibleEE(name string) map[string]string {
@@ -216,24 +177,6 @@ func labelsForAnsibleEE(name string) map[string]string {
 func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	var volumeMounts []corev1.VolumeMount
 	var volumes []corev1.Volume
-
-	if len(instance.Spec.Inventory) > 0 {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "inventory",
-			MountPath: "/runner/inventory/inventory.yaml",
-			SubPath:   "inventory.yaml",
-		})
-		volumes = append(volumes, corev1.Volume{
-			Name: "inventory",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "inventory-configmap",
-					},
-				},
-			},
-		})
-	}
 
 	for i := 0; i < len(instance.Spec.Configs); i++ {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
@@ -270,11 +213,18 @@ func addRoles(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 
+func addInventory(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
+	var invEnvVar corev1.EnvVar
+	invEnvVar.Name = "RUNNER_INVENTORY"
+	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
+	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *AnsibleEEReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&redhatcomv1alpha1.AnsibleEE{}).
 		Owns(&batchv1.Job{}).
-		Owns(&corev1.ConfigMap{}).
 		Complete(r)
 }
