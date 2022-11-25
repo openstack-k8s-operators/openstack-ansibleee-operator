@@ -170,7 +170,12 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 
 	if len(args) == 0 {
 		if len(instance.Spec.Playbook) == 0 {
-			args = []string{"ansible-runner", "run", "/runner", "-p", "playbook.yaml"}
+			if len(instance.Spec.Play) > 0 {
+				instance.Spec.Playbook = "playbook.yaml"
+			} else {
+				instance.Spec.Playbook = "standalone-playbook.yaml"
+			}
+			
 		}
 		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
