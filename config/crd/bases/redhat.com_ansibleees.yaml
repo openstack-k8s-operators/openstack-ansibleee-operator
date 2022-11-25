@@ -202,13 +202,56 @@ spec:
                 description: RestartPolicy is the policy applied to the Job on whether
                   it needs to restart the Pod. It can be "OnFailure" or "Never".
                 type: string
-              rolename:
-                description: RoleName is the name of the role to be executed.
-                type: string
-              roletasks:
-                description: RoleTasks is the name of the tasks file inside the RoleName
-                  whose tasks are going to be executed.
-                type: string
+              roles:
+                description: Role is the description of an Ansible Role
+                properties:
+                  any_errors_fatal:
+                    default: true
+                    type: boolean
+                  become:
+                    default: true
+                    type: boolean
+                  hosts:
+                    default: '{{ primary_role_name | default([]) }}:{{ deploy_target_host
+                      | default(''overcloud'') }}'
+                    type: string
+                  name:
+                    default: Run Standalone Role
+                    type: string
+                  strategy:
+                    default: tripleo_free
+                    type: string
+                  tasks:
+                    items:
+                      description: Task describes a task centered exclusively in running
+                        import_role
+                      properties:
+                        import_role:
+                          description: ImportRole contains the actual rolename and
+                            tasks file name to execute
+                          properties:
+                            name:
+                              type: string
+                            tasks_from:
+                              type: string
+                          required:
+                          - name
+                          - tasks_from
+                          type: object
+                        name:
+                          type: string
+                        tags:
+                          items:
+                            type: string
+                          type: array
+                      required:
+                      - import_role
+                      - name
+                      type: object
+                    type: array
+                required:
+                - tasks
+                type: object
               ttlSecondsAfterFinished:
                 default: 86400
                 description: TTLSecondsAfterFinished specified the number of seconds

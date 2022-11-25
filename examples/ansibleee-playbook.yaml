@@ -1,14 +1,14 @@
 apiVersion: redhat.com/v1alpha1
 kind: AnsibleEE
 metadata:
-  name: ansibleee-role
+  name: ansibleee-playbook
   namespace: openstack
 spec:
   # We can specify either playbook, which will run with default ansible-runner options,
   # or args, which allows specify the whole command that we want to execute
-  rolename: "tripleo_podman"
-  roletasks: "tripleo_podman_configure.yml"
-  #args: ["ansible-runner", "run", "/runner", "-p", "standalone-playbook.yaml"]
+  playbook: "deploy-tripleo-os-configure.yml"
+  # play: |
+  # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
   image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
   inventory: |
     Compute:
