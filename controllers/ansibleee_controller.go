@@ -68,52 +68,7 @@ func (r *AnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (
 	if err != nil || instance.Name == "" {
 		return ctrl.Result{}, err
 	}
-
-	//configMapVars := make(map[string]env.Setter)
-	//r.configMapForAnsibleEE(ctx, instance, helper, &configMapVars)
-
-	if len(instance.Spec.Inventory) > 0 {
-		foundCM := &corev1.ConfigMap{}
-		err = r.Get(ctx, types.NamespacedName{Name: "inventory-configmap", Namespace: instance.Namespace}, foundCM)
-		if err != nil && errors.IsNotFound(err) {
-			// Define a new configmap
-			cm := r.createConfigMapInventory(instance)
-			fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "inventory-configmap")
-			err = r.Create(ctx, cm)
-			if err != nil {
-				fmt.Println(err.Error())
-				return ctrl.Result{}, err
-			}
-			fmt.Println("configmap created successfully - return and requeue")
-			return ctrl.Result{Requeue: true}, nil
-		} else if err != nil {
-			fmt.Println(err.Error())
-			//log.Error(err, "Failed to get Job")
-			return ctrl.Result{}, err
-		}
-	}
-
-	if len(instance.Spec.Play) > 0 {
-		foundCM := &corev1.ConfigMap{}
-		err = r.Get(ctx, types.NamespacedName{Name: "playbook-configmap", Namespace: instance.Namespace}, foundCM)
-		if err != nil && errors.IsNotFound(err) {
-			// Define a new configmap
-			cm := r.createConfigMapPlay(instance)
-			fmt.Printf("Creating a new ConfigMap: ConfigMap.Namespace %s ConfigMap.Name %s\n", cm.Namespace, "playbook-configmap")
-			err = r.Create(ctx, cm)
-			if err != nil {
-				fmt.Println(err.Error())
-				return ctrl.Result{}, err
-			}
-			fmt.Println("configmap created successfully - return and requeue")
-			return ctrl.Result{Requeue: true}, nil
-		} else if err != nil {
-			fmt.Println(err.Error())
-			//log.Error(err, "Failed to get Job")
-			return ctrl.Result{}, err
-		}
-	}
-
+  
 	// Check if the job already exists, if not create a new one
 	foundJob := &batchv1.Job{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
@@ -170,13 +125,13 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 
 	if len(args) == 0 {
 		if len(instance.Spec.Playbook) == 0 {
-			args = []string{"ansible-runner", "run", "/runner", "-p", "playbook.yaml"}
-			fmt.Println(instance.Spec.Play)
-			// fmt.Println(";alksdfj;alksdjf")
-			// instance.Spec.Play = "playbook.yaml"
-			// fmt.Println(instance.Spec.Play)
-		} else {
-			args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
+			if len(instance.Spec.Play) > 0 {
+				instance.Spec.Playbook = "playbook.yaml"
+				fmt.Println(instance.Spec.Play)
+			} else {
+				instance.Spec.Playbook = "standalone-playbook.yaml"
+			}
+
 		}
 	}
 
@@ -206,6 +161,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	}
 
 	addInventory(instance, job)
+  	addPlay(instance, job)
 	addRoles(instance, job)
 	addMounts(instance, job)
 
@@ -217,39 +173,6 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 
 	return job, nil
 }
-
-func (r *AnsibleEEReconciler) createConfigMapInventory(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
-	data := map[string]string{
-		"inventory.yaml": instance.Spec.Inventory,
-	}
-
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "inventory-configmap",
-			Namespace: instance.Namespace,
-		},
-		Data: data,
-	}
-
-	return cm
-}
-
-func (r *AnsibleEEReconciler) createConfigMapPlay(instance *redhatcomv1alpha1.AnsibleEE) *corev1.ConfigMap {
-	data := map[string]string{
-		"playbook.yaml": instance.Spec.Play,
-	}
-
-	cm := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "playbook-configmap",
-			Namespace: instance.Namespace,
-		},
-		Data: data,
-	}
-
-	return cm
-}
-
 // labelsForAnsibleEE returns the labels for selecting the resources
 // belonging to the given ansibleee CR name.
 func labelsForAnsibleEE(name string) map[string]string {
@@ -259,43 +182,7 @@ func labelsForAnsibleEE(name string) map[string]string {
 func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	var volumeMounts []corev1.VolumeMount
 	var volumes []corev1.Volume
-
-	if len(instance.Spec.Inventory) > 0 {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "inventory",
-			MountPath: "/runner/inventory/inventory.yaml",
-			SubPath:   "inventory.yaml",
-		})
-		volumes = append(volumes, corev1.Volume{
-			Name: "inventory",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "inventory-configmap",
-					},
-				},
-			},
-		})
-	}
-
-	if len(instance.Spec.Play) > 0 {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      "playbook",
-			MountPath: "/runner/project/playbook.yaml",
-			SubPath:   "playbook.yaml",
-		})
-		volumes = append(volumes, corev1.Volume{
-			Name: "playbook",
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "playbook-configmap",
-					},
-				},
-			},
-		})
-	}
-
+  
 	for i := 0; i < len(instance.Spec.Configs); i++ {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      instance.Spec.Configs[i].Name,
@@ -329,6 +216,14 @@ func addRoles(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	roleEnvVar.Value = "\n" + string(d) + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+}
+
+func addPlay(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
+	var playEnvVar corev1.EnvVar
+	playEnvVar.Name = "RUNNER_PLAYBOOK"
+	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
+  job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 
 func addInventory(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
