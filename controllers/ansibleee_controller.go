@@ -171,8 +171,13 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	if len(args) == 0 {
 		if len(instance.Spec.Playbook) == 0 {
 			args = []string{"ansible-runner", "run", "/runner", "-p", "playbook.yaml"}
+			fmt.Println(instance.Spec.Play)
+			// fmt.Println(";alksdfj;alksdjf")
+			// instance.Spec.Play = "playbook.yaml"
+			// fmt.Println(instance.Spec.Play)
+		} else {
+			args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 		}
-		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
 
 	job := &batchv1.Job{
@@ -276,7 +281,7 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	if len(instance.Spec.Play) > 0 {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      "playbook",
-			MountPath: "/runner/projects/playbook.yaml",
+			MountPath: "/runner/project/playbook.yaml",
 			SubPath:   "playbook.yaml",
 		})
 		volumes = append(volumes, corev1.Volume{

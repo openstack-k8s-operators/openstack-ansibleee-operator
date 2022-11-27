@@ -7,9 +7,12 @@ spec:
   # We can specify either playbook, which will run with default ansible-runner options,
   # or args, which allows specify the whole command that we want to execute
   play: |
-    name: Execute hello world
-    debug:
-      msg: Hello, world!
+    - name: Print hello world
+      hosts: all
+      tasks:
+      - name: Using debug statement
+        ansible.builtin.debug:
+          msg: "Hello, world!"
   # playbook: "test.yaml"
   # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
   image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
