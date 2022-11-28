@@ -15,7 +15,7 @@ spec:
           msg: "Hello, world this is ansibleee-play.yaml"
   # playbook: "test.yaml"
   # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
-  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
+  image: "quay.io/adrbrown/osp-ansible-runner"
   inventory: |
     all:
       hosts:

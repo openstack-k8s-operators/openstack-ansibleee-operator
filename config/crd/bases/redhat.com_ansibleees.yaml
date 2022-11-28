@@ -198,9 +198,6 @@ spec:
                 description: Playbook is the playbook that ansible will run on this
                   execution
                 type: string
-              play:
-                description: Play is the playbook contents that ansible will run on execution
-                type: string
               restartPolicy:
                 default: Never
                 description: RestartPolicy is the policy applied to the Job on whether
