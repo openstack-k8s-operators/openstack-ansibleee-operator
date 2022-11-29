@@ -125,11 +125,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 
 	if len(args) == 0 {
 		if len(instance.Spec.Playbook) == 0 {
-			if len(instance.Spec.Play) > 0 {
-				instance.Spec.Playbook = "playbook.yaml"
-			} else {
-				instance.Spec.Playbook = "standalone-playbook.yaml"
-			}
+			instance.Spec.Playbook = "playbook.yaml"
 		}
 		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
@@ -160,8 +156,11 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	}
 
 	addInventory(instance, job)
-	addPlay(instance, job)
-	addRoles(instance, job)
+	if len(instance.Spec.Play) > 0 {
+		addPlay(instance, job)
+	} else {
+		addRoles(instance, job)
+	}
 	addMounts(instance, job)
 
 	// Set AnsibleEE instance as the owner and controller
@@ -212,7 +211,7 @@ func addRoles(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	}
 
 	var roleEnvVar corev1.EnvVar
-	roleEnvVar.Name = "RUNNER_STANDALONE_ROLE"
+	roleEnvVar.Name = "RUNNER_PLAYBOOK"
 	roleEnvVar.Value = "\n" + string(d) + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env

@@ -192,7 +192,7 @@ spec:
                 type: string
               play:
                 description: Play is the playbook contents that ansible will run on
-                  execution
+                  execution. If both Play and Roles are specified, Play takes precedence
                 type: string
               playbook:
                 description: Playbook is the playbook that ansible will run on this
@@ -204,7 +204,8 @@ spec:
                   it needs to restart the Pod. It can be "OnFailure" or "Never".
                 type: string
               roles:
-                description: Role is the description of an Ansible Role
+                description: Role is the description of an Ansible Role If both Play
+                  and Role are specified, Play takes precedence
                 properties:
                   any_errors_fatal:
                     default: true
