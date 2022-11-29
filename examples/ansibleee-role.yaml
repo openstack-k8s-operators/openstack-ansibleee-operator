@@ -24,7 +24,7 @@ spec:
           tasks_from: shutdown.yml
       
   #args: ["ansible-runner", "run", "/runner", "-p", "standalone-playbook.yaml"]
-  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
+  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
   inventory: |
     Compute:
       hosts:
