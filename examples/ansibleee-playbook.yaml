@@ -9,7 +9,7 @@ spec:
   playbook: "deploy-tripleo-os-configure.yml"
   # play: |
   # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
-  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee"
+  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
   inventory: |
     Compute:
       hosts:
