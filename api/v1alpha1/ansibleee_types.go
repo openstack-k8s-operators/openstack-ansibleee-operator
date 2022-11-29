@@ -29,7 +29,8 @@ type AnsibleEESpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Play is the playbook contents that ansible will run on execution
+	// Play is the playbook contents that ansible will run on execution.
+	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`
 	// Playbook is the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
@@ -60,6 +61,7 @@ type AnsibleEESpec struct {
 	// +kubebuilder:default:=86400
 	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
 	// Role is the description of an Ansible Role
+	// If both Play and Role are specified, Play takes precedence
 	Role Role `json:"roles,omitempty"`
 }
 
