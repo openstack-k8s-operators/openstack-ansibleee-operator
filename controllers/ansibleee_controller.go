@@ -186,6 +186,7 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 		volumeMounts = append(volumeMounts, corev1.VolumeMount{
 			Name:      instance.Spec.Configs[i].Name,
 			MountPath: instance.Spec.Configs[i].MountPath,
+			SubPath:   instance.Spec.Configs[i].SubPath,
 		})
 		volumes = append(volumes, corev1.Volume{
 			Name: instance.Spec.Configs[i].Name,

@@ -101,6 +101,8 @@ type Config struct {
 	Name string `json:"name"`
 	// MountPoint is the directory of the container where the ConfigMap will be mounted
 	MountPath string `json:"mountpath"`
+	// SubPath is the path from the ConfigMap to mount at MountPoint
+	SubPath string `json:"subpath,omitempty"`
 }
 
 // Role describes the format of an ansible playbook destinated to run roles
@@ -114,20 +116,20 @@ type Role struct {
 	// +kubebuilder:default:=true
 	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
 	// +kubebuilder:default:=true
-	Become bool `json:"become,omitempty"`
-	Tasks []Task `json:"tasks"`
+	Become bool   `json:"become,omitempty"`
+	Tasks  []Task `json:"tasks"`
 }
 
 // Task describes a task centered exclusively in running import_role
 type Task struct {
-	Name string `json:"name"`
+	Name       string     `json:"name"`
 	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
-	Tags []string `json:"tags,omitempty"`
+	Tags       []string   `json:"tags,omitempty"`
 }
 
 // ImportRole contains the actual rolename and tasks file name to execute
 type ImportRole struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
 	TasksFrom string `json:"tasks_from" yaml:"tasks_from"`
 }
 

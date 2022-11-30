@@ -61,6 +61,10 @@ spec:
                       description: Name is the name of the ConfigMap that we want
                         to mount
                       type: string
+                    subpath:
+                      description: SubPath is the path from the ConfigMap to mount
+                        at MountPoint
+                      type: string
                   required:
                   - mountpath
                   - name
