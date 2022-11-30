@@ -1855,6 +1855,10 @@ spec:
                 description: Playbook is the playbook that ansible will run on this
                   execution
                 type: string
+              plugin:
+                description: Plugin is the location for the source plugin that will
+                  build dynamic inventory.
+                type: string
               restartPolicy:
                 default: Never
                 description: RestartPolicy is the policy applied to the Job on whether

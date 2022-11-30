@@ -1857,7 +1857,7 @@ spec:
                 type: string
               plugin:
                 description: Plugin is the location for the source plugin that will
-                  build dynamic inventory if EnablePlugin is true.
+                  build dynamic inventory.
                 type: string
               restartPolicy:
                 default: Never
@@ -1926,8 +1926,6 @@ spec:
                 description: UID is the userid that will be used to run the container.
                 format: int64
                 type: integer
-            required:
-            - enablePlugin
             type: object
           status:
             description: AnsibleEEStatus defines the observed state of AnsibleEE
