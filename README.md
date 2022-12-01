@@ -66,9 +66,9 @@ podman, then adjust accordingly (e.g. symlink docker to podman).
 The example CR, examples/ansibleee-test.yaml, assumes the following
 `ConfigMap` resources have been created so create them first.
 ```
-oc create -f example/swift-configmap.yaml
-oc create -f example/test-configmap-1.yaml
-oc create -f example/test-configmap-2.yaml
+oc create -f examples/swift-configmap.yaml
+oc create -f examples/test-configmap-1.yaml
+oc create -f examples/test-configmap-2.yaml
 ```
 Create the CRD managed by the operator.
 ```
@@ -83,7 +83,7 @@ make build
 ```
 Once the operator is running, create the examle CR to run the test playbook.
 ```
-oc create -f example/ansibleee-playbook-local.yaml
+oc create -f examples/ansibleee-playbook-local.yaml
 ```
 The operator will create a ansible pod and run the playbook. It will
 then move to a completed state.
