@@ -6,25 +6,22 @@ metadata:
 spec:
   # We can specify either 
   # - playbook: which will run with default ansible-runner options
-  # - roles: which will run a list of tasks in files inside roles
+  # - tasks: which will run a list of tasks in files inside roles
   # - args: which allows specify the whole command that we want to execute
   roles:
     strategy: free
     become: true
     tasks:
-      - name: Generic standalone playbook running tripleo_podman | tripleo_podman_configure.yml | tripleo_podman
+      - name: Generic standalone playbook running tasks
         import_role:
           name: tripleo_podman
           tasks_from: tripleo_podman_configure.yml
         tags:
           - tripleo_podman
-      - name: Generic standalone playbook running tripleo_container_manage | shutdown.yml
+      - name: Generic standalone playbook running tasks
         import_role:
           name: tripleo_container_manage
           tasks_from: shutdown.yml
-      
-  #args: ["ansible-runner", "run", "/runner", "-p", "standalone-playbook.yaml"]
-  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
   inventory: |
     Compute:
       hosts:
@@ -45,10 +42,3 @@ spec:
       value: "-C -o ControlMaster=auto -o ControlPersist=80s"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
-  configs:
-    - name: swift-configmap
-      mountpath: /runner/configs/swift-configmap
-    - name: test-configmap-1
-      mountpath: /runner/configs/test-configmap-1
-    - name: test-configmap-2
-      mountpath: /runner/configs/test-configmap-2

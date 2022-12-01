@@ -4,8 +4,6 @@ metadata:
   name: ansibleee-play
   namespace: openstack
 spec:
-  # We can specify either playbook, which will run with default ansible-runner options,
-  # or args, which allows specify the whole command that we want to execute
   play: |
     - name: Print hello world
       hosts: all
@@ -13,24 +11,19 @@ spec:
       - name: Using debug statement
         ansible.builtin.debug:
           msg: "Hello, world this is ansibleee-play.yaml"
-  # playbook: "test.yaml"
-  # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
   image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
-  inventory: |
-    all:
-      hosts:
-        localhost
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_SSH_ARGS
-      value: "-C -o ControlMaster=auto -o ControlPersist=80s"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
-  configs:
-    - name: swift-configmap
-      mountpath: /runner/configs/swift-configmap
-    - name: test-configmap-1
-      mountpath: /runner/configs/test-configmap-1
-    - name: test-configmap-2
-      mountpath: /runner/configs/test-configmap-2
+  extraMounts:
+    extraVol:
+      volumes:
+      - name: inventory
+        projected:
+          sources:
+          - configmap:
+              name: inventory-configmap
+              items:
+              - key: inventory
+                path: inventory.yaml
+      mounts:
+      - name: inventory
+        mountPath: "/runner/inventory"
+        readOnly: true

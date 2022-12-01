@@ -7,9 +7,8 @@ spec:
   # We can specify either playbook, which will run with default ansible-runner options,
   # or args, which allows specify the whole command that we want to execute
   playbook: "deploy-tripleo-os-configure.yml"
-  # play: |
   # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
-  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
+  image: "quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:current-tripleo"
   inventory: |
     Compute:
       hosts:
@@ -30,10 +29,3 @@ spec:
       value: "-C -o ControlMaster=auto -o ControlPersist=80s"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
-  configs:
-    - name: swift-configmap
-      mountpath: /runner/configs/swift-configmap
-    - name: test-configmap-1
-      mountpath: /runner/configs/test-configmap-1
-    - name: test-configmap-2
-      mountpath: /runner/configs/test-configmap-2
