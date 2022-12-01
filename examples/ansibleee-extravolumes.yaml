@@ -1,34 +1,20 @@
 apiVersion: redhat.com/v1alpha1
 kind: AnsibleEE
 metadata:
-  name: ansibleee-playbook-local
+  name: ansibleee-test
   namespace: openstack
 spec:
   # We can specify either playbook, which will run with default ansible-runner options,
   # or args, which allows specify the whole command that we want to execute
-  # play: |
-  #   - name: Print hello world
-  #     hosts: all
-  #     tasks:
-  #     - name: Using debug statement
-  #       ansible.builtin.debug:
-  #         msg: "Hello, world!"
   playbook: "test.yaml"
   # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
   image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
   inventory: |
-    all:
-      hosts:
-        localhost
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_SSH_ARGS
-      value: "-C -o ControlMaster=auto -o ControlPersist=80s"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
+          all:
+            hosts:
+              localhost
   extraMounts:
-      extraVolType: Ceph
+    - extraVolType: Ceph
       volumes:
       - name: ceph
         secret:

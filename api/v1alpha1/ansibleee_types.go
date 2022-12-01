@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -54,6 +55,9 @@ type AnsibleEESpec struct {
 	Inventory string `json:"inventory,omitempty"`
 	// Config allows to pass a list of Config
 	Configs []Config `json:"configs,omitempty"`
+	// +kubebuilder:validation:Optional
+	// ExtraMounts containing conf files and credentials
+	ExtraMounts []storage.VolMounts `json:"extraMounts"`
 	// BackoffLimimt allows to define the maximum number of retried executions.
 	// +kubebuilder:default:=6
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
