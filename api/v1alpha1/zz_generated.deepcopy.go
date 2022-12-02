@@ -101,11 +101,6 @@ func (in *AnsibleEESpec) DeepCopyInto(out *AnsibleEESpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	if in.Configs != nil {
-		in, out := &in.Configs, &out.Configs
-		*out = make([]Config, len(*in))
-		copy(*out, *in)
-	}
 	if in.ExtraMounts != nil {
 		in, out := &in.ExtraMounts, &out.ExtraMounts
 		*out = make([]storage.VolMounts, len(*in))

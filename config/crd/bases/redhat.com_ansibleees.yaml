@@ -47,25 +47,6 @@ spec:
                   retried executions.
                 format: int32
                 type: integer
-              configs:
-                description: Config allows to pass a list of Config
-                items:
-                  description: Config is a specification of where to mount a certain
-                    ConfigMap object
-                  properties:
-                    mountpath:
-                      description: MountPoint is the directory of the container where
-                        the ConfigMap will be mounted
-                      type: string
-                    name:
-                      description: Name is the name of the ConfigMap that we want
-                        to mount
-                      type: string
-                  required:
-                  - mountpath
-                  - name
-                  type: object
-                type: array
               env:
                 description: Env is a list containing the environment variables to
                   pass to the pod

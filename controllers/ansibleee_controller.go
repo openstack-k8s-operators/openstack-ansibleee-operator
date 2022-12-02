@@ -185,25 +185,6 @@ func addMounts(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	var volumeMounts []corev1.VolumeMount
 	var volumes []corev1.Volume
 
-	// (fpantano) Configs can be optional, but we can cleanup this part as long
-	// as we're able to extend these structures using ExtraMounts
-	for i := 0; i < len(instance.Spec.Configs); i++ {
-		volumeMounts = append(volumeMounts, corev1.VolumeMount{
-			Name:      instance.Spec.Configs[i].Name,
-			MountPath: instance.Spec.Configs[i].MountPath,
-		})
-		volumes = append(volumes, corev1.Volume{
-			Name: instance.Spec.Configs[i].Name,
-			VolumeSource: corev1.VolumeSource{
-				ConfigMap: &corev1.ConfigMapVolumeSource{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: instance.Spec.Configs[i].Name,
-					},
-				},
-			},
-		})
-	}
-
 	// ExtraMounts propagation: for each volume defined in the top-level CR
 	// the propagation function provided by lib-common/modules/storage is
 	// called, and the resulting corev1.Volumes and corev1.Mounts are added
