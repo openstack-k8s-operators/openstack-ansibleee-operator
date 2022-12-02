@@ -42,3 +42,15 @@ spec:
       value: "-C -o ControlMaster=auto -o ControlPersist=80s"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
+  extraMounts:
+    - volumes:
+      - name: sshkey
+        secret:
+          secretName: ssh-key-secret
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+      mounts:
+      - name: sshkey
+        mountPath: /runner/env/ssh_key
+        subPath: ssh_key

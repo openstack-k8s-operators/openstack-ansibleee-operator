@@ -29,20 +29,27 @@ The first one is ansibleee-playbook-local.yaml. This wil execute locally the pla
 oc apply -f examples/ansibleee-playbook-local.yaml
 ```
 
-The second one is ansibleee-playbook.yaml. This one has a more evolved playbook with an inventory that actually points to an external node. It is compatible with the libvirt development environment deployment described in [libvirt_podified_standalone](https://gitlab.cee.redhat.com/rhos-upgrades/data-plane-adoption-dev/-/blob/main/libvirt_podified_standalone.md).
+There are other examples that also execute locally the playbook "test.yaml", but that serve as extraMounts demonstration: ansibleee-extravolumes.yaml and ansibleee-extravolumes_2_secret.yaml that need the secrets ceph-secret-example.yaml and ceph-secret-example2.yaml created:
+```
+oc apply -f ceph-secret-example.yaml
+oc apply -f ceph-secret-example2.yaml
+oc apply -f examples/ansibleee-extravolumes.yaml
+```
 
-Remember that to access an external node, you need to provide the ssh private key so ansible can connect to the node. This is being provided by the "key-configmap" ConfigMap (it will be a secret once the lib-common [extramounts system](https://github.com/openstack-k8s-operators/ansibleee-operator/pull/6) is integrated) with this format:
+There are also a number of examples that feature remote execution. By default, all of them expect a compute node to be available in 10.0.0.4, adjust the inventory accordingly for your environment. This setup is compatible with the libvirt development environment deployment described in [libvirt_podified_standalone](https://gitlab.cee.redhat.com/rhos-upgrades/data-plane-adoption-dev/-/blob/main/libvirt_podified_standalone.md).
+
+The first remote example is ansibleee-playbook.yaml. This runs one of the standalone playbooks that is included in the default image.
+
+To access an external node, you need to provide the ssh private key so ansible can connect to the node. This is being expected to be provided by a "ssh-key-secret" Secret with this format:
 ```
 apiVersion: v1
-kind: ConfigMap
+kind: Secret
 metadata:
-  name: key-configmap
+  name: ssh-key-secret
   namespace: openstack
 data:
-  ssh_key: |
-    -----BEGIN OPENSSH PRIVATE KEY-----
-    b3BlbnNzaC1rZX...
-    -----END OPENSSH PRIVATE KEY-----
+  ssh-privatekey:  3390 bytes                                                                                       │
+│ ssh-publickey:   750 bytes
 ```
 
 Once the key has been created, the CR should run the deploy-tripleo-os-configure.yml playbook on the external node:
@@ -50,10 +57,16 @@ Once the key has been created, the CR should run the deploy-tripleo-os-configure
 oc apply -f examples/ansibleee-playbook.yaml
 ```
 
+The second remote example is ansibleee-role.yaml, which will run a certain number of tasks from specific standalone roles:
+```
+oc apply -f examples/ansibleee-role.yaml
+```
 
-
-
-Modify the yaml to suit your needs.
+And the last remote example is ansibleee-play.yaml, which will run a CR-defined playbook using an inventory stored in a ConfigMap.
+```
+oc apply -f examples/inventory-configmap.yaml
+oc apply -f examples/ansibleee-play.yaml
+```
 
 ## Example Development Cycle
 
@@ -63,14 +76,7 @@ The following has been verified on
 The Makefile assumes you have docker installed. If you're using
 podman, then adjust accordingly (e.g. symlink docker to podman).
 
-The example CR, examples/ansibleee-test.yaml, assumes the following
-`ConfigMap` resources have been created so create them first.
-```
-oc create -f examples/swift-configmap.yaml
-oc create -f examples/test-configmap-1.yaml
-oc create -f examples/test-configmap-2.yaml
-```
-Create the CRD managed by the operator.
+Create the CRD managed by the operator. This must be deleted and re-created any time the api changes.
 ```
 oc create -f config/crd/bases/redhat.com_ansibleees.yaml
 ```

@@ -4,6 +4,7 @@ metadata:
   name: ansibleee-play
   namespace: openstack
 spec:
+  image: quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:2714eb18d2641740d621d55e34686834
   play: |
     - name: Print hello world
       hosts: all
@@ -11,19 +12,21 @@ spec:
       - name: Using debug statement
         ansible.builtin.debug:
           msg: "Hello, world this is ansibleee-play.yaml"
-  image: "quay.io/jlarriba/openstack-tripleo-ansible-ee:stable"
   extraMounts:
-    extraVol:
-      volumes:
+    - volumes:
       - name: inventory
-        projected:
-          sources:
-          - configmap:
-              name: inventory-configmap
-              items:
-              - key: inventory
-                path: inventory.yaml
+        configMap:
+          name: inventory-configmap
+      - name: sshkey
+        secret:
+          secretName: ssh-key-secret
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
       mounts:
       - name: inventory
-        mountPath: "/runner/inventory"
-        readOnly: true
+        mountPath: /runner/inventory/inventory.yaml
+        subPath: inventory.yaml
+      - name: sshkey
+        mountPath: /runner/env/ssh_key
+        subPath: ssh_key
