@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: openstack-configmap
+  namespace: openstack
+data:
+  openstack.yaml: |
+    plugin: openstack.cloud.openstack
+    expand_hostvars: yes
+    fail_on_errors: yes
+    all_projects: yes

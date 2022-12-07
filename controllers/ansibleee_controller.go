@@ -164,6 +164,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	} else {
 		addRoles(instance, job)
 	}
+
 	addMounts(instance, job)
 
 	// Set AnsibleEE instance as the owner and controller
@@ -227,6 +228,14 @@ func addInventory(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	var invEnvVar corev1.EnvVar
 	invEnvVar.Name = "RUNNER_INVENTORY"
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
+	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+}
+
+func addPlugin(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
+	var invEnvVar corev1.EnvVar
+	invEnvVar.Name = "RUNNER_PLUGIN"
+	invEnvVar.Value = "\n" + instance.Spec.Plugin + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
