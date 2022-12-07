@@ -56,7 +56,7 @@ type AnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials
 	ExtraMounts []storage.VolMounts `json:"extraMounts"`
-	// Plugin is the location for the source plugin that will build dynamic inventory.
+	// Plugin is the source script that is executed by runner to set env variables for inventory plugins
 	Plugin string `json:"plugin,omitempty"`
 	// BackoffLimimt allows to define the maximum number of retried executions.
 	// +kubebuilder:default:=6

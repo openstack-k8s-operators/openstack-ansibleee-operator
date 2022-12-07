@@ -1,37 +1,14 @@
 apiVersion: redhat.com/v1alpha1
 kind: AnsibleEE
 metadata:
-  name: ansibleee-play
+  name: ansibleee-plugin
   namespace: openstack
 spec:
-  # We can specify either playbook, which will run with default ansible-runner options,
-  # or args, which allows specify the whole command that we want to execute
-  play: |
-    - name: Print hello world
-      hosts: all
-      tasks:
-      - name: Using debug statement
-        ansible.builtin.debug:
-          msg: "Hello, world this is ansibleee-play.yaml"
-  # playbook: "test.yaml"
-  # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
-  image: "quay.io/adrbrown/osp-ansible-runner:main"
-  inventory: /runner/inventory/
+  playbook: "test.yaml"
+  image: "quay.io/adrbrown/osp-ansible-runner:update-entrypoint"
+  inventory: /runner/inventory
   plugin: |
-    # defines pluginrc.sh script to export needed env variables to use plugin
-    # export OS_USERNAME=admin
-    # export OS_PASSWORD=password
-    # export OS_PROJECT_NAME=admin
-    # export OS_AUTH_URL=http://192.168.122.4/identity
-    # export OS_IDENTITY_API_VERSION=3
     export OS_CLOUD=devstack-admin
-  env:
-    - name: ANSIBLE_FORCE_COLOR
-      value: "True"
-    - name: ANSIBLE_SSH_ARGS
-      value: "-C -o ControlMaster=auto -o ControlPersist=80s"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
   extraMounts:
     - volumes:
       - name: openstack
@@ -42,8 +19,8 @@ spec:
           name: clouds-configmap
       mounts:
       - name: openstack
-        mountPath: /runner/inventory/plugins/openstack.yaml
+        mountPath: /runner/inventory/plugin/openstack.yaml
         subPath: openstack.yaml
       - name: clouds
-        mountPath: /runner/inventory/plugins/clouds.yaml
+        mountPath: /runner/inventory/plugin/clouds.yaml
         subPath: clouds.yaml
