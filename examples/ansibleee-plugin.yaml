@@ -32,14 +32,18 @@ spec:
       value: "-C -o ControlMaster=auto -o ControlPersist=80s"
     - name: ANSIBLE_ENABLE_TASK_DEBUGGER
       value: "True"
-  configs:
-    - name: swift-configmap
-      mountpath: /runner/configs/swift-configmap
-    - name: test-configmap-1
-      mountpath: /runner/configs/test-configmap-1
-    - name: test-configmap-2
-      mountpath: /runner/configs/test-configmap-2
-    - name: openstack-configmap
-      mountpath: /runner/inventory/plugins
-    - name: clouds-configmap
-      mountpath: /runner/inventory/plugins
+  extraMounts:
+    - volumes:
+      - name: openstack
+        configMap:
+          name: openstack-configmap
+      - name: clouds
+        configMap:
+          name: clouds-configmap
+      mounts:
+      - name: openstack
+        mountPath: /runner/inventory/plugins/openstack.yaml
+        subPath: openstack.yaml
+      - name: clouds
+        mountPath: /runner/inventory/plugins/clouds.yaml
+        subPath: clouds.yaml
