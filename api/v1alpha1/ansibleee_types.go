@@ -107,15 +107,6 @@ type Config struct {
 	MountPath string `json:"mountpath"`
 }
 
-// TODO:
-// PluginConfig is a list where we will mount certain config settings for dynamic inventory sources.
-type PluginConfig struct {
-	// Name is the name of the object that we want to add to env settings
-	Name string `json:"name"`
-
-	
-}
-
 // Role describes the format of an ansible playbook destinated to run roles
 type Role struct {
 	// +kubebuilder:default:="Run Standalone Role"
