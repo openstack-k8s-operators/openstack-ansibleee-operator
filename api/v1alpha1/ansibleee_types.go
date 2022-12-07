@@ -53,8 +53,6 @@ type AnsibleEESpec struct {
 	UID int64 `json:"uid,omitempty"`
 	// Inventory is the inventory that the ansible playbook will use to launch the job.
 	Inventory string `json:"inventory,omitempty"`
-	// Config allows to pass a list of Config
-	Configs []Config `json:"configs,omitempty"`
 	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials
 	ExtraMounts []storage.VolMounts `json:"extraMounts"`
