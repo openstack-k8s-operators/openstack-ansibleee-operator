@@ -5,10 +5,10 @@ metadata:
   namespace: openstack
 spec:
   playbook: "test.yaml"
-  image: "quay.io/adrbrown/osp-ansible-runner:update-entrypoint"
-  inventory: /runner/inventory
+  image: "quay.io/adrbrown/osp-ansible-runner:latest"
   plugin: |
     export OS_CLOUD=devstack-admin
+  inventory: /runner/inventory
   extraMounts:
     - volumes:
       - name: openstack

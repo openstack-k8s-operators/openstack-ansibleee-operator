@@ -159,10 +159,14 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	if len(instance.Spec.Inventory) > 0 {
 		addInventory(instance, job)
 	}
-	if len(instance.Spec.Plugin) > 0 {
-		addPlugin(instance, job)
-		fmt.Println(instance.Spec.Plugin)
-	}
+
+	// TODO: debug why the job completes but this isnt printed
+	fmt.Println("-----------DEBUB-----------")
+	fmt.Println(instance.Spec.Plugin)
+	// if len(instance.Spec.Plugin) > 0 {
+	// 	addPlugin(instance, job)
+	// 	fmt.Println(instance.Spec.Plugin)
+	// }
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
 	} else {

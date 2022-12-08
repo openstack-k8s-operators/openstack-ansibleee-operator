@@ -1857,7 +1857,7 @@ spec:
                 type: string
               plugin:
                 description: Plugin is the source script that is executed by runner to set
-                  env variables for inventory plugins
+                  env variables for inventory plugins.
                 type: string
               restartPolicy:
                 default: Never
