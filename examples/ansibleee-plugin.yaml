@@ -4,11 +4,13 @@ metadata:
   name: ansibleee-plugin
   namespace: openstack
 spec:
-  playbook: "test.yaml"
-  image: "quay.io/adrbrown/osp-ansible-runner:latest"
-  plugin: |
-    export OS_CLOUD=devstack-admin
+  playbook: test.yaml
+  image: quay.io/adrbrown/osp-ansible-runner:latest
   inventory: /runner/inventory
+  env:
+    - name: ANSIBLE_PLUGIN
+      value: |
+        export OS_CLOUD=devstack-admin
   extraMounts:
     - volumes:
       - name: openstack

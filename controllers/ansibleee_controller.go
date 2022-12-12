@@ -164,7 +164,7 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	fmt.Println("-----------DEBUB-----------")
 	fmt.Println(instance.Spec.Plugin)
 	// if len(instance.Spec.Plugin) > 0 {
-	// 	addPlugin(instance, job)
+	// addPlugin(instance, job)
 	// 	fmt.Println(instance.Spec.Plugin)
 	// }
 	if len(instance.Spec.Play) > 0 {
@@ -241,10 +241,10 @@ func addInventory(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 }
 
 func addPlugin(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
-	var invEnvVar corev1.EnvVar
-	invEnvVar.Name = "RUNNER_PLUGIN"
-	invEnvVar.Value = "\n" + instance.Spec.Plugin + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
+	var pluginEnvVar corev1.EnvVar
+	pluginEnvVar.Name = "RUNNER_PLUGIN"
+	pluginEnvVar.Value = "\n" + instance.Spec.Plugin + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, pluginEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 
