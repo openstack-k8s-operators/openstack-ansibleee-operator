@@ -8,7 +8,7 @@ spec:
   image: quay.io/adrbrown/osp-ansible-runner:latest
   inventory: /runner/inventory
   env:
-    - name: ANSIBLE_PLUGIN
+    - name: RUNNER_PLUGIN
       value: |
         export OS_CLOUD=devstack-admin
   extraMounts:

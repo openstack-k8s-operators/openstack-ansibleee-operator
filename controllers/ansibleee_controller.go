@@ -159,14 +159,6 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	if len(instance.Spec.Inventory) > 0 {
 		addInventory(instance, job)
 	}
-
-	// TODO: debug why the job completes but this isnt printed
-	fmt.Println("-----------DEBUB-----------")
-	fmt.Println(instance.Spec.Plugin)
-	// if len(instance.Spec.Plugin) > 0 {
-	// addPlugin(instance, job)
-	// 	fmt.Println(instance.Spec.Plugin)
-	// }
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
 	} else {
@@ -237,14 +229,6 @@ func addInventory(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
 	invEnvVar.Name = "RUNNER_INVENTORY"
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
-	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-}
-
-func addPlugin(instance *redhatcomv1alpha1.AnsibleEE, job *batchv1.Job) {
-	var pluginEnvVar corev1.EnvVar
-	pluginEnvVar.Name = "RUNNER_PLUGIN"
-	pluginEnvVar.Value = "\n" + instance.Spec.Plugin + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, pluginEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 
