@@ -43,7 +43,7 @@ jobs:
     if: needs.check-secrets.outputs.have-secrets == 'true'
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Get branch name
       id: branch-name
@@ -80,12 +80,12 @@ jobs:
 
     steps:
     - name: Install Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: 1.18.x
 
     - name: Checkout ansibleee-operator repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Install operator-sdk
       uses: redhat-actions/openshift-tools-installer@v1
@@ -153,7 +153,7 @@ jobs:
 
     steps:
     - name: Checkout ansibleee-operator repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Get branch name
       id: branch-name
