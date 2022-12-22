@@ -161,10 +161,8 @@ func (r *AnsibleEEReconciler) jobForAnsibleEE(instance *redhatcomv1alpha1.Ansibl
 	}
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
-	} else {
-		addRoles(instance, job)
 	}
-
+	addRoles(instance, job)
 	addMounts(instance, job)
 
 	// Set AnsibleEE instance as the owner and controller

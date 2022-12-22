@@ -4,25 +4,23 @@ metadata:
   name: ansibleee-plugin
   namespace: openstack
 spec:
-  playbook: test.yaml
+  playbook: deploy-tripleo-os-configure.yml
   image: quay.io/adrbrown/osp-ansible-runner:latest
-  inventory: /runner/inventory
+  inventory: |
+    Compute:
+      hosts:
+        compute-0:
+          ansible_host: 10.0.0.4
+      vars:
+        ansible_ssh_user: root
+    allovercloud:
+      children:
+        Compute:
+    overcloud:
+      children:
+        Compute:
   env:
     - name: RUNNER_PLUGIN
       value: |
-        export OS_CLOUD=devstack-admin
-  extraMounts:
-    - volumes:
-      - name: openstack
-        configMap:
-          name: openstack-configmap
-      - name: clouds
-        configMap:
-          name: clouds-configmap
-      mounts:
-      - name: openstack
-        mountPath: /runner/inventory/plugin/openstack.yaml
-        subPath: openstack.yaml
-      - name: clouds
-        mountPath: /runner/inventory/plugin/clouds.yaml
-        subPath: clouds.yaml
+        ansible-playbook -i inventory/plugin/edpm_plugin.py --list-hosts $RUNNER_INVENTORY
+
