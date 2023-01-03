@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: edpm-configmap
+  namespace: openstack
+data:
+  edpm_inventory.yaml: |
+    Compute:
+      hosts:
+        compute-0:
+          ansible_host: 10.0.0.4
+      vars:
+        ansible_ssh_user: root
+    allovercloud:
+      children:
+        Compute:
+    overcloud:
+      children:
+        Compute:

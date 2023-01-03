@@ -4,18 +4,23 @@ metadata:
   name: ansibleee-plugin
   namespace: openstack
 spec:
-  # args: ["ansible-inventory", "-i", "/inventory/inventory.yaml", "--list"]
-  # play: |
-  #   - name: ping static inventory
-  #     hosts: all
-  #     tasks:
-  #     - name: Testing ping
-  #       ansible.builtin.ping:
-  image: quay.io/adrbrown/osp-ansible-runner:dev-plugin-revert
-  inventory: |
-    plugin: edpm_plugin                   
-    path_to_inventory: /runner/inventory   
-    inventory_file: edpm_inventory.yaml 
+  image: quay.io/adrbrown/osp-ansible-runner:dev-edpm-plugin
+  args: ["ansible-galaxy", "collection", "list"]
   env:
     - name: RUNNER_PLUGIN
-      value: ANSIBLE_INVENTORY_PLUGINS=/runner/plugin
+      value: "0"
+  extraMounts:
+    - volumes:
+      - name: edpm-inventory
+        configMap:
+          name: edpm-configmap
+      - name: inventory
+        configMap:
+          name: plugin-configmap
+      mounts:
+      - name: edpm-inventory
+        mountPath: /runner/inventory/edpm_inventory.yaml
+        subPath: edpm_inventory.yaml
+      - name: inventory
+        mountPath: /runner/inventory/inventory.yaml
+        subPath: inventory.yaml

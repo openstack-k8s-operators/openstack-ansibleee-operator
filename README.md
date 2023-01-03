@@ -62,10 +62,16 @@ The second remote example is ansibleee-role.yaml, which will run a certain numbe
 oc apply -f examples/ansibleee-role.yaml
 ```
 
-And the last remote example is ansibleee-play.yaml, which will run a CR-defined playbook using an inventory stored in a ConfigMap.
+The third remote example is ansibleee-play.yaml, which will run a CR-defined playbook using an inventory stored in a ConfigMap.
 ```
 oc apply -f examples/inventory-configmap.yaml
 oc apply -f examples/ansibleee-play.yaml
+```
+
+The fourth remote example is ansibleee-plugin.yaml, which will run a custom inventory plugin using `cloudguruab.edpm_plugin` collection using two configmaps; 1. edpm-configmap.yaml and 2. plugin-configmap.yaml to set the appropriate output given in each respective ConfigMap.
+```
+oc apply -f examples/plugin-configmap.yaml
+oc apply -f examples/edpm-configmap.yaml
 ```
 
 ## Example Development Cycle

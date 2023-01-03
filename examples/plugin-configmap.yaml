@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: plugin-configmap
+  namespace: openstack
+data:
+  inventory.yaml: |
+    plugin: edpm_plugin                   
+    path_to_inventory: /runner/inventory   
+    inventory_file: edpm_inventory.yaml 
