@@ -1,0 +1,44 @@
+site_name: Ansible EE Operator
+site_description: Ansible EE Operator
+site_author: Ansible EE Team
+site_url: https://openstack-k8s-operators.github.io/ansibleee-operator
+repo_name: openstack-k8s-operators/ansibleee-operator
+repo_url: https://github.com/openstack-k8s-operators/ansibleee-operator
+theme:
+  features:
+    - search.suggest
+    - search.highlight
+    - search.share
+  name: material
+  palette:
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: white
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      primary: white
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+nav:
+  - Home: index.md
+  - Custom Resources:
+      - AnsibleEE: ansibleee.md
+  - Contributing: contributing.md
+markdown_extensions:
+  - toc:
+      permalink: "#"
+  - pymdownx.superfences
+  - admonition
+extra:
+  version:
+    provider: mike
+    default: latest
+plugins:
+  - git-revision-date
+  - search:
+      lang: en
+      prebuild_index: true
