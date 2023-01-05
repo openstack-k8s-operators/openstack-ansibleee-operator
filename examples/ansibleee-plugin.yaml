@@ -4,11 +4,8 @@ metadata:
   name: ansibleee-plugin
   namespace: openstack
 spec:
-  image: quay.io/adrbrown/osp-ansible-runner:dev-edpm-plugin
+  image: quay.io/adrbrown/osp-ansible-runner:latest
   args: ["ansible-galaxy", "collection", "list"]
-  env:
-    - name: RUNNER_PLUGIN
-      value: "0"
   extraMounts:
     - volumes:
       - name: edpm-inventory
