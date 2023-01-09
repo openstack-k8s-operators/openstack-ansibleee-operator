@@ -102,3 +102,26 @@ To see the result of the playbook run, use `oc logs`.
 ```
 oc logs $(oc get pods | grep ansible | awk {'print $1'})
 ```
+
+## Using ansibleee-operator with TripleO Ansible
+
+When the ansibleee-operator spawns a job the
+[ansible-runner](https://ansible-runner.readthedocs.io/en/stable)
+can use playbooks and roles contained in its image.
+
+An openstack-tripleo-ansible-ee operator image is hosted at
+[quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee](http://quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee)
+which contains [tripleo-ansible](https://opendev.org/openstack/tripleo-ansible).
+The following commands may be used to inspect the content.
+```
+podman pull quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee
+IMAGE_ID=$(podman images --filter reference=openstack-tripleo-ansible-ee --format "{{.Id}}")
+podman run $IMAGE_ID ls -l
+```
+The container is built with
+[TCIB](https://specs.openstack.org/openstack/tripleo-specs/specs/victoria/simple-container-generation.html)
+using a
+[tripleo-ansible-ee.yaml](https://opendev.org/openstack/tripleo-common/src/branch/master/container-images/tcib/tripleo-ansible-ee/tripleo-ansible-ee.yaml)
+file hosted in tripleo-common. When a patch is merged in
+tripleo-ansible a new version of the openstack-tripleo-ansible-ee
+image is built by the CI system within minutes.
