@@ -1,4 +1,4 @@
-# ansibleee-operator
+# Ansible EE operator
 An operator to deploy and run an Ansible Execution Environment container on Openshit
 
 # Build and deploy
@@ -20,7 +20,7 @@ make undeploy
 ```
 
 # Use
-Once the operator has been deployed succesfully to the openshift/kubernetes cluster, you can see it in action by creating a new "ansibleee" CR. 
+Once the operator has been deployed succesfully to the openshift/kubernetes cluster, you can see it in action by creating a new "ansibleee" CR.
 
 There are some examples on the examples directory.
 
