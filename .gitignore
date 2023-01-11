@@ -25,6 +25,7 @@ config/manager/kustomization.yaml
 
 # editor and IDE paraphernalia
 .idea
+.vscode
 *.swp
 *.swo
 *~

@@ -10,16 +10,17 @@ theme:
     - search.highlight
     - search.share
   name: material
+  logo: images/openstack-logo.png
   palette:
     - scheme: default
       media: "(prefers-color-scheme: light)"
-      primary: white
+      primary: teal
       toggle:
         icon: material/toggle-switch-off-outline
         name: Switch to dark mode
     - scheme: slate
       media: "(prefers-color-scheme: dark)"
-      primary: white
+      primary: teal
       toggle:
         icon: material/toggle-switch
         name: Switch to light mode
