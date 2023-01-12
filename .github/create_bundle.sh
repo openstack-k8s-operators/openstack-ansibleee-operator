@@ -17,6 +17,7 @@ DIGEST=$(skopeo inspect docker://${REGISTRY}/${BASE_IMAGE}:${GITHUB_SHA} | jq '.
 echo "Digest: ${DIGEST}"
 
 RELEASE_VERSION=$(grep "^VERSION" Makefile | awk -F'?= ' '{ print $2 }')
+IMAGE_TAG_BASE=$(grep "^IMAGE_TAG_BASE" Makefile | awk -F'?= ' '{ print $2 }')
 OPERATOR_IMG_WITH_DIGEST="${REGISTRY}/${BASE_IMAGE}@${DIGEST}"
 
 echo "New Operator Image with Digest: $OPERATOR_IMG_WITH_DIGEST"
@@ -47,7 +48,7 @@ for csv_image in $(cat "${CLUSTER_BUNDLE_FILE}" | grep "image:" | sed -e "s|.*im
   base_image=$(echo $csv_image | cut -f 1 -d${delimeter})
   tag_image=$(echo $csv_image | cut -f 2 -d${delimeter})
 
-  if [[ "$base_image:$tag_image" == "controller:latest" ]]; then
+  if [[ "$base_image:$tag_image" == "$IMAGE_TAG_BASE:latest" ]]; then
     echo "$base_image:$tag_image becomes $OPERATOR_IMG_WITH_DIGEST"
     sed -e "s|$base_image:$tag_image|$OPERATOR_IMG_WITH_DIGEST|g" -i "${CLUSTER_BUNDLE_FILE}"
   else
