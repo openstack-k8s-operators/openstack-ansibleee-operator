@@ -1,5 +1,5 @@
 # Ansible EE operator
-An operator to deploy and run an Ansible Execution Environment container on Openshit
+An operator to deploy and run an Ansible Execution Environment container on Openshift
 
 # Build and deploy
 It uses operator-sdk to build and run.
