@@ -10,5 +10,5 @@ make manifests
 make build
 
 echo "DEPLOY"
-kl apply -f config/crd/bases/redhat.com_ansibleees.yaml
+oc apply -f config/crd/bases/redhat.com_ansibleees.yaml
 ./bin/manager
