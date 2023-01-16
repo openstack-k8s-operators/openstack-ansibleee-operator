@@ -17,16 +17,16 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 )
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// AnsibleEESpec defines the desired state of AnsibleEE
-type AnsibleEESpec struct {
+// OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
+type OpenStackAnsibleEESpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
@@ -41,7 +41,7 @@ type AnsibleEESpec struct {
 	// Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored.
 	Args []string `json:"args,omitempty"`
 	// Name is the name of the internal container inside the pod
-	// +kubebuilder:default:="ansibleee"
+	// +kubebuilder:default:="openstackansibleee"
 	Name string `json:"name,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
@@ -67,34 +67,35 @@ type AnsibleEESpec struct {
 	Role Role `json:"roles,omitempty"`
 }
 
-// AnsibleEEStatus defines the observed state of AnsibleEE
-type AnsibleEEStatus struct {
+// OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
+type OpenStackAnsibleEEStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Nodes are the names of the ansibleee pods
+	// Nodes are the names of the openstackansibleee pods
 	Nodes []string `json:"nodes"`
 }
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Ansible EE"
 
-// AnsibleEE is the Schema for the ansibleees API
-type AnsibleEE struct {
+// OpenStackAnsibleEE is the Schema for the openstackansibleees API
+type OpenStackAnsibleEE struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   AnsibleEESpec   `json:"spec,omitempty"`
-	Status AnsibleEEStatus `json:"status,omitempty"`
+	Spec   OpenStackAnsibleEESpec   `json:"spec,omitempty"`
+	Status OpenStackAnsibleEEStatus `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
 
-// AnsibleEEList contains a list of AnsibleEE
-type AnsibleEEList struct {
+// OpenStackAnsibleEEList contains a list of OpenStackAnsibleEE
+type OpenStackAnsibleEEList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []AnsibleEE `json:"items"`
+	Items           []OpenStackAnsibleEE `json:"items"`
 }
 
 // Config is a specification of where to mount a certain ConfigMap object
@@ -116,23 +117,23 @@ type Role struct {
 	// +kubebuilder:default:=true
 	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
 	// +kubebuilder:default:=true
-	Become bool `json:"become,omitempty"`
-	Tasks []Task `json:"tasks"`
+	Become bool   `json:"become,omitempty"`
+	Tasks  []Task `json:"tasks"`
 }
 
 // Task describes a task centered exclusively in running import_role
 type Task struct {
-	Name string `json:"name"`
+	Name       string     `json:"name"`
 	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
-	Tags []string `json:"tags,omitempty"`
+	Tags       []string   `json:"tags,omitempty"`
 }
 
 // ImportRole contains the actual rolename and tasks file name to execute
 type ImportRole struct {
-	Name string `json:"name"`
+	Name      string `json:"name"`
 	TasksFrom string `json:"tasks_from" yaml:"tasks_from"`
 }
 
 func init() {
-	SchemeBuilder.Register(&AnsibleEE{}, &AnsibleEEList{})
+	SchemeBuilder.Register(&OpenStackAnsibleEE{}, &OpenStackAnsibleEEList{})
 }

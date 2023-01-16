@@ -1,72 +1,17 @@
 
 ### Custom Resources
 
-* [AnsibleEE](#ansibleee)
+* [OpenStackAnsibleEE](#openstackansibleee)
 
 ### Sub Resources
 
-* [AnsibleEEList](#ansibleeelist)
-* [AnsibleEESpec](#ansibleeespec)
-* [AnsibleEEStatus](#ansibleeestatus)
 * [Config](#config)
 * [ImportRole](#importrole)
+* [OpenStackAnsibleEEList](#openstackansibleeelist)
+* [OpenStackAnsibleEESpec](#openstackansibleeespec)
+* [OpenStackAnsibleEEStatus](#openstackansibleeestatus)
 * [Role](#role)
 * [Task](#task)
-
-#### AnsibleEE
-
-AnsibleEE is the Schema for the ansibleees API
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| metadata |  | metav1.ObjectMeta | false |
-| spec |  | [AnsibleEESpec](#ansibleeespec) | false |
-| status |  | [AnsibleEEStatus](#ansibleeestatus) | false |
-
-[Back to Custom Resources](#custom-resources)
-
-#### AnsibleEEList
-
-AnsibleEEList contains a list of AnsibleEE
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| metadata |  | metav1.ListMeta | false |
-| items |  | [][AnsibleEE](#ansibleee) | true |
-
-[Back to Custom Resources](#custom-resources)
-
-#### AnsibleEESpec
-
-AnsibleEESpec defines the desired state of AnsibleEE
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| play | Play is the playbook contents that ansible will run on execution. If both Play and Roles are specified, Play takes precedence | string | false |
-| playbook | Playbook is the playbook that ansible will run on this execution | string | false |
-| image | Image is the container image that will execute the ansible command | string | false |
-| args | Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored. | []string | false |
-| name | Name is the name of the internal container inside the pod | string | false |
-| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
-| restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". | string | false |
-| uid | UID is the userid that will be used to run the container. | int64 | false |
-| inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
-| extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | true |
-| backoffLimit | BackoffLimimt allows to define the maximum number of retried executions. | *int32 | false |
-| ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
-| roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | [Role](#role) | false |
-
-[Back to Custom Resources](#custom-resources)
-
-#### AnsibleEEStatus
-
-AnsibleEEStatus defines the observed state of AnsibleEE
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| nodes | Nodes are the names of the ansibleee pods | []string | true |
-
-[Back to Custom Resources](#custom-resources)
 
 #### Config
 
@@ -87,6 +32,61 @@ ImportRole contains the actual rolename and tasks file name to execute
 | ----- | ----------- | ------ | -------- |
 | name |  | string | true |
 | tasks_from |  | string | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackAnsibleEE
+
+OpenStackAnsibleEE is the Schema for the openstackansibleees API
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| metadata |  | metav1.ObjectMeta | false |
+| spec |  | [OpenStackAnsibleEESpec](#openstackansibleeespec) | false |
+| status |  | [OpenStackAnsibleEEStatus](#openstackansibleeestatus) | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackAnsibleEEList
+
+OpenStackAnsibleEEList contains a list of OpenStackAnsibleEE
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| metadata |  | metav1.ListMeta | false |
+| items |  | [][OpenStackAnsibleEE](#openstackansibleee) | true |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackAnsibleEESpec
+
+OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| play | Play is the playbook contents that ansible will run on execution. If both Play and Roles are specified, Play takes precedence | string | false |
+| playbook | Playbook is the playbook that ansible will run on this execution | string | false |
+| image | Image is the container image that will execute the ansible command | string | false |
+| args | Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored. | []string | false |
+| name | Name is the name of the internal container inside the pod | string | false |
+| env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
+| restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". | string | false |
+| uid | UID is the userid that will be used to run the container. | int64 | false |
+| inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
+| extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | true |
+| backoffLimit | BackoffLimimt allows to define the maximum number of retried executions. | *int32 | false |
+| ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
+| roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | [Role](#role) | false |
+
+[Back to Custom Resources](#custom-resources)
+
+#### OpenStackAnsibleEEStatus
+
+OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
+
+| Field | Description | Scheme | Required |
+| ----- | ----------- | ------ | -------- |
+| nodes | Nodes are the names of the openstackansibleee pods | []string | true |
 
 [Back to Custom Resources](#custom-resources)
 

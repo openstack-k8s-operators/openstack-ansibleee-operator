@@ -4,19 +4,19 @@ metadata:
   annotations:
     alm-examples: '[]'
     capabilities: Basic Install
-  name: ansibleee-operator.v0.0.0
+  name: openstack-ansibleee-operator.v0.0.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: AnsibleEE is the Schema for the ansibleees API
-      displayName: Ansible EE
-      kind: AnsibleEE
-      name: ansibleees.redhat.com
+    - description: OpenStackAnsibleEE is the Schema for the openstackansibleees API
+      displayName: OpenStack Ansible EE
+      kind: OpenStackAnsibleEE
+      name: openstackansibleees.redhat.com
       version: v1alpha1
-  description: The Ansible Execution Environment Operator
-  displayName: AnsibleEE
+  description: The OpenStack Ansible Execution Environment Operator
+  displayName: OpenStackAnsibleEE
   icon:
   - base64data: ""
     mediatype: ""
@@ -37,8 +37,8 @@ spec:
   - ansible
   - execution
   links:
-  - name: Ansibleee Operator
-    url: https://ansibleee-operator.domain
+  - name: OpenStack Ansible EE Operator
+    url: https://openstack-k8s-operators.github.io/ansibleee-operator
   maintainers:
   - email: jlarriba@redhat.com
     name: Juan Larriba

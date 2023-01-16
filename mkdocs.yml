@@ -1,6 +1,6 @@
-site_name: Ansible EE Operator
-site_description: Ansible EE Operator
-site_author: Ansible EE Team
+site_name: OpenStack Ansible EE Operator
+site_description: OpenStack Ansible EE Operator
+site_author: OpenStack Team
 site_url: https://openstack-k8s-operators.github.io/ansibleee-operator
 repo_name: openstack-k8s-operators/ansibleee-operator
 repo_url: https://github.com/openstack-k8s-operators/ansibleee-operator
@@ -27,7 +27,7 @@ theme:
 nav:
   - Home: index.md
   - Custom Resources:
-      - AnsibleEE: ansibleee.md
+      - OpenStackAnsibleEE: openstack_ansibleee.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:

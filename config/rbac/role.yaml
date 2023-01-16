@@ -34,7 +34,7 @@ rules:
 - apiGroups:
   - redhat.com
   resources:
-  - ansibleees
+  - openstackansibleees
   verbs:
   - create
   - delete
@@ -46,13 +46,13 @@ rules:
 - apiGroups:
   - redhat.com
   resources:
-  - ansibleees/finalizers
+  - openstackansibleees/finalizers
   verbs:
   - update
 - apiGroups:
   - redhat.com
   resources:
-  - ansibleees/status
+  - openstackansibleees/status
   verbs:
   - get
   - patch

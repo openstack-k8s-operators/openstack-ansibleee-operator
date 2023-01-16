@@ -1,5 +1,5 @@
-# Ansible EE operator
-An operator to deploy and run an Ansible Execution Environment container on Openshift
+# OpenStack Ansible EE operator
+An operator to deploy and run an OpenStack Ansible Execution Environment container on Openshift
 
 # Build and deploy
 It uses operator-sdk to build and run.
@@ -26,14 +26,14 @@ There are some examples on the examples directory.
 
 The first one is ansibleee-playbook-local.yaml. This wil execute locally the playbook "test.yaml", which will run some checks on the container where ansible-runner is being executed.
 ```
-oc apply -f examples/ansibleee-playbook-local.yaml
+oc apply -f examples/openstack-ansibleee-playbook-local.yaml
 ```
 
 There are other examples that also execute locally the playbook "test.yaml", but that serve as extraMounts demonstration: ansibleee-extravolumes.yaml and ansibleee-extravolumes_2_secret.yaml that need the secrets ceph-secret-example.yaml and ceph-secret-example2.yaml created:
 ```
 oc apply -f ceph-secret-example.yaml
 oc apply -f ceph-secret-example2.yaml
-oc apply -f examples/ansibleee-extravolumes.yaml
+oc apply -f examples/openstack-ansibleee-extravolumes.yaml
 ```
 
 There are also a number of examples that feature remote execution. By default, all of them expect a compute node to be available in 10.0.0.4, adjust the inventory accordingly for your environment. This setup is compatible with the libvirt development environment deployment described in [libvirt_podified_standalone](https://gitlab.cee.redhat.com/rhos-upgrades/data-plane-adoption-dev/-/blob/main/libvirt_podified_standalone.md).
@@ -54,18 +54,18 @@ data:
 
 Once the key has been created, the CR should run the deploy-tripleo-os-configure.yml playbook on the external node:
 ```
-oc apply -f examples/ansibleee-playbook.yaml
+oc apply -f examples/openstack-ansibleee-playbook.yaml
 ```
 
 The second remote example is ansibleee-role.yaml, which will run a certain number of tasks from specific standalone roles:
 ```
-oc apply -f examples/ansibleee-role.yaml
+oc apply -f examples/openstack-ansibleee-role.yaml
 ```
 
 And the last remote example is ansibleee-play.yaml, which will run a CR-defined playbook using an inventory stored in a ConfigMap.
 ```
 oc apply -f examples/inventory-configmap.yaml
-oc apply -f examples/ansibleee-play.yaml
+oc apply -f examples/openstack-ansibleee-play.yaml
 ```
 
 ## Example Development Cycle
@@ -78,9 +78,9 @@ podman, then adjust accordingly (e.g. symlink docker to podman).
 
 Create the CRD managed by the operator. This must be deleted and re-created any time the api changes.
 ```
-oc create -f config/crd/bases/redhat.com_ansibleees.yaml
+oc create -f config/crd/bases/redhat.com_openstackansibleees.yaml
 ```
-Build and run a local copy of the Ansible Execution Environment operator.
+Build and run a local copy of the OpenStack Ansible Execution Environment operator.
 ```
 make generate
 make manifests
@@ -89,7 +89,7 @@ make build
 ```
 Once the operator is running, create the examle CR to run the test playbook.
 ```
-oc create -f examples/ansibleee-playbook-local.yaml
+oc create -f examples/openstack-ansibleee-playbook-local.yaml
 ```
 The operator will create a ansible pod and run the playbook. It will
 then move to a completed state.
