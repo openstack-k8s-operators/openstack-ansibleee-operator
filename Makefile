@@ -38,6 +38,9 @@ BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
 BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 
+# openstack-ansibleee-runner image
+EEIMG ?= quay.io/openstack-k8s-operators/openstack-ansibleee-runner
+
 VERIFY_TLS ?= true
 
 # USE_IMAGE_DIGESTS defines if images are resolved via tags or digests
@@ -128,6 +131,11 @@ docker-build: test ## Build docker image with the manager.
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
 	podman push --tls-verify=${VERIFY_TLS} ${IMG}
+
+##@ Build openstack-ansibleee-runner image 
+.PHONY: docker-build-ee
+docker-build-ee: 
+	cd ansibleee; podman build -t ${EEIMG} .
 
 ##@ Deployment
 
