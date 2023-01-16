@@ -103,9 +103,9 @@ To see the result of the playbook run, use `oc logs`.
 oc logs $(oc get pods | grep ansible | awk {'print $1'})
 ```
 
-## Using ansibleee-operator with TripleO Ansible
+## Using openstack-ansibleee-operator with TripleO Ansible
 
-When the ansibleee-operator spawns a job the
+When the openstack-ansibleee-operator spawns a job the
 [ansible-runner](https://ansible-runner.readthedocs.io/en/stable)
 can use playbooks and roles contained in its image.
 

@@ -36,8 +36,8 @@ jobs:
     outputs:
       have-secrets: ${{ steps.have-secrets.outputs.ok }}
 
-  build-ansibleee-operator:
-    name: Build ansibleee-operator image using buildah
+  build-openstack-ansibleee-operator:
+    name: Build openstack-ansibleee-operator image using buildah
     runs-on: ubuntu-latest
     needs: [check-secrets]
     if: needs.check-secrets.outputs.have-secrets == 'true'
@@ -55,26 +55,26 @@ jobs:
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
     - name: Buildah Action
-      id: build-ansibleee-operator
+      id: build-openstack-ansibleee-operator
       uses: redhat-actions/buildah-build@v2
       with:
-        image: ansibleee-operator
+        image: openstack-ansibleee-operator
         tags: ${{ env.latesttag }} ${{ github.sha }}
         containerfiles: |
           ./Dockerfile
 
-    - name: Push ansibleee-operator To ${{ env.imageregistry }}
+    - name: Push openstack-ansibleee-operator To ${{ env.imageregistry }}
       uses: redhat-actions/push-to-registry@v2
       with:
-        image: ${{ steps.build-ansibleee-operator.outputs.image }}
-        tags: ${{ steps.build-ansibleee-operator.outputs.tags }}
+        image: ${{ steps.build-openstack-ansibleee-operator.outputs.image }}
+        tags: ${{ steps.build-openstack-ansibleee-operator.outputs.tags }}
         registry: ${{ env.imageregistry }}/${{ env.imagenamespace }}
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}
 
-  build-ansibleee-operator-bundle:
-    needs: [ check-secrets, build-ansibleee-operator ]
-    name: ansibleee-operator-bundle
+  build-openstack-ansibleee-operator-bundle:
+    needs: [ check-secrets, build-openstack-ansibleee-operator ]
+    name: openstack-ansibleee-operator-bundle
     runs-on: ubuntu-latest
     if: needs.check-secrets.outputs.have-secrets == 'true'
 
@@ -84,7 +84,7 @@ jobs:
       with:
         go-version: 1.18.x
 
-    - name: Checkout ansibleee-operator repository
+    - name: Checkout openstack-ansibleee-operator repository
       uses: actions/checkout@v3
 
     - name: Install operator-sdk
@@ -116,7 +116,7 @@ jobs:
       env:
         REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         GITHUB_SHA: ${{ github.sha }}
-        BASE_IMAGE: ansibleee-operator
+        BASE_IMAGE: openstack-ansibleee-operator
 
     - name: Get branch name
       id: branch-name
@@ -127,32 +127,32 @@ jobs:
       run: |
         echo "latesttag=${{ steps.branch-name.outputs.current_branch }}-latest" >> $GITHUB_ENV
 
-    - name: Build ansibleee-operator-bundle using buildah
-      id: build-ansibleee-operator-bundle
+    - name: Build openstack-ansibleee-operator-bundle using buildah
+      id: build-openstack-ansibleee-operator-bundle
       uses: redhat-actions/buildah-build@v2
       with:
-        image: ansibleee-operator-bundle
+        image: openstack-ansibleee-operator-bundle
         tags: ${{ env.latesttag }} ${{ github.sha }}
         containerfiles: |
           ./bundle.Dockerfile
 
-    - name: Push ansibleee-operator To ${{ env.imageregistry }}
+    - name: Push openstack-ansibleee-operator To ${{ env.imageregistry }}
       uses: redhat-actions/push-to-registry@v2
       with:
-        image: ${{ steps.build-ansibleee-operator-bundle.outputs.image }}
-        tags: ${{ steps.build-ansibleee-operator-bundle.outputs.tags }}
+        image: ${{ steps.build-openstack-ansibleee-operator-bundle.outputs.image }}
+        tags: ${{ steps.build-openstack-ansibleee-operator-bundle.outputs.tags }}
         registry:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         username: ${{ secrets.QUAY_USERNAME }}
         password: ${{ secrets.QUAY_PASSWORD }}
 
-  build-ansibleee-operator-index:
-    needs: [ check-secrets, build-ansibleee-operator-bundle ]
-    name: ansibleee-operator-index
+  build-openstack-ansibleee-operator-index:
+    needs: [ check-secrets, build-openstack-ansibleee-operator-bundle ]
+    name: openstack-ansibleee-operator-index
     runs-on: ubuntu-latest
     if: needs.check-secrets.outputs.have-secrets == 'true'
 
     steps:
-    - name: Checkout ansibleee-operator repository
+    - name: Checkout openstack-ansibleee-operator repository
       uses: actions/checkout@v3
 
     - name: Get branch name
@@ -186,14 +186,14 @@ jobs:
       env:
         REGISTRY:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         GITHUB_SHA: ${{ github.sha }}
-        BUNDLE_IMAGE: ansibleee-operator-bundle
+        BUNDLE_IMAGE: openstack-ansibleee-operator-bundle
         INDEX_IMAGE_TAG: ${{ env.latesttag }}
-        INDEX_IMAGE: ansibleee-operator-index
+        INDEX_IMAGE: openstack-ansibleee-operator-index
 
-    - name: Push ansibleee-operator-index To ${{ env.imageregistry }}
+    - name: Push openstack-ansibleee-operator-index To ${{ env.imageregistry }}
       uses: redhat-actions/push-to-registry@v2
       with:
-        image: ansibleee-operator-index
+        image: openstack-ansibleee-operator-index
         tags: ${{ env.latesttag }} ${{ github.sha }}
         registry:  ${{ env.imageregistry }}/${{ env.imagenamespace }}
         username: ${{ secrets.QUAY_USERNAME }}

@@ -1,14 +1,14 @@
-module github.com/openstack-k8s-operators/ansibleee-operator
+module github.com/openstack-k8s-operators/openstack-ansibleee-operator
 
 go 1.18
 
-replace github.com/openstack-k8s-operators/ansibleee-operator/api => ./api
+replace github.com/openstack-k8s-operators/openstack-ansibleee-operator/api => ./api
 
 require (
 	github.com/go-logr/logr v1.2.3
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.24.1
-	github.com/openstack-k8s-operators/ansibleee-operator/api v0.0.0-00010101000000-000000000000
+	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-00010101000000-000000000000
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20221207150746-c4fe7a228d42
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.25.4

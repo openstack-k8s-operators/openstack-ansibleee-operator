@@ -1,4 +1,4 @@
-module github.com/openstack-k8s-operators/ansibleee-operator/api
+module github.com/openstack-k8s-operators/openstack-ansibleee-operator/api
 
 go 1.18
 

@@ -34,11 +34,11 @@ ARG DEST_ROOT=/dest-root
 # NONROOT default id https://github.com/GoogleContainerTools/distroless/blob/main/base/base.bzl#L8=
 ARG USER_ID=65532
 
-ARG IMAGE_COMPONENT="ansibleee-operator-container"
-ARG IMAGE_NAME="ansibleee-operator"
+ARG IMAGE_COMPONENT="openstack-ansibleee-operator-container"
+ARG IMAGE_NAME="openstack-ansibleee-operator"
 ARG IMAGE_VERSION="1.0.0"
-ARG IMAGE_SUMMARY="Ansible Operator"
-ARG IMAGE_DESC="This image includes the ansible-operator"
+ARG IMAGE_SUMMARY="OpenStack Ansible EE Operator"
+ARG IMAGE_DESC="This image includes the openstack-ansibleee-operator"
 ARG IMAGE_TAGS="cn-openstack openstack"
 
 ### DO NOT EDIT LINES BELOW
