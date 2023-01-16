@@ -126,7 +126,7 @@ run: manifests generate fmt vet ## Run a controller from your host.
 
 .PHONY: docker-build
 docker-build: test ## Build docker image with the manager.
-	cd ansibleee; podman build -t ${IMG} .;
+	podman build -t ${IMG} .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
