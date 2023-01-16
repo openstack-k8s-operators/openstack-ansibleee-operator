@@ -9,7 +9,6 @@
 * [ImportRole](#importrole)
 * [OpenStackAnsibleEEList](#openstackansibleeelist)
 * [OpenStackAnsibleEESpec](#openstackansibleeespec)
-* [OpenStackAnsibleEEStatus](#openstackansibleeestatus)
 * [Role](#role)
 * [Task](#task)
 
@@ -77,16 +76,6 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | backoffLimit | BackoffLimimt allows to define the maximum number of retried executions. | *int32 | false |
 | ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | [Role](#role) | false |
-
-[Back to Custom Resources](#custom-resources)
-
-#### OpenStackAnsibleEEStatus
-
-OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
-
-| Field | Description | Scheme | Required |
-| ----- | ----------- | ------ | -------- |
-| nodes | Nodes are the names of the openstackansibleee pods | []string | true |
 
 [Back to Custom Resources](#custom-resources)
 
