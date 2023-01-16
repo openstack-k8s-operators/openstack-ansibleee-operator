@@ -1926,14 +1926,6 @@ spec:
             type: object
           status:
             description: OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
-            properties:
-              nodes:
-                description: Nodes are the names of the openstackansibleee pods
-                items:
-                  type: string
-                type: array
-            required:
-            - nodes
             type: object
         type: object
     served: true

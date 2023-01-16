@@ -71,9 +71,6 @@ type OpenStackAnsibleEESpec struct {
 type OpenStackAnsibleEEStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-
-	// Nodes are the names of the openstackansibleee pods
-	Nodes []string `json:"nodes"`
 }
 
 //+kubebuilder:object:root=true
