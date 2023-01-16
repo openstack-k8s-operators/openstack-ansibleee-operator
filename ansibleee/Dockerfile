@@ -22,7 +22,7 @@ RUN sed -i '1d' /bin/entrypoint
 RUN cat /bin/entrypoint >> /bin/tripleo_entrypoint
 RUN chmod +x /bin/tripleo_entrypoint
 WORKDIR /runner
-RUN rm -rf /runner/roles && ln -snf /usr/share/ansible/roles roles
-RUN rm -rf /runner/project && ln -snf /usr/share/ansible/tripleo-playbooks project
+RUN rm -rf roles && ln -snf /usr/share/ansible/roles roles
+RUN rm -rf project && ln -snf /usr/share/ansible/tripleo-playbooks project
 USER 1001
 ENTRYPOINT ["tripleo_entrypoint"]
