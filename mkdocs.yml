@@ -1,9 +1,9 @@
 site_name: OpenStack Ansible EE Operator
 site_description: OpenStack Ansible EE Operator
 site_author: OpenStack Team
-site_url: https://openstack-k8s-operators.github.io/ansibleee-operator
-repo_name: openstack-k8s-operators/ansibleee-operator
-repo_url: https://github.com/openstack-k8s-operators/ansibleee-operator
+site_url: https://openstack-k8s-operators.github.io/openstack-ansibleee-operator
+repo_name: openstack-k8s-operators/openstack-ansibleee-operator
+repo_url: https://github.com/openstack-k8s-operators/openstack-ansibleee-operator
 theme:
   features:
     - search.suggest

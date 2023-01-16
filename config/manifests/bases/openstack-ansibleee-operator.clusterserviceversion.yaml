@@ -38,7 +38,7 @@ spec:
   - execution
   links:
   - name: OpenStack Ansible EE Operator
-    url: https://openstack-k8s-operators.github.io/ansibleee-operator
+    url: https://openstack-k8s-operators.github.io/openstack-ansibleee-operator
   maintainers:
   - email: jlarriba@redhat.com
     name: Juan Larriba
