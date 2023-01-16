@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-CLUSTER_BUNDLE_FILE="bundle/manifests/ansibleee-operator.clusterserviceversion.yaml"
+CLUSTER_BUNDLE_FILE="bundle/manifests/openstack-ansibleee-operator.clusterserviceversion.yaml"
 
 echo "Creating ansibleee operator bundle"
 cd ..

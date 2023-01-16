@@ -1,4 +1,4 @@
-name: AnsibleEE Operator image builder
+name: OpenStackAnsibleEE Operator image builder
 
 on:
   push:

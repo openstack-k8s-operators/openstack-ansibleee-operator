@@ -1,5 +1,5 @@
 apiVersion: redhat.com/v1alpha1
-kind: AnsibleEE
+kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-play
   namespace: openstack

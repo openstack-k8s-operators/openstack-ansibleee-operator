@@ -1,27 +1,11 @@
 apiVersion: redhat.com/v1alpha1
-kind: AnsibleEE
+kind: OpenStackAnsibleEE
 metadata:
-  name: ansibleee-role
+  name: ansibleee-playbook
   namespace: openstack
 spec:
-  # We can specify either 
-  # - playbook: which will run with default ansible-runner options
-  # - tasks: which will run a list of tasks in files inside roles
-  # - args: which allows specify the whole command that we want to execute
-  roles:
-    strategy: free
-    become: true
-    tasks:
-      - name: Generic standalone playbook running tasks
-        import_role:
-          name: tripleo_podman
-          tasks_from: tripleo_podman_configure.yml
-        tags:
-          - tripleo_podman
-      - name: Generic standalone playbook running tasks
-        import_role:
-          name: tripleo_container_manage
-          tasks_from: shutdown.yml
+  playbook: deploy-tripleo-os-configure.yml
+  image: quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:2714eb18d2641740d621d55e34686834
   inventory: |
     Compute:
       hosts:
