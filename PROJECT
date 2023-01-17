@@ -1,4 +1,4 @@
-domain: redhat.com
+domain: openstack.org
 layout:
 - go.kubebuilder.io/v3
 plugins:
@@ -11,7 +11,8 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: redhat.com
+  domain: openstack.org
+  group: ansibleee
   kind: OpenStackAnsibleEE
   path: github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1
   version: v1alpha1

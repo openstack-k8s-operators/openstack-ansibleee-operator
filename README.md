@@ -78,7 +78,7 @@ podman, then adjust accordingly (e.g. symlink docker to podman).
 
 Create the CRD managed by the operator. This must be deleted and re-created any time the api changes.
 ```
-oc create -f config/crd/bases/redhat.com_openstackansibleees.yaml
+oc create -f config/crd/bases/ansibleee.openstack.org_openstackansibleees.yaml
 ```
 Build and run a local copy of the OpenStack Ansible Execution Environment operator.
 ```

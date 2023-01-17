@@ -13,7 +13,7 @@ spec:
     - description: OpenStackAnsibleEE is the Schema for the openstackansibleees API
       displayName: OpenStack Ansible EE
       kind: OpenStackAnsibleEE
-      name: openstackansibleees.redhat.com
+      name: openstackansibleees.ansibleee.openstack.org
       version: v1alpha1
   description: The OpenStack Ansible Execution Environment Operator
   displayName: OpenStackAnsibleEE

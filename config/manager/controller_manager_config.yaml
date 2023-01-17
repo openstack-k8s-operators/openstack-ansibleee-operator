@@ -8,4 +8,4 @@ webhook:
   port: 9443
 leaderElection:
   leaderElect: true
-  resourceName: 258e89a9.redhat.com
+  resourceName: 258e89a9.openstack.org

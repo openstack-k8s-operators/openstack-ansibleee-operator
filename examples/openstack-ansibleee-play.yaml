@@ -1,4 +1,4 @@
-apiVersion: redhat.com/v1alpha1
+apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-play
