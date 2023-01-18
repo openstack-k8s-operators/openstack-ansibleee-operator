@@ -46,9 +46,9 @@ type OpenStackAnsibleEEReconciler struct {
 	Scheme  *runtime.Scheme
 }
 
-// +kubebuilder:rbac:groups=redhat.com,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=redhat.com,resources=openstackansibleees/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=redhat.com,resources=openstackansibleees/finalizers,verbs=update
+// +kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees/finalizers,verbs=update
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;

@@ -6,6 +6,32 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
+  - ansibleee.openstack.org
+  resources:
+  - openstackansibleees
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ansibleee.openstack.org
+  resources:
+  - openstackansibleees/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ansibleee.openstack.org
+  resources:
+  - openstackansibleees/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - batch
   resources:
   - jobs
@@ -31,29 +57,3 @@ rules:
   verbs:
   - get
   - list
-- apiGroups:
-  - redhat.com
-  resources:
-  - openstackansibleees
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - redhat.com
-  resources:
-  - openstackansibleees/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - redhat.com
-  resources:
-  - openstackansibleees/status
-  verbs:
-  - get
-  - patch
-  - update

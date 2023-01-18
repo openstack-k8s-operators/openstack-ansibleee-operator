@@ -5,7 +5,7 @@ metadata:
   name: ansibleee-viewer-role
 rules:
 - apiGroups:
-  - redhat.com
+  - ansibleee.openstack.org
   resources:
   - ansibleees
   verbs:
@@ -13,7 +13,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - redhat.com
+  - ansibleee.openstack.org
   resources:
   - ansibleees/status
   verbs:

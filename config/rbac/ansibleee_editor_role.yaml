@@ -5,7 +5,7 @@ metadata:
   name: ansibleee-editor-role
 rules:
 - apiGroups:
-  - redhat.com
+  - ansibleee.openstack.org
   resources:
   - ansibleees
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - redhat.com
+  - ansibleee.openstack.org
   resources:
   - ansibleees/status
   verbs:

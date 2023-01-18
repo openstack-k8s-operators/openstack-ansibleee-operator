@@ -5,9 +5,9 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.9.2
   creationTimestamp: null
-  name: openstackansibleees.redhat.com
+  name: openstackansibleees.ansibleee.openstack.org
 spec:
-  group: redhat.com
+  group: ansibleee.openstack.org
   names:
     kind: OpenStackAnsibleEE
     listKind: OpenStackAnsibleEEList
