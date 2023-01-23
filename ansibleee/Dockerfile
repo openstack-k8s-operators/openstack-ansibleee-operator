@@ -1,4 +1,4 @@
-FROM quay.io/ansible/creator-ee:latest
+FROM quay.io/ansible/creator-ee:v0.13.0
 USER root
 RUN chmod g=u /etc/passwd /etc/group
 # Install edpm-ansible content
