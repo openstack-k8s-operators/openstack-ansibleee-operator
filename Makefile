@@ -137,7 +137,7 @@ docker-push: ## Push docker image with the manager.
 docker-build-ee:
 	cd ansibleee; podman build -t ${EEIMG} .
 
-## Push openstack-ansible-runner-image
+## Push openstack-ansible-runner image
 .PHONY: docker-push-ee
 docker-push-ee:
 	cd ansibleee; podman push --tls-verify=${VERIFY_TLS} ${EEIMG}
