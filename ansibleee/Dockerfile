@@ -6,7 +6,7 @@ RUN chmod g=u /etc/passwd /etc/group
 #RUN dnf -y install gcc-c++  git libffi-devel openssl-devel podman \
 #    python3-devel python3-pyyaml python3-dnf python-rhsm-certificates python3-libselinux python3-libsemanage \
 #    gzip gettext && dnf clean all && rm -rf /var/cache/{dnf,yum} && rm -rf /var/lib/dnf/history.* && rm -rf /var/log/*
-RUN /usr/bin/git clone -b heat-temp https://github.com/kajinamit/edpm-ansible.git /var/tmp/edpm-ansible
+RUN /usr/bin/git clone https://github.com/openstack-k8s-operators/edpm-ansible.git /var/tmp/edpm-ansible
 RUN cd /var/tmp/edpm-ansible && pip install -r requirements.txt
 # ansible-galaxy issue with PyOpenSSL https://github.com/ansible/awx/issues/12124
 RUN pip3 install 'pyOpenSSL<20.0.0' 'cryptography >35,<37'
