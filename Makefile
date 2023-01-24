@@ -132,10 +132,15 @@ docker-build: test ## Build docker image with the manager.
 docker-push: ## Push docker image with the manager.
 	podman push --tls-verify=${VERIFY_TLS} ${IMG}
 
-##@ Build openstack-ansibleee-runner image 
+##@ Build openstack-ansibleee-runner image
 .PHONY: docker-build-ee
-docker-build-ee: 
+docker-build-ee:
 	cd ansibleee; podman build -t ${EEIMG} .
+
+## Push openstack-ansible-runner-image
+.PHONY: docker-push-ee
+docker-push-ee:
+	cd ansibleee; podman push --tls-verify=${VERIFY_TLS} ${EEIMG}
 
 ##@ Deployment
 
