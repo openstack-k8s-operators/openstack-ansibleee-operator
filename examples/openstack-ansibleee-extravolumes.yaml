@@ -20,4 +20,3 @@ spec:
       - name: ceph
         mountPath: "/etc/ceph"
         readOnly: true
-
