@@ -17,7 +17,7 @@ RUN pip3 install 'pyOpenSSL<20.0.0' 'cryptography >35,<37'
 RUN cd /var/tmp/edpm-ansible && ansible-galaxy role install -r requirements.yml --roles-path "/usr/share/ansible/roles" && \
     ansible-galaxy collection install -r requirements.yml --collections-path "/usr/share/ansible/collections"
 RUN cd /var/tmp/edpm-ansible && python3 setup.py install --prefix=/usr
-# When local repo of edpm-ansible is mounted as a volume, during podman build 
+# When local repo of edpm-ansible is mounted as a volume, during podman build
 # It will give Device/Resource busy. In order to fix that. Clean up the directory
 # Only when EDPM_LOCAL_REPO is defined.
 RUN if [ "$EDPM_LOCAL_REPO" == "" ] ; then \
