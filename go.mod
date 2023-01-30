@@ -1,6 +1,6 @@
 module github.com/openstack-k8s-operators/openstack-ansibleee-operator
 
-go 1.18
+go 1.19
 
 replace github.com/openstack-k8s-operators/openstack-ansibleee-operator/api => ./api
 
