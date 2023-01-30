@@ -1,8 +1,9 @@
 module github.com/openstack-k8s-operators/openstack-ansibleee-operator/api
 
-go 1.18
+go 1.19
 
 require (
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20221207150746-c4fe7a228d42
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.3
 	sigs.k8s.io/controller-runtime v0.13.0
@@ -15,7 +16,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20221207150746-c4fe7a228d42 // indirect
 	golang.org/x/net v0.2.0 // indirect
 	golang.org/x/text v0.4.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
