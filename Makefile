@@ -41,6 +41,9 @@ BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
 # openstack-ansibleee-runner image
 EEIMG ?= quay.io/openstack-k8s-operators/openstack-ansibleee-runner
 
+# edpm-ansible local repo
+EDPM_LOCAL_REPO ?= ""
+
 VERIFY_TLS ?= true
 
 # USE_IMAGE_DIGESTS defines if images are resolved via tags or digests
@@ -135,7 +138,11 @@ docker-push: ## Push docker image with the manager.
 ##@ Build openstack-ansibleee-runner image
 .PHONY: docker-build-ee
 docker-build-ee:
-	cd ansibleee; podman build -t ${EEIMG} .
+	if [ "$EDPM_LOCAL_REPO" != "" ] ; then \
+		cd ansibleee; podman build -t ${EEIMG} . --volume ${EDPM_LOCAL_REPO}:/var/tmp/edpm-ansible:z --build-arg EDPM_LOCAL_REPO=${EDPM_LOCAL_REPO}; \
+	else \
+		cd ansibleee; podman build -t ${EEIMG} .; \
+	fi
 
 ## Push openstack-ansible-runner image
 .PHONY: docker-push-ee
