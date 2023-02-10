@@ -1835,7 +1835,7 @@ spec:
                   type: object
                 type: array
               image:
-                default: quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:current-tripleo
+                default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
                 description: Image is the container image that will execute the ansible
                   command
                 type: string
@@ -1879,7 +1879,7 @@ spec:
                     default: Run Standalone Role
                     type: string
                   strategy:
-                    default: tripleo_free
+                    default: free
                     type: string
                   tasks:
                     items:
