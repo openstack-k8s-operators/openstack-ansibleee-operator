@@ -8,6 +8,7 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.26.0
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230203100003-04e7eeb4995d
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20221207150746-c4fe7a228d42
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
