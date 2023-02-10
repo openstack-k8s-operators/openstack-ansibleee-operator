@@ -36,7 +36,7 @@ type OpenStackAnsibleEESpec struct {
 	// Playbook is the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
 	// Image is the container image that will execute the ansible command
-	// +kubebuilder:default:="quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:current-tripleo"
+	// +kubebuilder:default:="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
 	Image string `json:"image,omitempty"`
 	// Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored.
 	Args []string `json:"args,omitempty"`
@@ -109,7 +109,7 @@ type Role struct {
 	Name string `json:"name,omitempty"`
 	// +kubebuilder:default:="{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
 	Hosts string `json:"hosts,omitempty"`
-	// +kubebuilder:default:=tripleo_free
+	// +kubebuilder:default:=free
 	Strategy string `json:"strategy,omitempty"`
 	// +kubebuilder:default:=true
 	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
