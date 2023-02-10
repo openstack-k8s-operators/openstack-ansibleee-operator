@@ -139,4 +139,4 @@ IMAGE_ID=$(podman images --filter reference=openstack-ansibleee-runner:latest --
 podman run $IMAGE_ID ls -l
 ```
 
-The container is built by a github actions from a [Dockerfile](https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/openstack_ansibleee/Dockerfile) in the [edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible) repository.
+The container is built by a github action from a [Dockerfile](https://github.com/openstack-k8s-operators/edpm-ansible/blob/main/openstack_ansibleee/Dockerfile) in the [edpm-ansible](https://github.com/openstack-k8s-operators/edpm-ansible) repository.
