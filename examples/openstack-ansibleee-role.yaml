@@ -14,13 +14,13 @@ spec:
     tasks:
       - name: Generic standalone playbook running tasks
         import_role:
-          name: tripleo_podman
+          name: edpm_podman
           tasks_from: tripleo_podman_configure.yml
         tags:
-          - tripleo_podman
+          - edpm_podman
       - name: Generic standalone playbook running tasks
         import_role:
-          name: tripleo_container_manage
+          name: edpm_container_manage
           tasks_from: shutdown.yml
   inventory: |
     Compute:

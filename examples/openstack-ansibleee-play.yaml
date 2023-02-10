@@ -4,7 +4,7 @@ metadata:
   name: ansibleee-play
   namespace: openstack
 spec:
-  image: quay.io/tripleomastercentos9/openstack-tripleo-ansible-ee:2714eb18d2641740d621d55e34686834
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   play: |
     - name: Print hello world
       hosts: all
