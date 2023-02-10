@@ -29,6 +29,8 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	util "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -63,9 +65,8 @@ type OpenStackAnsibleEEReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	//log := r.Log.WithValues("openstackansibleee", req.NamespacedName)
 
-	instance, err := r.getOpenStackAnsibleeeInstance(ctx, req)
+	instance, helper, err := r.getOpenStackAnsibleeeInstance(ctx, req)
 	if err != nil || instance.Name == "" {
 		return ctrl.Result{}, err
 	}
@@ -75,51 +76,67 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new job
-		job, err := r.jobForOpenStackAnsibleEE(instance)
+		job, err := r.jobForOpenStackAnsibleEE(instance, helper)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
-		fmt.Printf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name)
+		util.LogForObject(
+			helper,
+			fmt.Sprintf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name),
+			instance,
+		)
 		err = r.Create(ctx, job)
 		if err != nil {
-			fmt.Println(err.Error())
+			util.LogErrorForObject(helper, err, err.Error(), instance)
 			return ctrl.Result{}, err
 		}
-		fmt.Println("job created successfully - return and requeue")
+		util.LogForObject(
+			helper,
+			fmt.Sprintf("Job: Job.Namespace %s Job.Name %s created successfully - return and requeue\n", job.Namespace, job.Name),
+			instance,
+		)
 		return ctrl.Result{Requeue: true}, nil
 	} else if err != nil {
-		fmt.Println(err.Error())
-		//log.Error(err, "Failed to get Job")
+		util.LogErrorForObject(helper, err, err.Error(), instance)
 		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, error) {
+func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, *helper.Helper, error) {
 	// Fetch the OpenStackAnsibleEE instance
 	instance := &redhatcomv1alpha1.OpenStackAnsibleEE{}
+	helper, _ := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
 	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			fmt.Println("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted")
-			//log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted")
-			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, nil
+			util.LogForObject(
+				helper,
+				"OpenStackAnsibleEE resource not found. Ignoring since object must be deleted",
+				instance,
+			)
+			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, helper, nil
 		}
 		// Error reading the object - requeue the request.
-		fmt.Println(err.Error())
-		//log.Error(err, "Failed to get OpenStackAnsibleEE")
-		return &redhatcomv1alpha1.OpenStackAnsibleEE{}, err
+		util.LogErrorForObject(helper, err, err.Error(), instance)
+		return &redhatcomv1alpha1.OpenStackAnsibleEE{}, helper, err
 	}
 
-	return instance, nil
+	return instance, helper, nil
 }
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
-func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhatcomv1alpha1.OpenStackAnsibleEE) (*batchv1.Job, error) {
+func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper) (*batchv1.Job, error) {
 	ls := labelsForOpenStackAnsibleEE(instance.Name)
 
 	args := instance.Spec.Args
@@ -162,7 +179,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
 	} else {
-		addRoles(instance, job)
+		addRoles(instance, h, job)
 	}
 	addMounts(instance, job)
 
@@ -200,12 +217,12 @@ func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job)
 	job.Spec.Template.Spec.Volumes = volumes
 }
 
-func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, job *batchv1.Job) {
 	var roles []*redhatcomv1alpha1.Role
 	roles = append(roles, &instance.Spec.Role)
 	d, err := yaml.Marshal(&roles)
 	if err != nil {
-		fmt.Println(err.Error())
+		util.LogErrorForObject(h, err, err.Error(), instance)
 	}
 
 	var roleEnvVar corev1.EnvVar
