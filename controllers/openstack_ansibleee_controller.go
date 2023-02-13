@@ -107,14 +107,21 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, *helper.Helper, error) {
 	// Fetch the OpenStackAnsibleEE instance
 	instance := &redhatcomv1alpha1.OpenStackAnsibleEE{}
-	helper, _ := helper.NewHelper(
+	helper, err := helper.NewHelper(
 		instance,
 		r.Client,
 		r.Kclient,
 		r.Scheme,
 		r.Log,
 	)
-	err := r.Get(ctx, req.NamespacedName, instance)
+
+	if err != nil {
+		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
+		r.Log.Error(err, fmt.Sprintf("Unable to acquire helper for  OpenStackAnsibleEE %s", instance.Name))
+		return instance, nil, err
+	}
+
+	err = r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -129,7 +136,7 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 		}
 		// Error reading the object - requeue the request.
 		util.LogErrorForObject(helper, err, err.Error(), instance)
-		return &redhatcomv1alpha1.OpenStackAnsibleEE{}, helper, err
+		return instance, helper, err
 	}
 
 	return instance, helper, nil
