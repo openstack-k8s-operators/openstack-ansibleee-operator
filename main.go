@@ -81,6 +81,7 @@ func main() {
 	if err = (&controllers.OpenStackAnsibleEEReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		Log:    ctrl.Log.WithName("controllers").WithName("OpenStackAnsibleEE"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackAnsibleEE")
 		os.Exit(1)
