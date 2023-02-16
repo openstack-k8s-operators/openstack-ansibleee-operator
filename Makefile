@@ -95,7 +95,7 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen crd-to-markdown ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
 	rm -f api/bases/* && cp -a config/crd/bases api/
 	$(CRD_MARKDOWN) -f api/v1alpha1/openstack_ansibleee_types.go -n OpenStackAnsibleEE > docs/openstack_ansibleee.md
@@ -331,6 +331,7 @@ gowork: ## Generate go.work file to support our multi module repository
 	test -f go.work || go work init
 	go work use .
 	go work use ./api
+	go work sync
 
 .PHONY: operator-lint
 operator-lint: gowork ## Runs operator-lint
