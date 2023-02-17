@@ -44,7 +44,7 @@ oc apply -f ceph-secret-example2.yaml
 oc apply -f examples/openstack-ansibleee-extravolumes.yaml
 ```
 
-There are also a number of examples that feature remote execution. By default, all of them expect a compute node to be available in 10.0.0.4, adjust the inventory accordingly for your environment. This setup is compatible with the libvirt development environment deployment described in [libvirt_podified_standalone](https://gitlab.cee.redhat.com/rhos-upgrades/data-plane-adoption-dev/-/blob/main/libvirt_podified_standalone.md).
+There are also a number of examples that feature remote execution. By default, all of them expect a compute node to be available in 10.0.0.4, adjust the inventory accordingly for your environment. This setup is compatible with the libvirt development environment deployment described in libvirt_podified_standalone.
 
 The first remote example is ansibleee-playbook.yaml. This runs one of the standalone playbooks that is included in the default image.
 
