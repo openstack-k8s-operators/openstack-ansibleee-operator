@@ -114,14 +114,17 @@ type Role struct {
 	// +kubebuilder:default:=true
 	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
 	// +kubebuilder:default:=true
-	Become bool   `json:"become,omitempty"`
-	Tasks  []Task `json:"tasks"`
+	Become bool `json:"become,omitempty"`
+	// +kubebuilder:default:=false
+	GatherFacts bool   `json:"gather_facts,omitempty"`
+	Tasks       []Task `json:"tasks"`
 }
 
 // Task describes a task centered exclusively in running import_role
 type Task struct {
 	Name       string     `json:"name"`
 	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
+	Vars       string     `json:"vars,omitempty"`
 	Tags       []string   `json:"tags,omitempty"`
 }
 

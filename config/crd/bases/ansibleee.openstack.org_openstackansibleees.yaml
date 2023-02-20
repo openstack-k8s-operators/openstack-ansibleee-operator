@@ -1871,6 +1871,9 @@ spec:
                   become:
                     default: true
                     type: boolean
+                  gather_facts:
+                    default: false
+                    type: boolean
                   hosts:
                     default: '{{ primary_role_name | default([]) }}:{{ deploy_target_host
                       | default(''overcloud'') }}'
@@ -1904,6 +1907,8 @@ spec:
                           items:
                             type: string
                           type: array
+                        vars:
+                          type: string
                       required:
                       - import_role
                       - name

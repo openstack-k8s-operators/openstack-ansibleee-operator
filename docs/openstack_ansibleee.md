@@ -90,6 +90,7 @@ Role describes the format of an ansible playbook destinated to run roles
 | strategy |  | string | false |
 | any_errors_fatal |  | bool | false |
 | become |  | bool | false |
+| gather_facts |  | bool | false |
 | tasks |  | [][Task](#task) | true |
 
 [Back to Custom Resources](#custom-resources)
@@ -102,6 +103,7 @@ Task describes a task centered exclusively in running import_role
 | ----- | ----------- | ------ | -------- |
 | name |  | string | true |
 | import_role |  | [ImportRole](#importrole) | true |
+| vars |  | string | false |
 | tags |  | []string | false |
 
 [Back to Custom Resources](#custom-resources)
