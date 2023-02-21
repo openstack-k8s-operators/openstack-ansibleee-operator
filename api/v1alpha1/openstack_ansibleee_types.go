@@ -116,7 +116,7 @@ type Role struct {
 	// +kubebuilder:default:=true
 	Become bool `json:"become,omitempty"`
 	// +kubebuilder:default:=false
-	GatherFacts bool   `json:"gather_facts,omitempty"`
+	GatherFacts bool   `json:"gather_facts,omitempty" yaml:"gather_facts,omitempty"`
 	Tasks       []Task `json:"tasks"`
 }
 
