@@ -30,7 +30,7 @@ ImportRole contains the actual rolename and tasks file name to execute
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
 | name |  | string | true |
-| tasks_from |  | string | true |
+| tasks_from |  | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
@@ -72,7 +72,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". | string | false |
 | uid | UID is the userid that will be used to run the container. | int64 | false |
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
-| extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | true |
+| extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
 | backoffLimit | BackoffLimimt allows to define the maximum number of retried executions. | *int32 | false |
 | ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | [Role](#role) | false |

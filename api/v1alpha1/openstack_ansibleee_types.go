@@ -55,7 +55,7 @@ type OpenStackAnsibleEESpec struct {
 	Inventory string `json:"inventory,omitempty"`
 	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials
-	ExtraMounts []storage.VolMounts `json:"extraMounts"`
+	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// BackoffLimimt allows to define the maximum number of retried executions.
 	// +kubebuilder:default:=6
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
@@ -131,7 +131,7 @@ type Task struct {
 // ImportRole contains the actual rolename and tasks file name to execute
 type ImportRole struct {
 	Name      string `json:"name"`
-	TasksFrom string `json:"tasks_from" yaml:"tasks_from"`
+	TasksFrom string `json:"tasks_from,omitempty" yaml:"tasks_from,omitempty"`
 }
 
 func init() {
