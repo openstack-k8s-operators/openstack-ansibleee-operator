@@ -1908,6 +1908,8 @@ spec:
                           type: array
                         vars:
                           type: string
+                        when:
+                          type: string
                       required:
                       - import_role
                       - name
