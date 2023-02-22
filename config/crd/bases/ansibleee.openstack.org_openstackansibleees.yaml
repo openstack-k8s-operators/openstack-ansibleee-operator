@@ -1899,7 +1899,6 @@ spec:
                               type: string
                           required:
                           - name
-                          - tasks_from
                           type: object
                         name:
                           type: string
@@ -1908,6 +1907,8 @@ spec:
                             type: string
                           type: array
                         vars:
+                          type: string
+                        when:
                           type: string
                       required:
                       - import_role
