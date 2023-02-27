@@ -35,6 +35,8 @@ import (
 	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/controllers"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
+	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -47,6 +49,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(redhatcomv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(networkv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

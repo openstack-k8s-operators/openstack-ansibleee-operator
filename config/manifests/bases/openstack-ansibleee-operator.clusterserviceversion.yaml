@@ -14,6 +14,12 @@ spec:
       displayName: OpenStack Ansible EE
       kind: OpenStackAnsibleEE
       name: openstackansibleees.ansibleee.openstack.org
+      statusDescriptors:
+      - description: Conditions
+        displayName: Conditions
+        path: conditions
+        x-descriptors:
+        - urn:alm:descriptor:io.kubernetes.conditions
       version: v1alpha1
   description: The OpenStack Ansible Execution Environment Operator
   displayName: OpenStackAnsibleEE

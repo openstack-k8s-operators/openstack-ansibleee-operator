@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	yaml "gopkg.in/yaml.v3"
 	batchv1 "k8s.io/api/batch/v1"
@@ -29,7 +30,9 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	util "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
@@ -54,6 +57,7 @@ type OpenStackAnsibleEEReconciler struct {
 // +kubebuilder:rbac:groups=core,resources=configmaps,verbs=get;list;
 // +kubebuilder:rbac:groups=core,resources=pods,verbs=get;list;
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
+// +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
@@ -71,12 +75,41 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
+	// networks to attach to
+	for _, netAtt := range instance.Spec.NetworkAttachments {
+		_, err := nad.GetNADWithName(ctx, helper, netAtt, instance.Namespace)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				instance.Status.Conditions.Set(condition.FalseCondition(
+					condition.NetworkAttachmentsReadyCondition,
+					condition.RequestedReason,
+					condition.SeverityInfo,
+					condition.NetworkAttachmentsReadyWaitingMessage,
+					netAtt))
+				return ctrl.Result{RequeueAfter: time.Second * 10}, fmt.Errorf("network-attachment-definition %s not found", netAtt)
+			}
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				condition.NetworkAttachmentsReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				condition.NetworkAttachmentsReadyErrorMessage,
+				err.Error()))
+			return ctrl.Result{}, err
+		}
+	}
+
+	serviceAnnotations, err := nad.CreateNetworksAnnotation(instance.Namespace, instance.Spec.NetworkAttachments)
+	if err != nil {
+		return ctrl.Result{}, fmt.Errorf("failed create network annotation from %s: %w",
+			instance.Spec.NetworkAttachments, err)
+	}
+
 	// Check if the job already exists, if not create a new one
 	foundJob := &batchv1.Job{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new job
-		job, err := r.jobForOpenStackAnsibleEE(instance, helper)
+		job, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
@@ -99,6 +132,9 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	} else if err != nil {
 		util.LogErrorForObject(helper, err, err.Error(), instance)
 		return ctrl.Result{}, err
+	}
+	if instance.Status.NetworkAttachments == nil {
+		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
 	return ctrl.Result{}, nil
@@ -143,7 +179,7 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 }
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
-func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper) (*batchv1.Job, error) {
+func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, annotations map[string]string) (*batchv1.Job, error) {
 	ls := labelsForOpenStackAnsibleEE(instance.Name)
 
 	args := instance.Spec.Args
@@ -165,7 +201,8 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 			BackoffLimit:            instance.Spec.BackoffLimit,
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: ls,
+					Annotations: annotations,
+					Labels:      ls,
 				},
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
