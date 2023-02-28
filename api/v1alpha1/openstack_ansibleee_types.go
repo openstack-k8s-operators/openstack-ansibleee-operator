@@ -139,7 +139,7 @@ type Role struct {
 type Task struct {
 	Name       string     `json:"name"`
 	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
-	Vars       string     `json:"vars,omitempty"`
+	Vars       []string   `json:"vars,omitempty"`
 	When       string     `json:"when,omitempty"`
 	Tags       []string   `json:"tags,omitempty"`
 }

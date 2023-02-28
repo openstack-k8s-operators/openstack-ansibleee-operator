@@ -1913,7 +1913,9 @@ spec:
                             type: string
                           type: array
                         vars:
-                          type: string
+                          items:
+                            type: string
+                          type: array
                         when:
                           type: string
                       required:
