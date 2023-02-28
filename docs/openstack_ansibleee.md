@@ -116,7 +116,7 @@ Task describes a task centered exclusively in running import_role
 | ----- | ----------- | ------ | -------- |
 | name |  | string | true |
 | import_role |  | [ImportRole](#importrole) | true |
-| vars |  | string | false |
+| vars |  | []string | false |
 | when |  | string | false |
 | tags |  | []string | false |
 

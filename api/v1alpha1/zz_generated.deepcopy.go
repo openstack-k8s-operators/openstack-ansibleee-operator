@@ -230,6 +230,11 @@ func (in *Role) DeepCopy() *Role {
 func (in *Task) DeepCopyInto(out *Task) {
 	*out = *in
 	out.ImportRole = in.ImportRole
+	if in.Vars != nil {
+		in, out := &in.Vars, &out.Vars
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	if in.Tags != nil {
 		in, out := &in.Tags, &out.Tags
 		*out = make([]string, len(*in))
