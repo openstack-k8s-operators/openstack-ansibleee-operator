@@ -48,6 +48,9 @@ spec:
                   retried executions.
                 format: int32
                 type: integer
+              cmdLine:
+                description: CmdLine is the command line passed to ansible-runner
+                type: string
               env:
                 description: Env is a list containing the environment variables to
                   pass to the pod
