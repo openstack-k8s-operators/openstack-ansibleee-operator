@@ -85,6 +85,11 @@ type OpenStackAnsibleEEStatus struct {
 
 	// NetworkAttachments status of the deployment pods
 	NetworkAttachments map[string][]string `json:"networkAttachments,omitempty"`
+
+	// +kubebuilder:validation:Enum:=Pending;Running;Succeeded;Failed
+	// +kubebuilder:default:=Pending
+	// JobStatus status of the executed job (Pending/Running/Succeeded/Failed)
+	JobStatus string `json:"JobStatus,omitempty" optional:"true"`
 }
 
 //+kubebuilder:object:root=true
@@ -155,4 +160,10 @@ type ImportRole struct {
 
 func init() {
 	SchemeBuilder.Register(&OpenStackAnsibleEE{}, &OpenStackAnsibleEEList{})
+}
+
+// IsReady - returns true if the OpenStackAnsibleEE is ready
+func (instance OpenStackAnsibleEE) IsReady() bool {
+	readyCond := instance.Status.Conditions.Get(condition.ReadyCondition)
+	return readyCond != nil && readyCond.Status == corev1.ConditionTrue
 }

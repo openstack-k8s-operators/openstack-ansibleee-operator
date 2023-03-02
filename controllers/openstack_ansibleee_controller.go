@@ -68,11 +68,64 @@ type OpenStackAnsibleEEReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
-func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
-	instance, helper, err := r.getOpenStackAnsibleeeInstance(ctx, req)
+	instance, err := r.getOpenStackAnsibleeeInstance(ctx, req)
 	if err != nil || instance.Name == "" {
 		return ctrl.Result{}, err
+	}
+
+	helper, err := helper.NewHelper(
+		instance,
+		r.Client,
+		r.Kclient,
+		r.Scheme,
+		r.Log,
+	)
+
+	if err != nil {
+		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
+		r.Log.Error(err, fmt.Sprintf("Unable to acquire helper for  OpenStackAnsibleEE %s", instance.Name))
+		return ctrl.Result{}, err
+	}
+
+	// Always patch the instance status when exiting this function so we can
+	// persist any changes.
+	defer func() {
+		ready := true
+		for _, c := range instance.Status.Conditions {
+			if c.Type == condition.ReadyCondition {
+				continue
+			}
+			if c.Status != corev1.ConditionTrue {
+				ready = false
+				break
+			}
+		}
+		if ready {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		}
+		err := helper.PatchInstance(ctx, instance)
+		if err != nil {
+			r.Log.Error(_err, "PatchInstance error")
+			_err = err
+			return
+		}
+	}()
+
+	// Initialize Status
+	if instance.Status.Conditions == nil {
+		instance.Status.Conditions = condition.Conditions{}
+
+		cl := condition.CreateList(
+			condition.UnknownCondition(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, condition.InitReason, redhatcomv1alpha1.AnsibleExecutionJobInitMessage),
+		)
+
+		instance.Status.Conditions.Init(&cl)
+
+		// Register overall status immediately to have an early feedback e.g.
+		// in the cli
+		return ctrl.Result{}, nil
 	}
 
 	// networks to attach to
@@ -108,6 +161,12 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	foundJob := &batchv1.Job{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
 	if err != nil && errors.IsNotFound(err) {
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			redhatcomv1alpha1.AnsibleExecutionJobNotFoundMessage,
+		))
 		// Define a new job
 		job, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
 		if err != nil {
@@ -128,6 +187,13 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			fmt.Sprintf("Job: Job.Namespace %s Job.Name %s created successfully - return and requeue\n", job.Namespace, job.Name),
 			instance,
 		)
+		// Set AnsibleExecutionJobReadyCondition to requested
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+			condition.RequestedReason,
+			condition.SeverityInfo,
+			redhatcomv1alpha1.AnsibleExecutionJobWaitingMessage))
+		instance.Status.JobStatus = "Running"
 		return ctrl.Result{Requeue: true}, nil
 	} else if err != nil {
 		util.LogErrorForObject(helper, err, err.Error(), instance)
@@ -137,45 +203,49 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
+	if instance.Status.Conditions.IsFalse(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition) {
+		if foundJob.Status.Succeeded > 0 {
+			r.Log.Info(fmt.Sprintf("%s ready", redhatcomv1alpha1.AnsibleExecutionJobReadyCondition))
+			instance.Status.Conditions.Set(condition.TrueCondition(
+				redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+				redhatcomv1alpha1.AnsibleExecutionJobReadyMessage))
+			instance.Status.JobStatus = "Succeeded"
+		}
+		if foundJob.Status.Failed > 0 {
+			err = fmt.Errorf("job.name %s job.namespace %s failed", foundJob.Name, foundJob.Namespace)
+			instance.Status.Conditions.Set(condition.FalseCondition(
+				redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+				condition.ErrorReason,
+				condition.SeverityWarning,
+				redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
+				err.Error()))
+			instance.Status.JobStatus = "Failed"
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
-func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, *helper.Helper, error) {
+func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, error) {
 	// Fetch the OpenStackAnsibleEE instance
 	instance := &redhatcomv1alpha1.OpenStackAnsibleEE{}
-	helper, err := helper.NewHelper(
-		instance,
-		r.Client,
-		r.Kclient,
-		r.Scheme,
-		r.Log,
-	)
 
-	if err != nil {
-		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
-		r.Log.Error(err, fmt.Sprintf("Unable to acquire helper for  OpenStackAnsibleEE %s", instance.Name))
-		return instance, nil, err
-	}
-
-	err = r.Get(ctx, req.NamespacedName, instance)
+	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			util.LogForObject(
-				helper,
-				"OpenStackAnsibleEE resource not found. Ignoring since object must be deleted",
-				instance,
-			)
-			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, helper, nil
+			r.Log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted", instance)
+			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, nil
 		}
 		// Error reading the object - requeue the request.
-		util.LogErrorForObject(helper, err, err.Error(), instance)
-		return instance, helper, err
+		r.Log.Error(err, err.Error(), instance)
+		return instance, err
 	}
 
-	return instance, helper, nil
+	return instance, nil
 }
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
