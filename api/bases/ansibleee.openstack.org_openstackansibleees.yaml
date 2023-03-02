@@ -1944,6 +1944,15 @@ spec:
           status:
             description: OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
             properties:
+              JobStatus:
+                default: Pending
+                description: JobStatus status of the executed job (Pending/Running/Succeeded/Failed)
+                enum:
+                - Pending
+                - Running
+                - Succeeded
+                - Failed
+                type: string
               conditions:
                 description: Conditions
                 items:

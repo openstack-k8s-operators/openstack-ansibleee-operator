@@ -90,6 +90,7 @@ OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
 | ----- | ----------- | ------ | -------- |
 | conditions | Conditions | condition.Conditions | false |
 | networkAttachments | NetworkAttachments status of the deployment pods | map[string][]string | false |
+| JobStatus | JobStatus status of the executed job (Pending/Running/Succeeded/Failed) | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
