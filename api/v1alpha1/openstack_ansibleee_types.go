@@ -69,6 +69,9 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
+	// +kubebuilder:validation:Optional
+	// CmdLine is the command line passed to ansible-runner
+	CmdLine string `json:"cmdLine,omitempty"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE

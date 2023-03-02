@@ -225,6 +225,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	} else {
 		addRoles(instance, h, job)
 	}
+	if len(instance.Spec.CmdLine) > 0 {
+		addCmdLine(instance, job)
+	}
 	addMounts(instance, job)
 
 	// Set OpenStackAnsibleEE instance as the owner and controller
@@ -289,6 +292,14 @@ func addInventory(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.J
 	invEnvVar.Name = "RUNNER_INVENTORY"
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
+	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+}
+
+func addCmdLine(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+	var cmdLineEnvVar corev1.EnvVar
+	cmdLineEnvVar.Name = "RUNNER_CMDLINE"
+	cmdLineEnvVar.Value = "\n" + instance.Spec.CmdLine + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, cmdLineEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 

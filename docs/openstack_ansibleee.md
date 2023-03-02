@@ -78,6 +78,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | [Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
+| cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
 
 [Back to Custom Resources](#custom-resources)
 
