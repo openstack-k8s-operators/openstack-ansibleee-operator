@@ -65,7 +65,8 @@ type OpenStackAnsibleEESpec struct {
 	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
 	// Role is the description of an Ansible Role
 	// If both Play and Role are specified, Play takes precedence
-	Role Role `json:"roles,omitempty"`
+	// +kubebuilder:validation:Optional
+	Role *Role `json:"roles,omitempty"`
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`

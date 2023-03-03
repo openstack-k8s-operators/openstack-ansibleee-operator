@@ -203,25 +203,23 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
-	if instance.Status.Conditions.IsFalse(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition) {
-		if foundJob.Status.Succeeded > 0 {
-			r.Log.Info(fmt.Sprintf("%s ready", redhatcomv1alpha1.AnsibleExecutionJobReadyCondition))
-			instance.Status.Conditions.Set(condition.TrueCondition(
-				redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
-				redhatcomv1alpha1.AnsibleExecutionJobReadyMessage))
-			instance.Status.JobStatus = "Succeeded"
-		}
-		if foundJob.Status.Failed > 0 {
-			err = fmt.Errorf("job.name %s job.namespace %s failed", foundJob.Name, foundJob.Namespace)
-			instance.Status.Conditions.Set(condition.FalseCondition(
-				redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
-				condition.ErrorReason,
-				condition.SeverityWarning,
-				redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
-				err.Error()))
-			instance.Status.JobStatus = "Failed"
-			return ctrl.Result{}, err
-		}
+	if foundJob.Status.Succeeded > 0 {
+		r.Log.Info(fmt.Sprintf("%s ready", redhatcomv1alpha1.AnsibleExecutionJobReadyCondition))
+		instance.Status.Conditions.Set(condition.TrueCondition(
+			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+			redhatcomv1alpha1.AnsibleExecutionJobReadyMessage))
+		instance.Status.JobStatus = "Succeeded"
+	}
+	if foundJob.Status.Failed > 0 {
+		err = fmt.Errorf("job.name %s job.namespace %s failed", foundJob.Name, foundJob.Namespace)
+		instance.Status.Conditions.Set(condition.FalseCondition(
+			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+			condition.ErrorReason,
+			condition.SeverityWarning,
+			redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
+			err.Error()))
+		instance.Status.JobStatus = "Failed"
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -292,7 +290,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	}
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
-	} else {
+	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job)
 	}
 	if len(instance.Spec.CmdLine) > 0 {
@@ -336,7 +334,7 @@ func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job)
 
 func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, job *batchv1.Job) {
 	var roles []*redhatcomv1alpha1.Role
-	roles = append(roles, &instance.Spec.Role)
+	roles = append(roles, instance.Spec.Role)
 	d, err := yaml.Marshal(&roles)
 	if err != nil {
 		util.LogErrorForObject(h, err, err.Error(), instance)
