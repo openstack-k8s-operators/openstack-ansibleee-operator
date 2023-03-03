@@ -106,7 +106,7 @@ Role describes the format of an ansible playbook destinated to run roles
 | any_errors_fatal | any_errors_fatal defaults to true | bool | false |
 | become | become defaults to false | bool | false |
 | gather_facts | gather_facts defaults to false | bool | false |
-| tasks |  | [][Task](#task) | true |
+| tasks |  | [][Task](#task) | false |
 
 [Back to Custom Resources](#custom-resources)
 

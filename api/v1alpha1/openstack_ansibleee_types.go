@@ -154,7 +154,7 @@ type Role struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// gather_facts defaults to false
 	GatherFacts bool   `json:"gather_facts,omitempty" yaml:"gather_facts,omitempty"`
-	Tasks       []Task `json:"tasks"`
+	Tasks       []Task `json:"tasks,omitempty"`
 }
 
 // Task describes a task centered exclusively in running import_role
