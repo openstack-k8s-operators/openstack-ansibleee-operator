@@ -1898,8 +1898,8 @@ spec:
                     default: Run Standalone Role
                     type: string
                   strategy:
-                    default: free
-                    description: strategy defaults to free
+                    default: linear
+                    description: strategy defaults to linear
                     type: string
                   tasks:
                     items:

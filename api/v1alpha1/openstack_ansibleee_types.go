@@ -139,8 +139,8 @@ type Role struct {
 	Name string `json:"name,omitempty"`
 	// +kubebuilder:default:="{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
 	Hosts string `json:"hosts,omitempty"`
-	// +kubebuilder:default:=free
-	// strategy defaults to free
+	// +kubebuilder:default:=linear
+	// strategy defaults to linear
 	Strategy string `json:"strategy,omitempty"`
 	// +kubebuilder:default:=true
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
