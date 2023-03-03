@@ -1878,7 +1878,7 @@ spec:
                     default: true
                     type: boolean
                   become:
-                    default: true
+                    default: false
                     type: boolean
                   gather_facts:
                     default: false

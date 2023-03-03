@@ -137,7 +137,7 @@ type Role struct {
 	Strategy string `json:"strategy,omitempty"`
 	// +kubebuilder:default:=true
 	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
-	// +kubebuilder:default:=true
+	// +kubebuilder:default:=false
 	Become bool `json:"become,omitempty"`
 	// +kubebuilder:default:=false
 	GatherFacts bool   `json:"gather_facts,omitempty" yaml:"gather_facts,omitempty"`
