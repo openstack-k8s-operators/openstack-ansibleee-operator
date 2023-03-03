@@ -70,12 +70,12 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | args | Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored. | []string | false |
 | name | Name is the name of the internal container inside the pod | string | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
-| restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". | string | false |
+| restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: Never | string | false |
 | uid | UID is the userid that will be used to run the container. | int64 | false |
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
-| backoffLimit | BackoffLimimt allows to define the maximum number of retried executions. | *int32 | false |
-| ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
+| backoffLimit | BackoffLimimt allows to define the maximum number of retried executions (defaults to 6). | *int32 | false |
+| ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. TTLSecondsAfterFinished default: 86400 | *int32 | false |
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
@@ -102,10 +102,10 @@ Role describes the format of an ansible playbook destinated to run roles
 | ----- | ----------- | ------ | -------- |
 | name |  | string | false |
 | hosts |  | string | false |
-| strategy |  | string | false |
-| any_errors_fatal |  | bool | false |
-| become |  | bool | false |
-| gather_facts |  | bool | false |
+| strategy | strategy defaults to free | string | false |
+| any_errors_fatal | any_errors_fatal defaults to true | bool | false |
+| become | become defaults to false | bool | false |
+| gather_facts | gather_facts defaults to false | bool | false |
 | tasks |  | [][Task](#task) | true |
 
 [Back to Custom Resources](#custom-resources)
