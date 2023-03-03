@@ -76,7 +76,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
 | backoffLimit | BackoffLimimt allows to define the maximum number of retried executions. | *int32 | false |
 | ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. | *int32 | false |
-| roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | [Role](#role) | false |
+| roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
 

@@ -149,7 +149,11 @@ func (in *OpenStackAnsibleEESpec) DeepCopyInto(out *OpenStackAnsibleEESpec) {
 		*out = new(int32)
 		**out = **in
 	}
-	in.Role.DeepCopyInto(&out.Role)
+	if in.Role != nil {
+		in, out := &in.Role, &out.Role
+		*out = new(Role)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.NetworkAttachments != nil {
 		in, out := &in.NetworkAttachments, &out.NetworkAttachments
 		*out = make([]string, len(*in))
