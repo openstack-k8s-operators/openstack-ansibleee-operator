@@ -45,7 +45,7 @@ spec:
               backoffLimit:
                 default: 6
                 description: BackoffLimimt allows to define the maximum number of
-                  retried executions.
+                  retried executions (defaults to 6).
                 format: int32
                 type: integer
               cmdLine:
@@ -1867,8 +1867,12 @@ spec:
                 type: string
               restartPolicy:
                 default: Never
-                description: RestartPolicy is the policy applied to the Job on whether
-                  it needs to restart the Pod. It can be "OnFailure" or "Never".
+                description: 'RestartPolicy is the policy applied to the Job on whether
+                  it needs to restart the Pod. It can be "OnFailure" or "Never". RestartPolicy
+                  default: Never'
+                enum:
+                - OnFailure
+                - Never
                 type: string
               roles:
                 description: Role is the description of an Ansible Role If both Play
@@ -1876,12 +1880,15 @@ spec:
                 properties:
                   any_errors_fatal:
                     default: true
+                    description: any_errors_fatal defaults to true
                     type: boolean
                   become:
-                    default: true
+                    default: false
+                    description: become defaults to false
                     type: boolean
                   gather_facts:
                     default: false
+                    description: gather_facts defaults to false
                     type: boolean
                   hosts:
                     default: '{{ primary_role_name | default([]) }}:{{ deploy_target_host
@@ -1892,6 +1899,7 @@ spec:
                     type: string
                   strategy:
                     default: free
+                    description: strategy defaults to free
                     type: string
                   tasks:
                     items:
@@ -1931,8 +1939,9 @@ spec:
                 type: object
               ttlSecondsAfterFinished:
                 default: 86400
-                description: TTLSecondsAfterFinished specified the number of seconds
-                  the job will be kept in Kubernetes after completion.
+                description: 'TTLSecondsAfterFinished specified the number of seconds
+                  the job will be kept in Kubernetes after completion. TTLSecondsAfterFinished
+                  default: 86400'
                 format: int32
                 type: integer
               uid:

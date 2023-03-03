@@ -47,6 +47,9 @@ type OpenStackAnsibleEESpec struct {
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
 	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be "OnFailure" or "Never".
+	// RestartPolicy default: Never
+	// +kubebuilder:validation:Enum:=OnFailure;Never
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:OnFailure","urn:alm:descriptor:com.tectonic.ui:select:Never"}
 	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
 	// UID is the userid that will be used to run the container.
@@ -57,11 +60,14 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
-	// BackoffLimimt allows to define the maximum number of retried executions.
+	// BackoffLimimt allows to define the maximum number of retried executions (defaults to 6).
 	// +kubebuilder:default:=6
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
 	// TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion.
+	// TTLSecondsAfterFinished default: 86400
 	// +kubebuilder:default:=86400
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
 	// Role is the description of an Ansible Role
 	// If both Play and Role are specified, Play takes precedence
@@ -134,12 +140,19 @@ type Role struct {
 	// +kubebuilder:default:="{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
 	Hosts string `json:"hosts,omitempty"`
 	// +kubebuilder:default:=free
+	// strategy defaults to free
 	Strategy string `json:"strategy,omitempty"`
 	// +kubebuilder:default:=true
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// any_errors_fatal defaults to true
 	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
-	// +kubebuilder:default:=true
+	// +kubebuilder:default:=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// become defaults to false
 	Become bool `json:"become,omitempty"`
 	// +kubebuilder:default:=false
+	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
+	// gather_facts defaults to false
 	GatherFacts bool   `json:"gather_facts,omitempty" yaml:"gather_facts,omitempty"`
 	Tasks       []Task `json:"tasks"`
 }
