@@ -102,7 +102,7 @@ Role describes the format of an ansible playbook destinated to run roles
 | ----- | ----------- | ------ | -------- |
 | name |  | string | false |
 | hosts |  | string | false |
-| strategy | strategy defaults to free | string | false |
+| strategy | strategy defaults to linear | string | false |
 | any_errors_fatal | any_errors_fatal defaults to true | bool | false |
 | become | become defaults to false | bool | false |
 | gather_facts | gather_facts defaults to false | bool | false |
