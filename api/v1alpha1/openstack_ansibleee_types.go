@@ -136,12 +136,12 @@ type Config struct {
 // Role describes the format of an ansible playbook destinated to run roles
 type Role struct {
 	// +kubebuilder:default:="Run Standalone Role"
-	Name string `json:"name,omitempty"`
+	Name string `json:"name,omitempty" yaml:"name,omitempty"`
 	// +kubebuilder:default:="{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
-	Hosts string `json:"hosts,omitempty"`
+	Hosts string `json:"hosts,omitempty" yaml:"hosts,omitempty"`
 	// +kubebuilder:default:=linear
 	// strategy defaults to linear
-	Strategy string `json:"strategy,omitempty"`
+	Strategy string `json:"strategy,omitempty" yaml:"strategy,omitempty"`
 	// +kubebuilder:default:=true
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// any_errors_fatal defaults to true
@@ -149,26 +149,26 @@ type Role struct {
 	// +kubebuilder:default:=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// become defaults to false
-	Become bool `json:"become,omitempty"`
+	Become bool `json:"become,omitempty" yaml:"become,omitempty"`
 	// +kubebuilder:default:=false
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
 	// gather_facts defaults to false
 	GatherFacts bool   `json:"gather_facts,omitempty" yaml:"gather_facts,omitempty"`
-	Tasks       []Task `json:"tasks,omitempty"`
+	Tasks       []Task `json:"tasks,omitempty" yaml:"tasks,omitempty"`
 }
 
 // Task describes a task centered exclusively in running import_role
 type Task struct {
-	Name       string     `json:"name"`
+	Name       string     `json:"name" yaml:"name"`
 	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
-	Vars       []string   `json:"vars,omitempty"`
-	When       string     `json:"when,omitempty"`
-	Tags       []string   `json:"tags,omitempty"`
+	Vars       []string   `json:"vars,omitempty" yaml:"vars,omitempty"`
+	When       string     `json:"when,omitempty" yaml:"when,omitempty"`
+	Tags       []string   `json:"tags,omitempty" yaml:"tags,omitempty"`
 }
 
 // ImportRole contains the actual rolename and tasks file name to execute
 type ImportRole struct {
-	Name      string `json:"name"`
+	Name      string `json:"name" yaml:"name"`
 	TasksFrom string `json:"tasks_from,omitempty" yaml:"tasks_from,omitempty"`
 }
 
