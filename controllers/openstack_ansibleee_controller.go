@@ -274,7 +274,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 				},
 				Spec: corev1.PodSpec{
 					RestartPolicy:      corev1.RestartPolicy(instance.Spec.RestartPolicy),
-					ServiceAccountName: "openstack-ansibleee-operator-ansibleee",
+					ServiceAccountName: "openstack-ansibleee-operator-openstack-ansibleee",
 					Containers: []corev1.Container{{
 						ImagePullPolicy: "Always",
 						Image:           instance.Spec.Image,
