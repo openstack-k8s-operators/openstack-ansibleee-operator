@@ -235,11 +235,11 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			r.Log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted", instance)
+			r.Log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted")
 			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, nil
 		}
 		// Error reading the object - requeue the request.
-		r.Log.Error(err, err.Error(), instance)
+		r.Log.Error(err, err.Error())
 		return instance, err
 	}
 
