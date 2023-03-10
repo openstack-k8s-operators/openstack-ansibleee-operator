@@ -102,6 +102,9 @@ type OpenStackAnsibleEEStatus struct {
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Ansible EE"
+//+kubebuilder:printcolumn:name="NetworkAttachments",type="string",JSONPath=".spec.networkAttachments",description="NetworkAttachments"
+//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
+//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackAnsibleEE is the Schema for the openstackansibleees API
 type OpenStackAnsibleEE struct {
@@ -113,10 +116,6 @@ type OpenStackAnsibleEE struct {
 }
 
 //+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
-//+kubebuilder:printcolumn:name="NetworkAttachments",type="string",JSONPath=".spec.networkAttachments",description="NetworkAttachments"
-//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
-//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
 
 // OpenStackAnsibleEEList contains a list of OpenStackAnsibleEE
 type OpenStackAnsibleEEList struct {
@@ -178,6 +177,5 @@ func init() {
 
 // IsReady - returns true if the OpenStackAnsibleEE is ready
 func (instance OpenStackAnsibleEE) IsReady() bool {
-	readyCond := instance.Status.Conditions.Get(condition.ReadyCondition)
-	return readyCond != nil && readyCond.Status == corev1.ConditionTrue
+	return instance.Status.Conditions.IsTrue(AnsibleExecutionJobReadyCondition)
 }

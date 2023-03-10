@@ -15,7 +15,20 @@ spec:
     singular: openstackansibleee
   scope: Namespaced
   versions:
-  - name: v1alpha1
+  - additionalPrinterColumns:
+    - description: NetworkAttachments
+      jsonPath: .spec.networkAttachments
+      name: NetworkAttachments
+      type: string
+    - description: Status
+      jsonPath: .status.conditions[0].status
+      name: Status
+      type: string
+    - description: Message
+      jsonPath: .status.conditions[0].message
+      name: Message
+      type: string
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         description: OpenStackAnsibleEE is the Schema for the openstackansibleees

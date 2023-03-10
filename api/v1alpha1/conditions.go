@@ -34,13 +34,13 @@ const (
 	AnsibleExecutionJobInitMessage = "AnsibleExecutionJob not started"
 
 	// AnsibleExecutionJobReadyMessage
-	AnsibleExecutionJobReadyMessage = "AnsibleExecutionJob ready"
+	AnsibleExecutionJobReadyMessage = "AnsibleExecutionJob complete"
 
 	// AnsibleExecutionJobNotFoundMessage
 	AnsibleExecutionJobNotFoundMessage = "AnsibleExecutionJob not found"
 
 	// AnsibleExecutionJobWaitingMessage
-	AnsibleExecutionJobWaitingMessage = "AnsibleExecutionJob not yet ready"
+	AnsibleExecutionJobWaitingMessage = "AnsibleExecutionJob is running"
 
 	// AnsibleExecutionJobErrorMessage
 	AnsibleExecutionJobErrorMessage = "AnsibleExecutionJob error occured %s"
