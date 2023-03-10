@@ -92,18 +92,15 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	// Always patch the instance status when exiting this function so we can
 	// persist any changes.
 	defer func() {
-		ready := true
-		for _, c := range instance.Status.Conditions {
-			if c.Type == condition.ReadyCondition {
-				continue
-			}
-			if c.Status != corev1.ConditionTrue {
-				ready = false
-				break
-			}
-		}
-		if ready {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, condition.ReadyMessage)
+		// update the overall status condition if service is ready
+		if instance.IsReady() {
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
+		} else {
+			// something is not ready so reset the Ready condition
+			instance.Status.Conditions.MarkUnknown(
+				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
+			// and recalculate it based on the state of the rest of the conditions
+			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
@@ -215,7 +212,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
 			condition.ErrorReason,
-			condition.SeverityWarning,
+			condition.SeverityError,
 			redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
 			err.Error()))
 		instance.Status.JobStatus = "Failed"
