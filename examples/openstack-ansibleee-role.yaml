@@ -15,7 +15,7 @@ spec:
       - name: Generic standalone playbook running tasks
         import_role:
           name: edpm_podman
-          tasks_from: tripleo_podman_configure.yml
+          tasks_from: configure.yml
         tags:
           - edpm_podman
       - name: Generic standalone playbook running tasks
