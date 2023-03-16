@@ -12,6 +12,11 @@ spec:
     kind: OpenStackAnsibleEE
     listKind: OpenStackAnsibleEEList
     plural: openstackansibleees
+    shortNames:
+    - osaee
+    - osaees
+    - osansible
+    - osansibles
     singular: openstackansibleee
   scope: Namespaced
   versions:
