@@ -1,0 +1,23 @@
+#
+# Check for:
+#
+# - No Ansibleee-play pod
+# - No Ansibleee-play job
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: ansible-play-
+  labels:
+    app: openstackansibleee
+    job-name: ansibleee-play
+  namespace: openstack
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: openstackansibleee
+    job-name: ansibleee-play
+  name: ansibleee-play
+  namespace: openstack

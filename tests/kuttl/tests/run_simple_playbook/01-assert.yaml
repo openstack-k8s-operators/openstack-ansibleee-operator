@@ -1,0 +1,62 @@
+#
+# Check for:
+#
+# - 1 OpenStackAnsibleEE CR
+# - 1 Ansibleee-play pod
+# - 1 Ansibleee-play job
+# - Correct output from ansible play
+#
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: ansibleee-play
+  namespace: openstack
+spec:
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  name: openstackansibleee
+  play: |
+    - name: Print hello world
+      hosts: localhost
+      tasks:
+      - name: Using debug statement
+        ansible.builtin.debug:
+          msg: "Hello, world this is ansibleee-play.yaml"
+status:
+  JobStatus: Succeeded
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: ansibleee-play-
+  labels:
+    app: openstackansibleee
+    job-name: ansibleee-play
+  namespace: openstack
+status:
+  phase: Succeeded
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: openstackansibleee
+    job-name: ansibleee-play
+  name: ansibleee-play
+  namespace: openstack
+status:
+  ready: 0
+  succeeded: 1
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+namespaced: true
+commands:
+  - script: |
+      pod=$(oc get pods -n openstack -l app=openstackansibleee -o name)
+      logs=$(oc logs -n openstack "$pod" | grep 'Hello, world this is ansibleee-play.yaml')
+
+      if [ -n "$logs" ]; then
+        exit 0
+      else
+        exit 1
+      fi
