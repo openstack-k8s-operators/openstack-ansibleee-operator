@@ -1,0 +1,6 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+delete:
+- apiVersion: ansibleee.openstack.org/v1alpha1
+  kind: OpenStackAnsibleEE
+  name: ansibleee-play
