@@ -924,10 +924,6 @@ spec:
                       type: object
                     type: array
                 type: object
-              ttlSecondsAfterFinished:
-                default: 86400
-                format: int32
-                type: integer
               uid:
                 default: 1001
                 format: int64

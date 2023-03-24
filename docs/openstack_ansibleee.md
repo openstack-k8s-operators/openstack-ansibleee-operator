@@ -75,7 +75,6 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
 | backoffLimit | BackoffLimimt allows to define the maximum number of retried executions (defaults to 6). | *int32 | false |
-| ttlSecondsAfterFinished | TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion. TTLSecondsAfterFinished default: 86400 | *int32 | false |
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
