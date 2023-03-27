@@ -64,11 +64,6 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:default:=6
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
-	// TTLSecondsAfterFinished specified the number of seconds the job will be kept in Kubernetes after completion.
-	// TTLSecondsAfterFinished default: 86400
-	// +kubebuilder:default:=86400
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
-	TTLSecondsAfterFinished *int32 `json:"ttlSecondsAfterFinished,omitempty"`
 	// Role is the description of an Ansible Role
 	// If both Play and Role are specified, Play takes precedence
 	// +kubebuilder:validation:Optional

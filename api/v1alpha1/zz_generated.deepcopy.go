@@ -144,11 +144,6 @@ func (in *OpenStackAnsibleEESpec) DeepCopyInto(out *OpenStackAnsibleEESpec) {
 		*out = new(int32)
 		**out = **in
 	}
-	if in.TTLSecondsAfterFinished != nil {
-		in, out := &in.TTLSecondsAfterFinished, &out.TTLSecondsAfterFinished
-		*out = new(int32)
-		**out = **in
-	}
 	if in.Role != nil {
 		in, out := &in.Role, &out.Role
 		*out = new(Role)
