@@ -44,7 +44,6 @@ metadata:
   name: ansibleee-play
   namespace: openstack
 status:
-  ready: 0
   succeeded: 1
 ---
 apiVersion: kuttl.dev/v1beta1
