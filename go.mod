@@ -5,7 +5,7 @@ go 1.19
 replace github.com/openstack-k8s-operators/openstack-ansibleee-operator/api => ./api
 
 require (
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.2.4
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.9.2
 	github.com/onsi/gomega v1.27.6
