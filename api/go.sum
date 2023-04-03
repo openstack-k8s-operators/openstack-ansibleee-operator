@@ -34,10 +34,11 @@ github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjY
 github.com/onsi/ginkgo/v2 v2.9.2 h1:BA2GMJOtfGAfagzYtrAlufIP0lq6QERkFmHLMLPwFSU=
 github.com/onsi/ginkgo/v2 v2.9.2/go.mod h1:WHcJJG2dIlcCqVfBAwUCrJxSPFb6v4azBwgxeMeDuts=
 github.com/onsi/gomega v1.27.6 h1:ENqfyGeS5AX/rlXDd/ETokDz93u0YufY1Pgxuy/PvWE=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230328062245-1d1669cdb4f3 h1:jLv7qsE9EhLi+ouU7QfE58QEmGIQwibPjxMQJjUd2a8=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230328062245-1d1669cdb4f3/go.mod h1:D9riTIFxv/vxN9jR42YTBtJQz3pBFh5yCxtBtgJAc0U=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230328062245-1d1669cdb4f3 h1:MOmUMGwVG0DZrjGXpxgm1J7svKAr2HLoDLGua5Bw84w=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230328062245-1d1669cdb4f3/go.mod h1:+Zk7gog4h3vBSw78nCQFVZaFzecSFvxQq1HeA9EBISY=
+github.com/onsi/gomega v1.27.6/go.mod h1:PIQNjfQwkP3aQAH7lf7j87O/5FiNr+ZR8+ipb+qQlhg=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230330142224-662fe86a2458 h1:N+OeJl5X+WXzFWLva2KzFUUSlS2qz5aJXFWvPD0eE9A=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230330142224-662fe86a2458/go.mod h1:D9riTIFxv/vxN9jR42YTBtJQz3pBFh5yCxtBtgJAc0U=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230330142224-662fe86a2458 h1:0k4PHSmL5tQ50fx2T1SgUNCGGmb0+edtpocJubj55JA=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230330142224-662fe86a2458/go.mod h1:+Zk7gog4h3vBSw78nCQFVZaFzecSFvxQq1HeA9EBISY=
 github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
