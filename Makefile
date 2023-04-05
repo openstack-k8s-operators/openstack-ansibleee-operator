@@ -338,13 +338,10 @@ gowork: ## Generate go.work file to support our multi module repository
 	go work use ./api
 	go work sync
 
-APIPATH ?= $(shell pwd)/api
 .PHONY: tidy
-tidy: fmt
-	go mod tidy; \
-	pushd $(APIPATH); \
-	go mod tidy; \
-	popd
+tidy: ## Run go mod tidy on every mod file in the repo
+	go mod tidy
+	cd ./api && go mod tidy
 
 .PHONY: operator-lint
 operator-lint: gowork ## Runs operator-lint
