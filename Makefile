@@ -340,7 +340,7 @@ gowork: ## Generate go.work file to support our multi module repository
 
 APIPATH ?= $(shell pwd)/api
 .PHONY: tidy
-tidy: fmt
+tidy: ## Run go mod tidy on every mod file in the repo
 	go mod tidy; \
 	pushd $(APIPATH); \
 	go mod tidy; \
