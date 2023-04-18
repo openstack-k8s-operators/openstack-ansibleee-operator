@@ -281,6 +281,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 		},
 	}
 
+	if len(instance.Spec.InitContainers) > 0 {
+		job.Spec.Template.Spec.InitContainers = instance.Spec.InitContainers
+	}
 	if len(instance.Spec.Inventory) > 0 {
 		addInventory(instance, job)
 	}
