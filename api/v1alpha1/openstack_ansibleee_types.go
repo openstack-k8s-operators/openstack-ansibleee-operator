@@ -74,6 +74,9 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// CmdLine is the command line passed to ansible-runner
 	CmdLine string `json:"cmdLine,omitempty"`
+	// +kubebuilder:validation:Optional
+	// InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself
+	InitContainers []corev1.Container `json:"initContainers,omitempty"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE

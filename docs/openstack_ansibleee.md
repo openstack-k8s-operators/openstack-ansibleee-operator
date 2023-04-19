@@ -78,6 +78,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
+| initContainers | InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself | []corev1.Container | false |
 
 [Back to Custom Resources](#custom-resources)
 
