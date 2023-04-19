@@ -13,3 +13,4 @@ kind: Kustomization
 images:
 - name: controller
   newName: quay.io/openstack-k8s-operators/openstack-ansibleee-operator
+  newTag: latest
