@@ -88,6 +88,7 @@ OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| hash | Map of hashes to track e.g. job status | map[string]string | false |
 | conditions | Conditions | condition.Conditions | false |
 | networkAttachments | NetworkAttachments status of the deployment pods | map[string][]string | false |
 | JobStatus | JobStatus status of the executed job (Pending/Running/Succeeded/Failed) | string | false |

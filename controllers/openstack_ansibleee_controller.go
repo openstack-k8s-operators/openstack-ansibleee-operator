@@ -244,7 +244,10 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 }
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
-func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, annotations map[string]string) (*batchv1.Job, error) {
+func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
+	annotations map[string]string) (*batchv1.Job, error) {
 	ls := labelsForOpenStackAnsibleEE(instance.Name)
 
 	args := instance.Spec.Args
@@ -281,21 +284,34 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 		},
 	}
 
+	//Populate hash
+	hashes := make(map[string]string)
+
 	if len(instance.Spec.InitContainers) > 0 {
 		job.Spec.Template.Spec.InitContainers = instance.Spec.InitContainers
 	}
 	if len(instance.Spec.Inventory) > 0 {
-		addInventory(instance, job)
+		addInventory(instance, job, hashes)
 	}
 	if len(instance.Spec.Play) > 0 {
-		addPlay(instance, job)
+		addPlay(instance, job, hashes)
 	} else if instance.Spec.Role != nil {
-		addRoles(instance, h, job)
+		addRoles(instance, h, job, hashes)
 	}
 	if len(instance.Spec.CmdLine) > 0 {
-		addCmdLine(instance, job)
+		addCmdLine(instance, job, hashes)
 	}
 	addMounts(instance, job)
+
+	if instance.Status.Hash == nil {
+		instance.Status.Hash = make(map[string]string)
+	}
+
+	inputHash, errorHash := HashOfInputHashes(hashes)
+	if errorHash != nil {
+		fmt.Println("Error generating hash of input hashes")
+	}
+	instance.Status.Hash["input"] = inputHash
 
 	// Set OpenStackAnsibleEE instance as the owner and controller
 	err := ctrl.SetControllerReference(instance, job, r.Scheme)
@@ -331,7 +347,11 @@ func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job)
 	job.Spec.Template.Spec.Volumes = volumes
 }
 
-func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, job *batchv1.Job) {
+func addRoles(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var roles []*redhatcomv1alpha1.Role
 	roles = append(roles, instance.Spec.Role)
 	d, err := yaml.Marshal(&roles)
@@ -344,30 +364,84 @@ func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, 
 	roleEnvVar.Value = "\n" + string(d) + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["roles"], err = CalculateHash(string(d))
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addPlay(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addPlay(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var playEnvVar corev1.EnvVar
+	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["playbooks"], err = CalculateHash(instance.Spec.Play)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addInventory(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addInventory(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var invEnvVar corev1.EnvVar
+	var err error
 	invEnvVar.Name = "RUNNER_INVENTORY"
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["inventory"], err = CalculateHash(instance.Spec.Inventory)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addCmdLine(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addCmdLine(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var cmdLineEnvVar corev1.EnvVar
+	var err error
 	cmdLineEnvVar.Name = "RUNNER_CMDLINE"
 	cmdLineEnvVar.Value = "\n" + instance.Spec.CmdLine + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, cmdLineEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["cmdline"], err = CalculateHash(instance.Spec.CmdLine)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
+}
+
+func CalculateHash(envVar string) (string, error) {
+	hash, err := util.ObjectHash(envVar)
+	if err != nil {
+		return "", err
+	}
+	return hash, nil
+}
+
+func HashOfInputHashes(hashes map[string]string) (string, error) {
+	var stringConcat string
+	var err error
+	if len(hashes) != 0 {
+		for key, value := range hashes {
+			fmt.Printf("%s - %s\n", key, value)
+			stringConcat += stringConcat + value
+		}
+	} else {
+		stringConcat = ""
+	}
+	hash, err := util.ObjectHash(stringConcat)
+	if err != nil {
+		return hash, err
+	}
+	return hash, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.
