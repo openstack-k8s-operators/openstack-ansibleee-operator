@@ -79,6 +79,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
 | initContainers | InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself | []corev1.Container | false |
+| serviceAccountName | ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount | string | false |
 
 [Back to Custom Resources](#custom-resources)
 

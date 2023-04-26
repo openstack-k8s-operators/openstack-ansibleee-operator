@@ -77,6 +77,10 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself
 	InitContainers []corev1.Container `json:"initContainers,omitempty"`
+	// +kubebuilder:validation:Optional
+	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
+	// it will run with default serviceaccount
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
