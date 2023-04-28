@@ -46,9 +46,10 @@ import (
 // OpenStackAnsibleEEReconciler reconciles a OpenStackAnsibleEE object
 type OpenStackAnsibleEEReconciler struct {
 	client.Client
-	Kclient kubernetes.Interface
-	Log     logr.Logger
-	Scheme  *runtime.Scheme
+	Kclient               kubernetes.Interface
+	Log                   logr.Logger
+	Scheme                *runtime.Scheme
+	AnsibleRunnerDebugCmd []string
 }
 
 // +kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
@@ -248,12 +249,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	ls := labelsForOpenStackAnsibleEE(instance.Name)
 
 	args := instance.Spec.Args
-
 	if len(args) == 0 {
 		if len(instance.Spec.Playbook) == 0 {
 			instance.Spec.Playbook = "playbook.yaml"
 		}
-		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
 
 	job := &batchv1.Job{
@@ -274,11 +273,15 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 						ImagePullPolicy: "Always",
 						Image:           instance.Spec.Image,
 						Name:            instance.Spec.Name,
-						Args:            args,
 					}},
 				},
 			},
 		},
+	}
+	if len(r.AnsibleRunnerDebugCmd) != 0 {
+		job.Spec.Template.Spec.Containers[0].Command = r.AnsibleRunnerDebugCmd
+	} else {
+		job.Spec.Template.Spec.Containers[0].Args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
 	}
 
 	if len(instance.Spec.InitContainers) > 0 {
