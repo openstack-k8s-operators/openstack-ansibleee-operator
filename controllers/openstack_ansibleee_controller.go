@@ -275,6 +275,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 						Image:           instance.Spec.Image,
 						Name:            instance.Spec.Name,
 						Args:            args,
+						Env:             instance.Spec.Env,
 					}},
 				},
 			},
@@ -292,6 +293,8 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	}
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
+	} else if len(instance.Spec.Playbook) > 0 {
+		addPlaybook(instance, job)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job)
 	}
@@ -353,6 +356,14 @@ func addPlay(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
 	var playEnvVar corev1.EnvVar
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
+	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+}
+
+func addPlaybook(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+	var playEnvVar corev1.EnvVar
+	playEnvVar.Name = "RUNNER_PLAYBOOK"
+	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
