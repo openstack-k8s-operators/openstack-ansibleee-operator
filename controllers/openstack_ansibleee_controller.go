@@ -293,10 +293,12 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	}
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, job)
-	} else if len(instance.Spec.Playbook) > 0 {
-		addPlaybook(instance, job)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job)
+	} else if len(instance.Spec.Playbook) > 0 {
+		// As we set "playbook.yaml" as default
+		// we need to ensure that Play and Role are empty before addPlaybook
+		addPlaybook(instance, job)
 	}
 	if len(instance.Spec.CmdLine) > 0 {
 		addCmdLine(instance, job)
