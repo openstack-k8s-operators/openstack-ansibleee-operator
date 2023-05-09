@@ -71,6 +71,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | name | Name is the name of the internal container inside the pod | string | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: Never | string | false |
+| preserveJobs | PreserveJobs - do not delete jobs after they finished e.g. to check logs | bool | true |
 | uid | UID is the userid that will be used to run the container. | int64 | false |
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
@@ -79,6 +80,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
 | initContainers | InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself | []corev1.Container | false |
+| deployIdentifier | DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources so that the OpenStackAnsibleEE controller can determine job input uniqueness. It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true). | string | true |
 
 [Back to Custom Resources](#custom-resources)
 

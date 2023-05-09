@@ -55,6 +55,8 @@ spec:
                 type: integer
               cmdLine:
                 type: string
+              deployIdentifier:
+                type: string
               env:
                 items:
                   properties:
@@ -1485,6 +1487,9 @@ spec:
                 type: string
               playbook:
                 type: string
+              preserveJobs:
+                default: false
+                type: boolean
               restartPolicy:
                 default: Never
                 enum:

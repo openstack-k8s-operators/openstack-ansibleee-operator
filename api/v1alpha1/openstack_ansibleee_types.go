@@ -52,6 +52,10 @@ type OpenStackAnsibleEESpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:OnFailure","urn:alm:descriptor:com.tectonic.ui:select:Never"}
 	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
+	PreserveJobs bool `json:"preserveJobs"`
 	// UID is the userid that will be used to run the container.
 	// +kubebuilder:default:=1001
 	UID int64 `json:"uid,omitempty"`
@@ -77,6 +81,11 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself
 	InitContainers []corev1.Container `json:"initContainers,omitempty"`
+	// DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources
+	// so that the OpenStackAnsibleEE controller can determine job input uniqueness.
+	// It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true).
+	// +kubebuilder:validation:Optional
+	DeployIdentifier string `json:"deployIdentifier"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE

@@ -25,13 +25,13 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"context"
 
 	"github.com/go-logr/logr"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	job "github.com/openstack-k8s-operators/lib-common/modules/common/job"
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	util "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -59,15 +59,6 @@ type OpenStackAnsibleEEReconciler struct {
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the OpenStackAnsibleEE object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
 func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
 	instance, err := r.getOpenStackAnsibleeeInstance(ctx, req)
@@ -154,69 +145,62 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			instance.Spec.NetworkAttachments, err)
 	}
 
-	// Check if the job already exists, if not create a new one
-	foundJob := &batchv1.Job{}
-	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
-	if err != nil && errors.IsNotFound(err) {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityWarning,
-			redhatcomv1alpha1.AnsibleExecutionJobNotFoundMessage,
-		))
-		// Define a new job
-		job, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		util.LogForObject(
-			helper,
-			fmt.Sprintf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name),
-			instance,
-		)
-		err = r.Create(ctx, job)
-		if err != nil {
-			util.LogErrorForObject(helper, err, err.Error(), instance)
-			return ctrl.Result{}, err
-		}
-		util.LogForObject(
-			helper,
-			fmt.Sprintf("Job: Job.Namespace %s Job.Name %s created successfully - return and requeue\n", job.Namespace, job.Name),
-			instance,
-		)
-		// Set AnsibleExecutionJobReadyCondition to requested
+	// Define a new job
+	jobDef, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	jobHash := instance.Status.Hash["job"]
+	// inputHashes := instance.Status.Hash["inputHashes"]
+
+	ansibleeeJob := job.NewJob(
+		jobDef,
+		"job",
+		instance.Spec.PreserveJobs,
+		time.Duration(5)*time.Second,
+		jobHash,
+	)
+
+	ctrlResult, err := ansibleeeJob.DoJob(
+		ctx,
+		helper,
+	)
+
+	if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			redhatcomv1alpha1.AnsibleExecutionJobWaitingMessage))
 		instance.Status.JobStatus = "Running"
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		util.LogErrorForObject(helper, err, err.Error(), instance)
-		return ctrl.Result{}, err
-	}
-	if instance.Status.NetworkAttachments == nil {
-		instance.Status.NetworkAttachments = map[string][]string{}
+		return ctrlResult, nil
 	}
 
-	if foundJob.Status.Succeeded > 0 {
-		r.Log.Info(fmt.Sprintf("%s ready", redhatcomv1alpha1.AnsibleExecutionJobReadyCondition))
-		instance.Status.Conditions.Set(condition.TrueCondition(
-			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
-			redhatcomv1alpha1.AnsibleExecutionJobReadyMessage))
-		instance.Status.JobStatus = "Succeeded"
-	}
-	if foundJob.Status.Failed > 0 {
-		err = fmt.Errorf("job.name %s job.namespace %s failed", foundJob.Name, foundJob.Namespace)
+	if err != nil {
+		err = fmt.Errorf("job.name %s job.namespace %s failed", jobDef.Name, jobDef.Namespace)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
 			condition.ErrorReason,
-			condition.SeverityError,
+			condition.SeverityWarning,
 			redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
 			err.Error()))
 		instance.Status.JobStatus = "Failed"
 		return ctrl.Result{}, err
+	}
+	if ansibleeeJob.HasChanged() {
+		instance.Status.Hash["job"] = ansibleeeJob.GetHash()
+		r.Log.Info(fmt.Sprintf("Job %s hash added - %s", jobDef.Name, instance.Status.Hash["job"]))
+	}
+	// if inputHashes != instance.Status.Hash["inputHashes"] {
+	// 	r.Log.Info("Input parameters are changed, deleting active job and creating a new one")
+	// 	job.DeleteJob(ctx, helper, jobDef.Name, jobDef.Namespace)
+	// }
+	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
+	instance.Status.JobStatus = "Succeeded"
+
+	if instance.Status.NetworkAttachments == nil {
+		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
 	return ctrl.Result{}, nil
@@ -301,6 +285,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	if len(instance.Spec.CmdLine) > 0 {
 		addCmdLine(instance, job, hashes)
 	}
+	if len(instance.Spec.DeployIdentifier) > 0 {
+		hashes["deployIdentifier"] = instance.Spec.DeployIdentifier
+	}
+
 	addMounts(instance, job)
 
 	if instance.Status.Hash == nil {
@@ -311,7 +299,11 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	if errorHash != nil {
 		fmt.Println("Error generating hash of input hashes")
 	}
-	instance.Status.Hash["input"] = inputHash
+	instance.Status.Hash["inputHashes"] = inputHash
+	errUpdate := r.Status().Update(context.Background(), instance)
+	if errUpdate != nil {
+		return nil, errUpdate
+	}
 
 	// Set OpenStackAnsibleEE instance as the owner and controller
 	err := ctrl.SetControllerReference(instance, job, r.Scheme)
