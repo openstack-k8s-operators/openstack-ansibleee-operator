@@ -86,6 +86,10 @@ type OpenStackAnsibleEESpec struct {
 	// It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true).
 	// +kubebuilder:validation:Optional
 	DeployIdentifier string `json:"deployIdentifier"`
+	// +kubebuilder:validation:Optional
+	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
+	// it will run with default serviceaccount
+	ServiceAccountName string `json:"serviceAccountName,omitempty"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE

@@ -262,6 +262,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 						Image:           instance.Spec.Image,
 						Name:            instance.Spec.Name,
 						Args:            args,
+						Env:             instance.Spec.Env,
 					}},
 				},
 			},
@@ -274,6 +275,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	if len(instance.Spec.InitContainers) > 0 {
 		job.Spec.Template.Spec.InitContainers = instance.Spec.InitContainers
 	}
+	if len(instance.Spec.ServiceAccountName) > 0 {
+		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
+	}
 	if len(instance.Spec.Inventory) > 0 {
 		addInventory(instance, job, hashes)
 	}
@@ -281,6 +285,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		addPlay(instance, job, hashes)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job, hashes)
+	} else if len(instance.Spec.Playbook) > 0 {
+		// As we set "playbook.yaml" as default
+		// we need to ensure that Play and Role are empty before addPlaybook
+		addPlaybook(instance, job, hashes)
 	}
 	if len(instance.Spec.CmdLine) > 0 {
 		addCmdLine(instance, job, hashes)
@@ -376,6 +384,14 @@ func addPlay(
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
+}
+
+func addPlaybook(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+	var playEnvVar corev1.EnvVar
+	playEnvVar.Name = "RUNNER_PLAYBOOK"
+	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
+	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
+	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 }
 
 func addInventory(
