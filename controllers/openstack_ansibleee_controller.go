@@ -59,6 +59,15 @@ type OpenStackAnsibleEEReconciler struct {
 // +kubebuilder:rbac:groups=batch,resources=jobs,verbs=get;list;watch;create;update;patch;delete;
 // +kubebuilder:rbac:groups=k8s.cni.cncf.io,resources=network-attachment-definitions,verbs=get;list;watch
 
+// Reconcile is part of the main kubernetes reconciliation loop which aims to
+// move the current state of the cluster closer to the desired state.
+// TODO(user): Modify the Reconcile function to compare the state specified by
+// the Nova object against the actual cluster state, and then
+// perform operations to make the cluster state reflect the state specified by
+// the user.
+//
+// For more details, check Reconcile and its Result here:
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
 	instance, err := r.getOpenStackAnsibleeeInstance(ctx, req)
@@ -303,7 +312,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		instance.Status.Hash = make(map[string]string)
 	}
 
-	inputHash, errorHash := HashOfInputHashes(hashes)
+	inputHash, errorHash := hashOfInputHashes(hashes)
 	if errorHash != nil {
 		fmt.Println("Error generating hash of input hashes")
 	}
@@ -364,7 +373,7 @@ func addRoles(
 	roleEnvVar.Value = "\n" + string(d) + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["roles"], err = CalculateHash(string(d))
+	hashes["roles"], err = calculateHash(string(d))
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
@@ -380,7 +389,7 @@ func addPlay(
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["play"], err = CalculateHash(instance.Spec.Play)
+	hashes["play"], err = calculateHash(instance.Spec.Play)
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
@@ -396,7 +405,7 @@ func addPlaybook(
 	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["playbooks"], err = CalculateHash(instance.Spec.Play)
+	hashes["playbooks"], err = calculateHash(instance.Spec.Play)
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
@@ -412,7 +421,7 @@ func addInventory(
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["inventory"], err = CalculateHash(instance.Spec.Inventory)
+	hashes["inventory"], err = calculateHash(instance.Spec.Inventory)
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
@@ -428,13 +437,13 @@ func addCmdLine(
 	cmdLineEnvVar.Value = "\n" + instance.Spec.CmdLine + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, cmdLineEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["cmdline"], err = CalculateHash(instance.Spec.CmdLine)
+	hashes["cmdline"], err = calculateHash(instance.Spec.CmdLine)
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
 }
 
-func CalculateHash(envVar string) (string, error) {
+func calculateHash(envVar string) (string, error) {
 	hash, err := util.ObjectHash(envVar)
 	if err != nil {
 		return "", err
@@ -442,7 +451,7 @@ func CalculateHash(envVar string) (string, error) {
 	return hash, nil
 }
 
-func HashOfInputHashes(hashes map[string]string) (string, error) {
+func hashOfInputHashes(hashes map[string]string) (string, error) {
 	var stringConcat string
 	var err error
 	if len(hashes) != 0 {
