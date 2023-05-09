@@ -456,8 +456,11 @@ func hashOfInputHashes(hashes map[string]string) (string, error) {
 	var err error
 	if len(hashes) != 0 {
 		for key, value := range hashes {
-			fmt.Printf("%s - %s\n", key, value)
-			stringConcat += stringConcat + value
+			// fmt.Printf("%s - %s\n", key, value)
+			// exclude hash defined by the job itself
+			if key != "job" {
+				stringConcat += stringConcat + value
+			}
 		}
 	} else {
 		stringConcat = ""
