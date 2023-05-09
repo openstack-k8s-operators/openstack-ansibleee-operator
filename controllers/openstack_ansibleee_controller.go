@@ -380,18 +380,26 @@ func addPlay(
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["playbooks"], err = CalculateHash(instance.Spec.Play)
+	hashes["play"], err = CalculateHash(instance.Spec.Play)
 	if err != nil {
 		fmt.Printf("Error calculating the hash!")
 	}
 }
 
-func addPlaybook(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addPlaybook(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var playEnvVar corev1.EnvVar
+	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["playbooks"], err = CalculateHash(instance.Spec.Play)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
 func addInventory(
