@@ -62,7 +62,7 @@ type OpenStackAnsibleEEReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the Nova object against the actual cluster state, and then
+// the AnsibleEE object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
@@ -161,7 +161,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	jobHash := instance.Status.Hash["job"]
-	// inputHashes := instance.Status.Hash["inputHashes"]
 
 	ansibleeeJob := job.NewJob(
 		jobDef,
@@ -201,10 +200,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Hash["job"] = ansibleeeJob.GetHash()
 		r.Log.Info(fmt.Sprintf("Job %s hash added - %s", jobDef.Name, instance.Status.Hash["job"]))
 	}
-	// if inputHashes != instance.Status.Hash["inputHashes"] {
-	// 	r.Log.Info("Input parameters are changed, deleting active job and creating a new one")
-	// 	job.DeleteJob(ctx, helper, jobDef.Name, jobDef.Namespace)
-	// }
+
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = "Succeeded"
 
@@ -241,7 +237,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	annotations map[string]string) (*batchv1.Job, error) {
-	ls := labelsForOpenStackAnsibleEE(instance.Name)
+	ls := labelsForOpenStackAnsibleEE(instance.Name, instance.Spec.DeployIdentifier)
 
 	args := instance.Spec.Args
 
@@ -317,10 +313,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		fmt.Println("Error generating hash of input hashes")
 	}
 	instance.Status.Hash["inputHashes"] = inputHash
-	errUpdate := r.Status().Update(context.Background(), instance)
-	if errUpdate != nil {
-		return nil, errUpdate
-	}
 
 	// Set OpenStackAnsibleEE instance as the owner and controller
 	err := ctrl.SetControllerReference(instance, job, r.Scheme)
@@ -333,8 +325,12 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 // labelsForOpenStackAnsibleEE returns the labels for selecting the resources
 // belonging to the given openstackansibleee CR name.
-func labelsForOpenStackAnsibleEE(name string) map[string]string {
-	return map[string]string{"app": "openstackansibleee", "openstackansibleee_cr": name}
+func labelsForOpenStackAnsibleEE(name string, deployIdentifier string) map[string]string {
+	return map[string]string{
+		"app":                   "openstackansibleee",
+		"deployIdentifier":      deployIdentifier,
+		"openstackansibleee_cr": name,
+	}
 }
 
 func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
