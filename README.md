@@ -61,7 +61,7 @@ data:
   ssh-publickey:   750 bytes
 ```
 
-Once the key has been created, the CR should run the deploy-tripleo-os-configure.yml playbook on the external node:
+Once the key has been created, the CR should run the deploy-edpm-os-configure.yml playbook on the external node:
 
 ```bash
 oc apply -f examples/openstack-ansibleee-playbook.yaml
