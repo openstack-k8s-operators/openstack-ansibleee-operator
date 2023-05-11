@@ -28,6 +28,8 @@ nav:
   - Home: index.md
   - Custom Resources:
       - OpenStackAnsibleEE: openstack_ansibleee.md
+  - Config:
+    - Logs: logs.md
   - Contributing: contributing.md
 markdown_extensions:
   - toc:
