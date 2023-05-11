@@ -26,6 +26,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apiserver/pkg/storage/names"
 
 	"context"
 
@@ -254,6 +255,21 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 			instance.Spec.Playbook = "playbook.yaml"
 		}
 		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
+	}
+
+	hasIdentifier := false
+	for _, arg := range args {
+		// ansible runner identifier
+		// https://ansible-runner.readthedocs.io/en/stable/intro/#artifactdir
+		if arg == "-i" || arg == "--ident" {
+			hasIdentifier = true
+			break
+		}
+	}
+
+	if !hasIdentifier {
+		identifier := names.SimpleNameGenerator.GenerateName(fmt.Sprintf("%s-", instance.Name))
+		args = append(args, []string{"-i", identifier}...)
 	}
 
 	job := &batchv1.Job{
