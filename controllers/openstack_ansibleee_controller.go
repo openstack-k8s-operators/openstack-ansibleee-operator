@@ -326,7 +326,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 	inputHash, errorHash := hashOfInputHashes(hashes)
 	if errorHash != nil {
-		fmt.Println("Error generating hash of input hashes")
+		return nil, fmt.Errorf("error generating hash of input hashes: %w", errorHash)
 	}
 	instance.Status.Hash["inputHashes"] = inputHash
 
