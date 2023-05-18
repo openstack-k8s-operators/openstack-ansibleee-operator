@@ -197,10 +197,10 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.JobStatus = "Failed"
 		return ctrl.Result{}, err
 	}
-	if ansibleeeJob.HasChanged() {
-		instance.Status.Hash["job"] = ansibleeeJob.GetHash()
-		r.Log.Info(fmt.Sprintf("Job %s hash added - %s", jobDef.Name, instance.Status.Hash["job"]))
-	}
+	// if ansibleeeJob.HasChanged() {
+	// 	instance.Status.Hash["job"] = ansibleeeJob.GetHash()
+	// 	r.Log.Info(fmt.Sprintf("Job %s hash added - %s", jobDef.Name, instance.Status.Hash["job"]))
+	// }
 
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = "Succeeded"
