@@ -865,7 +865,6 @@ spec:
                   type: object
                 type: array
               image:
-                default: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
                 type: string
               initContainers:
                 items:

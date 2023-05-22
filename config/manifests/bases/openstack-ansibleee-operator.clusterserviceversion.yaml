@@ -44,13 +44,6 @@ spec:
         path: roles.gather_facts
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:booleanSwitch
-      - description: 'TTLSecondsAfterFinished specified the number of seconds the
-          job will be kept in Kubernetes after completion. TTLSecondsAfterFinished
-          default: 86400'
-        displayName: TTLSeconds After Finished
-        path: ttlSecondsAfterFinished
-        x-descriptors:
-        - urn:alm:descriptor:com.tectonic.ui:number
       statusDescriptors:
       - description: Conditions
         displayName: Conditions
