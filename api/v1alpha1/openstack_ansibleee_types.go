@@ -18,13 +18,18 @@ package v1alpha1
 
 import (
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+const (
+	// Container image fall-back defaults
+
+	// OpenStackAnsibleEEContainerImage is the fall-back container image for OpenStackAnsibleEE
+	OpenStackAnsibleEEContainerImage = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+)
 
 // OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 type OpenStackAnsibleEESpec struct {
@@ -37,7 +42,6 @@ type OpenStackAnsibleEESpec struct {
 	// Playbook is the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
 	// Image is the container image that will execute the ansible command
-	// +kubebuilder:default:="quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
 	Image string `json:"image,omitempty"`
 	// Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored.
 	Args []string `json:"args,omitempty"`
@@ -181,4 +185,14 @@ func init() {
 // IsReady - returns true if the OpenStackAnsibleEE is ready
 func (instance OpenStackAnsibleEE) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(AnsibleExecutionJobReadyCondition)
+}
+
+// SetupDefaults - initializes any CRD field defaults based on environment variables (the defaulting mechanism itself is implemented via webhooks)
+func SetupDefaults() {
+	// Acquire environmental defaults and initialize OpenStackAnsibleEE defaults with them
+	openstackAnsibleEEDefaults := OpenStackAnsibleEEDefaults{
+		ContainerImageURL: util.GetEnvVar("ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
+	}
+
+	SetupOpenStackAnsibleEEDefaults(openstackAnsibleEEDefaults)
 }
