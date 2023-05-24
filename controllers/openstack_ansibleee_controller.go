@@ -161,14 +161,18 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	jobHash := instance.Status.Hash["job"]
+	currentJobHash := instance.Status.Hash["job"]
+
+	if instance.Status.JobStatus == "Succeeded" {
+		return ctrl.Result{}, nil
+	}
 
 	ansibleeeJob := job.NewJob(
 		jobDef,
 		"job",
 		instance.Spec.PreserveJobs,
 		time.Duration(5)*time.Second,
-		jobHash,
+		currentJobHash,
 	)
 
 	ctrlResult, err := ansibleeeJob.DoJob(
@@ -197,10 +201,11 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.JobStatus = "Failed"
 		return ctrl.Result{}, err
 	}
-	// if ansibleeeJob.HasChanged() {
-	// 	instance.Status.Hash["job"] = ansibleeeJob.GetHash()
-	// 	r.Log.Info(fmt.Sprintf("Job %s hash added - %s", jobDef.Name, instance.Status.Hash["job"]))
-	// }
+
+	if ansibleeeJob.HasChanged() {
+		instance.Status.Hash["job"] = ansibleeeJob.GetHash()
+		r.Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash["job"]))
+	}
 
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = "Succeeded"
@@ -209,6 +214,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
+	r.Log.Info(fmt.Sprintf("Reconciled Service '%s' init successfully", instance.Name))
 	return ctrl.Result{}, nil
 }
 
@@ -238,7 +244,15 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	annotations map[string]string) (*batchv1.Job, error) {
-	ls := labelsForOpenStackAnsibleEE(instance.Name, instance.Spec.DeployIdentifier)
+	labels := instance.GetObjectMeta().GetLabels()
+	var deployIdentifier string
+	if len(labels["deployIdentifier"]) > 0 {
+		fmt.Printf("label: %s", labels["deployIdentifier"])
+		deployIdentifier = labels["deployIdentifier"]
+	} else {
+		deployIdentifier = ""
+	}
+	ls := labelsForOpenStackAnsibleEE(instance.Name, deployIdentifier)
 
 	args := instance.Spec.Args
 
@@ -314,8 +328,8 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	if len(instance.Spec.CmdLine) > 0 {
 		addCmdLine(instance, job, hashes)
 	}
-	if len(instance.Spec.DeployIdentifier) > 0 {
-		hashes["deployIdentifier"] = instance.Spec.DeployIdentifier
+	if len(labels["deployIdentifier"]) > 0 {
+		hashes["deployIdentifier"] = labels["deployIdentifier"]
 	}
 
 	addMounts(instance, job)

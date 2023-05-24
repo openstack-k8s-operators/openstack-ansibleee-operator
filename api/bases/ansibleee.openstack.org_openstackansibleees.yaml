@@ -55,8 +55,6 @@ spec:
                 type: integer
               cmdLine:
                 type: string
-              deployIdentifier:
-                type: string
               env:
                 items:
                   properties:

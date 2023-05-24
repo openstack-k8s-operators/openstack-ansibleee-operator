@@ -80,7 +80,6 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
 | initContainers | InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself | []corev1.Container | false |
-| deployIdentifier | DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources so that the OpenStackAnsibleEE controller can determine job input uniqueness. It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true). | string | true |
 | serviceAccountName | ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount | string | false |
 
 [Back to Custom Resources](#custom-resources)

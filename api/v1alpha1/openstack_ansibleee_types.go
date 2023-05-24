@@ -81,11 +81,6 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself
 	InitContainers []corev1.Container `json:"initContainers,omitempty"`
-	// DeployIdentifier is a generated UUID set as input on OpenStackAnsibleEE resources
-	// so that the OpenStackAnsibleEE controller can determine job input uniqueness.
-	// It is generated on each new deploy request (when DeployStrategy.Deploy is changed to true).
-	// +kubebuilder:validation:Optional
-	DeployIdentifier string `json:"deployIdentifier"`
 	// +kubebuilder:validation:Optional
 	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
 	// it will run with default serviceaccount
