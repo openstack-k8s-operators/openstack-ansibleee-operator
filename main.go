@@ -19,6 +19,8 @@ package main
 import (
 	"flag"
 	"os"
+	"strconv"
+	"strings"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
@@ -32,9 +34,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
+	"sigs.k8s.io/controller-runtime/pkg/client/config"
+
 	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/controllers"
-	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
 	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
 	//+kubebuilder:scaffold:imports
@@ -62,8 +65,12 @@ func main() {
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	devMode, err := strconv.ParseBool(os.Getenv("DEV_MODE"))
+	if err != nil {
+		devMode = false
+	}
 	opts := zap.Options{
-		Development: true,
+		Development: devMode,
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
@@ -103,6 +110,18 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackAnsibleEE")
 		os.Exit(1)
 	}
+
+	// Acquire environmental defaults and initialize operator defaults with them
+	redhatcomv1alpha1.SetupDefaults()
+
+	// Setup webhooks if requested
+	if strings.ToLower(os.Getenv("ENABLE_WEBHOOKS")) != "false" {
+		if err = (&redhatcomv1alpha1.OpenStackAnsibleEE{}).SetupWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackAnsibleEE")
+			os.Exit(1)
+		}
+	}
+
 	//+kubebuilder:scaffold:builder
 
 	if err := mgr.AddHealthzCheck("healthz", healthz.Ping); err != nil {
