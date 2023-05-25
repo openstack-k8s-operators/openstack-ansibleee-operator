@@ -279,17 +279,16 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:        instance.Name,
-			Namespace:   instance.Namespace,
-			Annotations: annotations,
-			Labels:      ls,
+			Name:      instance.Name,
+			Namespace: instance.Namespace,
+			Labels:    ls,
 		},
 		Spec: batchv1.JobSpec{
 			BackoffLimit: instance.Spec.BackoffLimit,
 			Template: corev1.PodTemplateSpec{
-				// ObjectMeta: metav1.ObjectMeta{
-				// 	Annotations: annotations,
-				// },
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: annotations,
+				},
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 					Containers: []corev1.Container{{
