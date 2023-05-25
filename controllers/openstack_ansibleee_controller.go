@@ -44,6 +44,10 @@ import (
 	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
+const (
+	ansibleeeJobType = "ansibleee"
+)
+
 // OpenStackAnsibleEEReconciler reconciles a OpenStackAnsibleEE object
 type OpenStackAnsibleEEReconciler struct {
 	client.Client
@@ -96,13 +100,14 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
-		} else {
-			// something is not ready so reset the Ready condition
-			instance.Status.Conditions.MarkUnknown(
-				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
-			// and recalculate it based on the state of the rest of the conditions
-			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
+			// } else {
+			// 	// something is not ready so reset the Ready condition
+			// 	instance.Status.Conditions.MarkUnknown(
+			// 		condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
+			// 	// and recalculate it based on the state of the rest of the conditions
+			// 	instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -124,6 +129,14 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil
+	}
+
+	// Initialize Status fields
+	if instance.Status.Hash == nil {
+		instance.Status.Hash = map[string]string{}
+	}
+	if instance.Status.NetworkAttachments == nil {
+		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
 	// networks to attach to
@@ -155,21 +168,18 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			instance.Spec.NetworkAttachments, err)
 	}
 
+	currentJobHash := instance.Status.Hash[ansibleeeJobType]
+	fmt.Printf("currentJobHash: %s\n", currentJobHash)
+
 	// Define a new job
 	jobDef, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
-	currentJobHash := instance.Status.Hash["job"]
-
-	if instance.Status.JobStatus == "Succeeded" {
-		return ctrl.Result{}, nil
-	}
-
 	ansibleeeJob := job.NewJob(
 		jobDef,
-		"job",
+		ansibleeeJobType,
 		instance.Spec.PreserveJobs,
 		time.Duration(5)*time.Second,
 		currentJobHash,
@@ -202,17 +212,15 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
+	fmt.Printf("ansibleeeJob: %+v\n", ansibleeeJob)
+
 	if ansibleeeJob.HasChanged() {
-		instance.Status.Hash["job"] = ansibleeeJob.GetHash()
-		r.Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash["job"]))
+		instance.Status.Hash[ansibleeeJobType] = ansibleeeJob.GetHash()
+		r.Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash[ansibleeeJobType]))
 	}
 
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = "Succeeded"
-
-	if instance.Status.NetworkAttachments == nil {
-		instance.Status.NetworkAttachments = map[string][]string{}
-	}
 
 	r.Log.Info(fmt.Sprintf("Reconciled Service '%s' init successfully", instance.Name))
 	return ctrl.Result{}, nil
@@ -280,16 +288,17 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
+			Name:        instance.Name,
+			Namespace:   instance.Namespace,
+			Annotations: annotations,
+			Labels:      ls,
 		},
 		Spec: batchv1.JobSpec{
 			BackoffLimit: instance.Spec.BackoffLimit,
 			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Annotations: annotations,
-					Labels:      ls,
-				},
+				// ObjectMeta: metav1.ObjectMeta{
+				// 	Annotations: annotations,
+				// },
 				Spec: corev1.PodSpec{
 					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 					Containers: []corev1.Container{{
@@ -333,10 +342,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	}
 
 	addMounts(instance, job)
-
-	if instance.Status.Hash == nil {
-		instance.Status.Hash = make(map[string]string)
-	}
 
 	inputHash, errorHash := hashOfInputHashes(hashes)
 	if errorHash != nil {
