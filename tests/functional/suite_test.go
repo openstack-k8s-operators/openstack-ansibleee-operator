@@ -20,10 +20,15 @@ import (
 	"context"
 	"path/filepath"
 	"testing"
+	"time"
 
+	"github.com/go-logr/logr"
+	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	. "github.com/openstack-k8s-operators/lib-common/modules/test-operators/helpers"
 
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -41,12 +46,21 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
+const (
+	timeout = 10 * time.Second
+	// have maximum 100 retries before the timeout hits
+	interval = timeout / 100
+)
+
 var (
-	cfg       *rest.Config
-	k8sClient client.Client
-	testEnv   *envtest.Environment
-	ctx       context.Context
-	cancel    context.CancelFunc
+	cfg           *rest.Config
+	k8sClient     client.Client
+	testEnv       *envtest.Environment
+	ctx           context.Context
+	cancel        context.CancelFunc
+	th            *TestHelper
+	logger        logr.Logger
+	ansibleeeName types.NamespacedName
 )
 
 func TestAPIs(t *testing.T) {
@@ -77,9 +91,14 @@ var _ = BeforeSuite(func() {
 
 	//+kubebuilder:scaffold:scheme
 
+	logger = ctrl.Log.WithName("---Test---")
+
 	k8sClient, err = client.New(cfg, client.Options{Scheme: scheme.Scheme})
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
+
+	th = NewTestHelper(ctx, k8sClient, timeout, interval, logger)
+	Expect(th).NotTo(BeNil())
 
 	// Start the controller-manager in a goroutine
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
@@ -99,7 +118,7 @@ var _ = BeforeSuite(func() {
 		Client:  k8sManager.GetClient(),
 		Scheme:  k8sManager.GetScheme(),
 		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("Glance"),
+		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackAnsibleEE"),
 	}).SetupWithManager(k8sManager)
 	Expect(err).ToNot(HaveOccurred())
 
@@ -116,4 +135,20 @@ var _ = AfterSuite(func() {
 	cancel()
 	err := testEnv.Stop()
 	Expect(err).NotTo(HaveOccurred())
+})
+
+var _ = BeforeEach(func() {
+	// NOTE(gibi): We need to create a unique namespace for each test run
+	// as namespaces cannot be deleted in a locally running envtest. See
+	// https://book.kubebuilder.io/reference/envtest.html#namespace-usage-limitation
+	namespace := uuid.New().String()
+	th.CreateNamespace(namespace)
+	// We still request the delete of the Namespace to properly cleanup if
+	// we run the test in an existing cluster.
+	DeferCleanup(th.DeleteNamespace, namespace)
+
+	ansibleeeName = types.NamespacedName{
+		Namespace: namespace,
+		Name:      uuid.New().String(),
+	}
 })

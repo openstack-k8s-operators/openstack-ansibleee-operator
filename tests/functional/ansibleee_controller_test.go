@@ -17,15 +17,35 @@ limitations under the License.
 package functional_test
 
 import (
-	"time"
+	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
+	. "github.com/openstack-k8s-operators/lib-common/modules/test/helpers"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
 var _ = Describe("Ansibleee controller", func() {
 	When("Ansibleee CR instance is created", func() {
-		It("is not Ready", func() {
-			time.Sleep(5 * time.Second)
+		BeforeEach(func() {
+			DeferCleanup(th.DeleteInstance, CreateAnsibleee(ansibleeeName))
+		})
+
+		It("runs a Job", func() {
+			th.ExpectConditionWithDetails(
+				ansibleeeName,
+				ConditionGetterFunc(AnsibleeeConditionGetter),
+				v1alpha1.AnsibleExecutionJobReadyCondition,
+				corev1.ConditionFalse,
+				condition.RequestedReason,
+				"AnsibleExecutionJob is running",
+			)
+			th.ExpectCondition(
+				ansibleeeName,
+				ConditionGetterFunc(AnsibleeeConditionGetter),
+				condition.ReadyCondition,
+				corev1.ConditionUnknown,
+			)
 		})
 	})
 })
