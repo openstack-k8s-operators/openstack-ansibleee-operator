@@ -213,7 +213,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = "Succeeded"
 
-	r.Log.Info(fmt.Sprintf("Reconciled Service '%s' init successfully", instance.Name))
+	r.Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
 	return ctrl.Result{}, nil
 }
 
