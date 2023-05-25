@@ -25,7 +25,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apiserver/pkg/storage/names"
 
 	"context"
 
@@ -45,7 +44,8 @@ import (
 )
 
 const (
-	ansibleeeJobType = "ansibleee"
+	ansibleeeJobType       = "ansibleee"
+	ansibleeeInputHashName = "input"
 )
 
 // OpenStackAnsibleEEReconciler reconciles a OpenStackAnsibleEE object
@@ -100,12 +100,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
 			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
-			// } else {
-			// 	// something is not ready so reset the Ready condition
-			// 	instance.Status.Conditions.MarkUnknown(
-			// 		condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
-			// 	// and recalculate it based on the state of the rest of the conditions
-			// 	instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 
 		err := helper.PatchInstance(ctx, instance)
@@ -169,7 +163,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	currentJobHash := instance.Status.Hash[ansibleeeJobType]
-	fmt.Printf("currentJobHash: %s\n", currentJobHash)
 
 	// Define a new job
 	jobDef, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
@@ -211,8 +204,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.JobStatus = "Failed"
 		return ctrl.Result{}, err
 	}
-
-	fmt.Printf("ansibleeeJob: %+v\n", ansibleeeJob)
 
 	if ansibleeeJob.HasChanged() {
 		instance.Status.Hash[ansibleeeJobType] = ansibleeeJob.GetHash()
@@ -282,7 +273,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	}
 
 	if !hasIdentifier {
-		identifier := names.SimpleNameGenerator.GenerateName(fmt.Sprintf("%s-", instance.Name))
+		identifier := instance.Name
 		args = append(args, []string{"-i", identifier}...)
 	}
 
@@ -347,7 +338,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	if errorHash != nil {
 		return nil, fmt.Errorf("error generating hash of input hashes: %w", errorHash)
 	}
-	instance.Status.Hash["inputHashes"] = inputHash
+	instance.Status.Hash[ansibleeeInputHashName] = inputHash
 
 	// Set OpenStackAnsibleEE instance as the owner and controller
 	err := ctrl.SetControllerReference(instance, job, r.Scheme)
