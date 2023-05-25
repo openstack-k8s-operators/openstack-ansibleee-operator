@@ -69,6 +69,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | image | Image is the container image that will execute the ansible command | string | false |
 | args | Args are the command plus the playbook executed by the image. If args is passed, Playbook is ignored. | []string | false |
 | name | Name is the name of the internal container inside the pod | string | false |
+| envConfigMapName | EnvConfigMapName is the name of the k8s config map that contains the ansible env variables | string | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: Never | string | false |
 | uid | UID is the userid that will be used to run the container. | int64 | false |

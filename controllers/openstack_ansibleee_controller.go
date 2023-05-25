@@ -175,6 +175,19 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			fmt.Sprintf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name),
 			instance,
 		)
+
+		if len(instance.Spec.EnvConfigMapName) == 0 {
+			instance.Spec.EnvConfigMapName = "openstack-aee-default-env"
+		}
+		configMap := &corev1.ConfigMap{}
+		err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
+		if err != nil && !errors.IsNotFound(err) {
+			r.Log.Error(err, err.Error())
+			return ctrl.Result{}, err
+		} else if err == nil {
+			addEnvFrom(instance, job)
+		}
+
 		err = r.Create(ctx, job)
 		if err != nil {
 			util.LogErrorForObject(helper, err, err.Error(), instance)
@@ -334,6 +347,16 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 // belonging to the given openstackansibleee CR name.
 func labelsForOpenStackAnsibleEE(name string) map[string]string {
 	return map[string]string{"app": "openstackansibleee", "openstackansibleee_cr": name}
+}
+
+func addEnvFrom(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+	job.Spec.Template.Spec.Containers[0].EnvFrom = []corev1.EnvFromSource{
+		{
+			ConfigMapRef: &corev1.ConfigMapEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: instance.Spec.EnvConfigMapName},
+			},
+		},
+	}
 }
 
 func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {

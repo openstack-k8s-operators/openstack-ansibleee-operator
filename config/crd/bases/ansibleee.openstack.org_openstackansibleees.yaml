@@ -119,6 +119,9 @@ spec:
                   - name
                   type: object
                 type: array
+              envConfigMapName:
+                default: openstack-aee-default-env
+                type: string
               extraMounts:
                 items:
                   properties:
