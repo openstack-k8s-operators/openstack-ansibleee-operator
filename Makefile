@@ -59,6 +59,7 @@ CRDDESC_OVERRIDE ?= :maxDescLen=0
 IMG ?= $(IMAGE_TAG_BASE):latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25
+GINKGO ?= $(LOCALBIN)/ginkgo
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
@@ -98,7 +99,7 @@ help: ## Display this help.
 .PHONY: manifests
 manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
-	rm -f api/bases/* && cp -a config/crd/bases api/
+	rm -rf api/bases && cp -a config/crd/bases api/
 	$(CRD_MARKDOWN) -f api/v1alpha1/openstack_ansibleee_types.go -n OpenStackAnsibleEE > docs/openstack_ansibleee.md
 
 .PHONY: generate
@@ -114,9 +115,13 @@ vet: gowork ## Run go vet against code.
 	go vet ./...
 	go vet ./api/...
 
+PROCS?=$(shell expr $(shell nproc --ignore 2) / 2)
+PROC_CMD = --procs ${PROCS}
+
 .PHONY: test
-test: manifests generate fmt vet envtest ## Run tests.
-	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test ./... -coverprofile cover.out
+test: manifests generate fmt vet envtest ginkgo ## Run tests.
+	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" \
+	 $(GINKGO) --trace --randomize-all ${PROC_CMD} $(GINKGO_ARGS) ./tests/functional/...
 
 ##@ Build
 
@@ -317,9 +322,7 @@ govet: get-ci-tools
 	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/govet.sh ./api
 
 # Run go test against code
-gotest: get-ci-tools
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gotest.sh
-	GOWORK=off $(CI_TOOLS_REPO_DIR)/test-runner/gotest.sh ./api
+gotest: test
 
 # Run golangci-lint test against code
 golangci: get-ci-tools
@@ -360,3 +363,8 @@ SKIP_CERT ?=false
 run-with-webhook: manifests generate fmt vet ## Run a controller from your host.
 	/bin/bash hack/configure_local_webhook.sh
 	go run ./main.go
+
+.PHONY: ginkgo
+ginkgo: $(GINKGO) ## Download ginkgo locally if necessary.
+$(GINKGO): $(LOCALBIN)
+	test -s $(LOCALBIN)/ginkgo || GOBIN=$(LOCALBIN) go install github.com/onsi/ginkgo/v2/ginkgo
