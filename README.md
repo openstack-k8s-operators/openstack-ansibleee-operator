@@ -126,7 +126,7 @@ oc logs $(oc get pods | grep ansible | awk {'print $1'})
 ## Using openstack-ansibleee-operator with EDPM Ansible
 
 When the openstack-ansibleee-operator spawns a job ansible execution environment crafted image
-can use playbooks and roles contained in its image.
+can use playbooks and roles contained in its image
 
 An openstack-ansibleee-runner image is hosted at
 [quay.io/openstack-k8s-operators/openstack-ansibleee-runner](https://quay.io/openstack-k8s-operators/openstack-ansibleee-runner)
