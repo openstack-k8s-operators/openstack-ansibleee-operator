@@ -364,6 +364,16 @@ func labelsForOpenStackAnsibleEE(name string, deployIdentifier string) map[strin
 	}
 }
 
+func addEnvFrom(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+	job.Spec.Template.Spec.Containers[0].EnvFrom = []corev1.EnvFromSource{
+		{
+			ConfigMapRef: &corev1.ConfigMapEnvSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: instance.Spec.EnvConfigMapName},
+			},
+		},
+	}
+}
+
 func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
 	var volumeMounts []corev1.VolumeMount
 	var volumes []corev1.Volume
