@@ -25,6 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 
 	"context"
 
@@ -174,6 +175,19 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	jobDef, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if len(instance.Spec.EnvConfigMapName) == 0 {
+		instance.Spec.EnvConfigMapName = "openstack-aee-default-env"
+	}
+
+	configMap := &corev1.ConfigMap{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
+	if err != nil && !errors.IsNotFound(err) {
+		r.Log.Error(err, err.Error())
+		return ctrl.Result{}, err
+	} else if err == nil {
+		addEnvFrom(instance, jobDef)
 	}
 
 	ansibleeeJob := job.NewJob(
