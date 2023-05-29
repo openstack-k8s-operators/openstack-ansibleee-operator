@@ -5,11 +5,8 @@
     vars:
       cifmw_operator_build_org: openstack-k8s-operators
       cifmw_operator_build_operators:
-        - name: "openstack-ansibleee-operator"
-          src: "{{ ansible_user_dir }}/src/github.com/{{ cifmw_operator_build_org }}/openstack-ansibleee-operator"
         - name: "openstack-operator"
-          src: "{{ ansible_user_dir }}/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
-          image_base: ansibleee
+          src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
 
 - job:
     name: ansibleee-operator-crc-podified-edpm-deployment
