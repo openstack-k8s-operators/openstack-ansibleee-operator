@@ -7,6 +7,7 @@
       cifmw_operator_build_operators:
         - name: "openstack-operator"
           src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
+          image_base: openstack-ansibleee
 
 - job:
     name: ansibleee-operator-crc-podified-edpm-deployment
