@@ -59,6 +59,10 @@ type OpenStackAnsibleEESpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:OnFailure","urn:alm:descriptor:com.tectonic.ui:select:Never"}
 	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
+	PreserveJobs bool `json:"preserveJobs"`
 	// UID is the userid that will be used to run the container.
 	// +kubebuilder:default:=1001
 	UID int64 `json:"uid,omitempty"`
@@ -94,6 +98,9 @@ type OpenStackAnsibleEESpec struct {
 type OpenStackAnsibleEEStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
+
+	// Map of hashes to track e.g. job status
+	Hash map[string]string `json:"hash,omitempty"`
 
 	// +operator-sdk:csv:customresourcedefinitions:type=status,xDescriptors={"urn:alm:descriptor:io.kubernetes.conditions"}
 	// Conditions

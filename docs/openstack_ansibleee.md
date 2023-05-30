@@ -72,6 +72,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | envConfigMapName | EnvConfigMapName is the name of the k8s config map that contains the ansible env variables | string | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: Never | string | false |
+| preserveJobs | PreserveJobs - do not delete jobs after they finished e.g. to check logs | bool | true |
 | uid | UID is the userid that will be used to run the container. | int64 | false |
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
@@ -90,6 +91,7 @@ OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
+| hash | Map of hashes to track e.g. job status | map[string]string | false |
 | conditions | Conditions | condition.Conditions | false |
 | networkAttachments | NetworkAttachments status of the deployment pods | map[string][]string | false |
 | JobStatus | JobStatus status of the executed job (Pending/Running/Succeeded/Failed) | string | false |

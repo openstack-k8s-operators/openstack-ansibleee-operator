@@ -26,13 +26,13 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apiserver/pkg/storage/names"
 
 	"context"
 
 	"github.com/go-logr/logr"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
+	job "github.com/openstack-k8s-operators/lib-common/modules/common/job"
 	nad "github.com/openstack-k8s-operators/lib-common/modules/common/networkattachment"
 	util "github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -42,6 +42,11 @@ import (
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+)
+
+const (
+	ansibleeeJobType       = "ansibleee"
+	ansibleeeInputHashName = "input"
 )
 
 // OpenStackAnsibleEEReconciler reconciles a OpenStackAnsibleEE object
@@ -63,12 +68,12 @@ type OpenStackAnsibleEEReconciler struct {
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // TODO(user): Modify the Reconcile function to compare the state specified by
-// the OpenStackAnsibleEE object against the actual cluster state, and then
+// the AnsibleEE object against the actual cluster state, and then
 // perform operations to make the cluster state reflect the state specified by
 // the user.
 //
 // For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.2/pkg/reconcile
+// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
 
 	instance, err := r.getOpenStackAnsibleeeInstance(ctx, req)
@@ -103,6 +108,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			// and recalculate it based on the state of the rest of the conditions
 			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			r.Log.Error(_err, "PatchInstance error")
@@ -124,6 +130,14 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		// Register overall status immediately to have an early feedback e.g.
 		// in the cli
 		return ctrl.Result{}, nil
+	}
+
+	// Initialize Status fields
+	if instance.Status.Hash == nil {
+		instance.Status.Hash = map[string]string{}
+	}
+	if instance.Status.NetworkAttachments == nil {
+		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
 	// networks to attach to
@@ -155,84 +169,71 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			instance.Spec.NetworkAttachments, err)
 	}
 
-	// Check if the job already exists, if not create a new one
-	foundJob := &batchv1.Job{}
-	err = r.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, foundJob)
-	if err != nil && errors.IsNotFound(err) {
-		instance.Status.Conditions.Set(condition.FalseCondition(
-			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityWarning,
-			redhatcomv1alpha1.AnsibleExecutionJobNotFoundMessage,
-		))
-		// Define a new job
-		job, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		util.LogForObject(
-			helper,
-			fmt.Sprintf("Creating a new Job: Job.Namespace %s Job.Name %s\n", job.Namespace, job.Name),
-			instance,
-		)
+	currentJobHash := instance.Status.Hash[ansibleeeJobType]
 
-		if len(instance.Spec.EnvConfigMapName) == 0 {
-			instance.Spec.EnvConfigMapName = "openstack-aee-default-env"
-		}
-		configMap := &corev1.ConfigMap{}
-		err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
-		if err != nil && !errors.IsNotFound(err) {
-			r.Log.Error(err, err.Error())
-			return ctrl.Result{}, err
-		} else if err == nil {
-			addEnvFrom(instance, job)
-		}
+	// Define a new job
+	jobDef, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
 
-		err = r.Create(ctx, job)
-		if err != nil {
-			util.LogErrorForObject(helper, err, err.Error(), instance)
-			return ctrl.Result{}, err
-		}
-		util.LogForObject(
-			helper,
-			fmt.Sprintf("Job: Job.Namespace %s Job.Name %s created successfully - return and requeue\n", job.Namespace, job.Name),
-			instance,
-		)
-		// Set AnsibleExecutionJobReadyCondition to requested
+	if len(instance.Spec.EnvConfigMapName) == 0 {
+		instance.Spec.EnvConfigMapName = "openstack-aee-default-env"
+	}
+
+	configMap := &corev1.ConfigMap{}
+	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
+	if err != nil && !errors.IsNotFound(err) {
+		r.Log.Error(err, err.Error())
+		return ctrl.Result{}, err
+	} else if err == nil {
+		addEnvFrom(instance, jobDef)
+	}
+
+	ansibleeeJob := job.NewJob(
+		jobDef,
+		ansibleeeJobType,
+		instance.Spec.PreserveJobs,
+		time.Duration(5)*time.Second,
+		currentJobHash,
+	)
+
+	ctrlResult, err := ansibleeeJob.DoJob(
+		ctx,
+		helper,
+	)
+
+	if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			redhatcomv1alpha1.AnsibleExecutionJobWaitingMessage))
 		instance.Status.JobStatus = "Running"
-		return ctrl.Result{Requeue: true}, nil
-	} else if err != nil {
-		util.LogErrorForObject(helper, err, err.Error(), instance)
-		return ctrl.Result{}, err
-	}
-	if instance.Status.NetworkAttachments == nil {
-		instance.Status.NetworkAttachments = map[string][]string{}
+		return ctrlResult, nil
 	}
 
-	if foundJob.Status.Succeeded > 0 {
-		r.Log.Info(fmt.Sprintf("%s ready", redhatcomv1alpha1.AnsibleExecutionJobReadyCondition))
-		instance.Status.Conditions.Set(condition.TrueCondition(
-			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
-			redhatcomv1alpha1.AnsibleExecutionJobReadyMessage))
-		instance.Status.JobStatus = "Succeeded"
-	}
-	if foundJob.Status.Failed > 0 {
-		err = fmt.Errorf("job.name %s job.namespace %s failed", foundJob.Name, foundJob.Namespace)
+	if err != nil {
+		err = fmt.Errorf("job.name %s job.namespace %s failed", jobDef.Name, jobDef.Namespace)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
 			condition.ErrorReason,
-			condition.SeverityError,
+			condition.SeverityWarning,
 			redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
 			err.Error()))
 		instance.Status.JobStatus = "Failed"
 		return ctrl.Result{}, err
 	}
 
+	if ansibleeeJob.HasChanged() {
+		instance.Status.Hash[ansibleeeJobType] = ansibleeeJob.GetHash()
+		r.Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash[ansibleeeJobType]))
+	}
+
+	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
+	instance.Status.JobStatus = "Succeeded"
+
+	r.Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
 	return ctrl.Result{}, nil
 }
 
@@ -258,8 +259,19 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 }
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
-func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, annotations map[string]string) (*batchv1.Job, error) {
-	ls := labelsForOpenStackAnsibleEE(instance.Name)
+func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
+	annotations map[string]string) (*batchv1.Job, error) {
+	labels := instance.GetObjectMeta().GetLabels()
+	var deployIdentifier string
+	if len(labels["deployIdentifier"]) > 0 {
+		fmt.Printf("label: %s", labels["deployIdentifier"])
+		deployIdentifier = labels["deployIdentifier"]
+	} else {
+		deployIdentifier = ""
+	}
+	ls := labelsForOpenStackAnsibleEE(instance.Name, deployIdentifier)
 
 	args := instance.Spec.Args
 
@@ -281,7 +293,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 	}
 
 	if !hasIdentifier {
-		identifier := names.SimpleNameGenerator.GenerateName(fmt.Sprintf("%s-", instance.Name))
+		identifier := instance.Name
 		args = append(args, []string{"-i", identifier}...)
 	}
 
@@ -311,6 +323,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 		},
 	}
 
+	//Populate hash
+	hashes := make(map[string]string)
+
 	if len(instance.Spec.InitContainers) > 0 {
 		job.Spec.Template.Spec.InitContainers = instance.Spec.InitContainers
 	}
@@ -318,21 +333,31 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
 	if len(instance.Spec.Inventory) > 0 {
-		addInventory(instance, job)
+		addInventory(instance, job, hashes)
 	}
 	if len(instance.Spec.Play) > 0 {
-		addPlay(instance, job)
+		addPlay(instance, job, hashes)
 	} else if instance.Spec.Role != nil {
-		addRoles(instance, h, job)
+		addRoles(instance, h, job, hashes)
 	} else if len(instance.Spec.Playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
-		addPlaybook(instance, job)
+		addPlaybook(instance, job, hashes)
 	}
 	if len(instance.Spec.CmdLine) > 0 {
-		addCmdLine(instance, job)
+		addCmdLine(instance, job, hashes)
 	}
+	if len(labels["deployIdentifier"]) > 0 {
+		hashes["deployIdentifier"] = labels["deployIdentifier"]
+	}
+
 	addMounts(instance, job)
+
+	inputHash, errorHash := hashOfInputHashes(hashes)
+	if errorHash != nil {
+		return nil, fmt.Errorf("error generating hash of input hashes: %w", errorHash)
+	}
+	instance.Status.Hash[ansibleeeInputHashName] = inputHash
 
 	// Set OpenStackAnsibleEE instance as the owner and controller
 	err := ctrl.SetControllerReference(instance, job, r.Scheme)
@@ -345,8 +370,12 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(instance *redhat
 
 // labelsForOpenStackAnsibleEE returns the labels for selecting the resources
 // belonging to the given openstackansibleee CR name.
-func labelsForOpenStackAnsibleEE(name string) map[string]string {
-	return map[string]string{"app": "openstackansibleee", "openstackansibleee_cr": name}
+func labelsForOpenStackAnsibleEE(name string, deployIdentifier string) map[string]string {
+	return map[string]string{
+		"app":                   "openstackansibleee",
+		"deployIdentifier":      deployIdentifier,
+		"openstackansibleee_cr": name,
+	}
 }
 
 func addEnvFrom(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
@@ -378,7 +407,11 @@ func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job)
 	job.Spec.Template.Spec.Volumes = volumes
 }
 
-func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, job *batchv1.Job) {
+func addRoles(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var roles []*redhatcomv1alpha1.Role
 	roles = append(roles, instance.Spec.Role)
 	d, err := yaml.Marshal(&roles)
@@ -391,38 +424,103 @@ func addRoles(instance *redhatcomv1alpha1.OpenStackAnsibleEE, h *helper.Helper, 
 	roleEnvVar.Value = "\n" + string(d) + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["roles"], err = calculateHash(string(d))
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addPlay(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addPlay(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var playEnvVar corev1.EnvVar
+	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["play"], err = calculateHash(instance.Spec.Play)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addPlaybook(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addPlaybook(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var playEnvVar corev1.EnvVar
+	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["playbooks"], err = calculateHash(instance.Spec.Play)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addInventory(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addInventory(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var invEnvVar corev1.EnvVar
+	var err error
 	invEnvVar.Name = "RUNNER_INVENTORY"
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["inventory"], err = calculateHash(instance.Spec.Inventory)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
 }
 
-func addCmdLine(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addCmdLine(
+	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	job *batchv1.Job,
+	hashes map[string]string) {
 	var cmdLineEnvVar corev1.EnvVar
+	var err error
 	cmdLineEnvVar.Name = "RUNNER_CMDLINE"
 	cmdLineEnvVar.Value = "\n" + instance.Spec.CmdLine + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, cmdLineEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	hashes["cmdline"], err = calculateHash(instance.Spec.CmdLine)
+	if err != nil {
+		fmt.Printf("Error calculating the hash!")
+	}
+}
+
+func calculateHash(envVar string) (string, error) {
+	hash, err := util.ObjectHash(envVar)
+	if err != nil {
+		return "", err
+	}
+	return hash, nil
+}
+
+func hashOfInputHashes(hashes map[string]string) (string, error) {
+	var stringConcat string
+	var err error
+	if len(hashes) != 0 {
+		for key, value := range hashes {
+			// fmt.Printf("%s - %s\n", key, value)
+			// exclude hash defined by the job itself
+			if key != "job" {
+				stringConcat += stringConcat + value
+			}
+		}
+	} else {
+		stringConcat = ""
+	}
+	hash, err := util.ObjectHash(stringConcat)
+	if err != nil {
+		return hash, err
+	}
+	return hash, nil
 }
 
 // SetupWithManager sets up the controller with the Manager.

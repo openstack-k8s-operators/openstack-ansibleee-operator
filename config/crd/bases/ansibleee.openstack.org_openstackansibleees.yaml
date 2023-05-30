@@ -1487,6 +1487,9 @@ spec:
                 type: string
               playbook:
                 type: string
+              preserveJobs:
+                default: false
+                type: boolean
               restartPolicy:
                 default: Never
                 enum:
@@ -1583,6 +1586,10 @@ spec:
                   - type
                   type: object
                 type: array
+              hash:
+                additionalProperties:
+                  type: string
+                type: object
               networkAttachments:
                 additionalProperties:
                   items:
