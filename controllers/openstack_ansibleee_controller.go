@@ -266,7 +266,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	labels := instance.GetObjectMeta().GetLabels()
 	var deployIdentifier string
 	if len(labels["deployIdentifier"]) > 0 {
-		fmt.Printf("label: %s", labels["deployIdentifier"])
 		deployIdentifier = labels["deployIdentifier"]
 	} else {
 		deployIdentifier = ""
@@ -333,19 +332,19 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
 	if len(instance.Spec.Inventory) > 0 {
-		addInventory(instance, job, hashes)
+		addInventory(instance, h, job, hashes)
 	}
 	if len(instance.Spec.Play) > 0 {
-		addPlay(instance, job, hashes)
+		addPlay(instance, h, job, hashes)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job, hashes)
 	} else if len(instance.Spec.Playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
-		addPlaybook(instance, job, hashes)
+		addPlaybook(instance, h, job, hashes)
 	}
 	if len(instance.Spec.CmdLine) > 0 {
-		addCmdLine(instance, job, hashes)
+		addCmdLine(instance, h, job, hashes)
 	}
 	if len(labels["deployIdentifier"]) > 0 {
 		hashes["deployIdentifier"] = labels["deployIdentifier"]
@@ -426,12 +425,13 @@ func addRoles(
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 	hashes["roles"], err = calculateHash(string(d))
 	if err != nil {
-		fmt.Printf("Error calculating the hash!")
+		h.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
 func addPlay(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
 	job *batchv1.Job,
 	hashes map[string]string) {
 	var playEnvVar corev1.EnvVar
@@ -442,12 +442,13 @@ func addPlay(
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 	hashes["play"], err = calculateHash(instance.Spec.Play)
 	if err != nil {
-		fmt.Printf("Error calculating the hash!")
+		h.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
 func addPlaybook(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
 	job *batchv1.Job,
 	hashes map[string]string) {
 	var playEnvVar corev1.EnvVar
@@ -458,12 +459,13 @@ func addPlaybook(
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 	hashes["playbooks"], err = calculateHash(instance.Spec.Play)
 	if err != nil {
-		fmt.Printf("Error calculating the hash!")
+		h.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
 func addInventory(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
 	job *batchv1.Job,
 	hashes map[string]string) {
 	var invEnvVar corev1.EnvVar
@@ -474,12 +476,13 @@ func addInventory(
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 	hashes["inventory"], err = calculateHash(instance.Spec.Inventory)
 	if err != nil {
-		fmt.Printf("Error calculating the hash!")
+		h.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
 func addCmdLine(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	h *helper.Helper,
 	job *batchv1.Job,
 	hashes map[string]string) {
 	var cmdLineEnvVar corev1.EnvVar
@@ -490,7 +493,7 @@ func addCmdLine(
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
 	hashes["cmdline"], err = calculateHash(instance.Spec.CmdLine)
 	if err != nil {
-		fmt.Printf("Error calculating the hash!")
+		h.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
@@ -507,7 +510,6 @@ func hashOfInputHashes(hashes map[string]string) (string, error) {
 	var err error
 	if len(hashes) != 0 {
 		for key, value := range hashes {
-			// fmt.Printf("%s - %s\n", key, value)
 			// exclude hash defined by the job itself
 			if key != "job" {
 				stringConcat += stringConcat + value
