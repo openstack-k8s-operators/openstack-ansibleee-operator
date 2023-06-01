@@ -10,10 +10,10 @@ require (
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.9.5
 	github.com/onsi/gomega v1.27.7
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230523095909-db05945b0b1e
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230523095909-db05945b0b1e
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230522113906-6f4206cbf317
-	github.com/openstack-k8s-operators/lib-common/modules/test-operators v0.0.0-20230524134507-696d321a942e
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230601090817-30a4a761a756
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230601090817-30a4a761a756
+	github.com/openstack-k8s-operators/lib-common/modules/test-operators v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.3
@@ -41,7 +41,7 @@ require (
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1 // indirect
-	github.com/gophercloud/gophercloud v1.2.0 // indirect
+	github.com/gophercloud/gophercloud v1.4.0 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
