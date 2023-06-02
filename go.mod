@@ -8,7 +8,7 @@ require (
 	github.com/go-logr/logr v1.2.4
 	github.com/google/uuid v1.3.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
-	github.com/onsi/ginkgo/v2 v2.9.5
+	github.com/onsi/ginkgo/v2 v2.9.7
 	github.com/onsi/gomega v1.27.7
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230601090817-30a4a761a756
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230601090817-30a4a761a756
