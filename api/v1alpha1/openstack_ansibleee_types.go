@@ -192,6 +192,21 @@ func init() {
 	SchemeBuilder.Register(&OpenStackAnsibleEE{}, &OpenStackAnsibleEEList{})
 }
 
+// NewOpenStackAnsibleEE returns a OpenStackAnsibleEESpec where the fields are defaulted according
+// to the CRD definition
+func NewOpenStackAnsibleEE(name string) OpenStackAnsibleEESpec {
+	backoff := int32(6)
+	return OpenStackAnsibleEESpec{
+		Name:             name,
+		Image:            util.GetEnvVar("ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
+		EnvConfigMapName: "openstack-aee-default-env",
+		PreserveJobs:     false,
+		RestartPolicy:    "Never",
+		UID:              1001,
+		BackoffLimit:     &backoff,
+	}
+}
+
 // IsReady - returns true if the OpenStackAnsibleEE is ready
 func (instance OpenStackAnsibleEE) IsReady() bool {
 	return instance.Status.Conditions.IsTrue(AnsibleExecutionJobReadyCondition)
