@@ -31,6 +31,20 @@ const (
 	OpenStackAnsibleEEContainerImage = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
 )
 
+const (
+	// JobStatusSucceeded -
+	JobStatusSucceeded = "Succeeded"
+
+	// JobStatusFailed -
+	JobStatusFailed = "Failed"
+
+	// JobStatusRunning -
+	JobStatusRunning = "Running"
+
+	// JobStatusPending -
+	JobStatusPending = "Pending"
+)
+
 // OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 type OpenStackAnsibleEESpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
