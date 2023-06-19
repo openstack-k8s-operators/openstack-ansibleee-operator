@@ -8,9 +8,27 @@
         - name: "openstack-operator"
           src: "~/src/github.com/{{ cifmw_operator_build_org }}/openstack-operator"
           image_base: openstack-ansibleee
+    irrelevant-files: &openstack_if
+      - tests
+      - docs
+      - examples
+      - .github/workflows
+      - .ci-operator.yaml
+      - .dockerignore
+      - .gitignore
+      - .golangci.yaml
+      - .pre-commit-config.yaml
+      - LICENSE
+      - OWNERS*
+      - PROJECT
+      - .*/*.md
+      - mkdocs.yml
+      - kuttl-test.yaml
+      - renovate.json
 
 - job:
     name: ansibleee-operator-crc-podified-edpm-deployment
     parent: cifmw-crc-podified-edpm-deployment
     vars:
       bmo_setup: true
+    irrelevant-files: *openstack_if
