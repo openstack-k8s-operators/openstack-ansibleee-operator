@@ -140,11 +140,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
-	// Initialize Job Status field
-	if instance.Status.JobStatus == "" {
-		instance.Status.JobStatus = redhatcomv1alpha1.JobStatusPending
-	}
-
 	// networks to attach to
 	for _, netAtt := range instance.Spec.NetworkAttachments {
 		_, err := nad.GetNADWithName(ctx, helper, netAtt, instance.Namespace)
