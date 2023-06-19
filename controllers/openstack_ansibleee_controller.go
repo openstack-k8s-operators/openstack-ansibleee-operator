@@ -140,6 +140,11 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
 
+	// Initialize Job Status field
+	if instance.Status.JobStatus == "" {
+		instance.Status.JobStatus = redhatcomv1alpha1.JobStatusPending
+	}
+
 	// networks to attach to
 	for _, netAtt := range instance.Spec.NetworkAttachments {
 		_, err := nad.GetNADWithName(ctx, helper, netAtt, instance.Namespace)
@@ -209,7 +214,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			condition.RequestedReason,
 			condition.SeverityInfo,
 			redhatcomv1alpha1.AnsibleExecutionJobWaitingMessage))
-		instance.Status.JobStatus = "Running"
+		instance.Status.JobStatus = redhatcomv1alpha1.JobStatusRunning
 		return ctrlResult, nil
 	}
 
@@ -221,7 +226,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			condition.SeverityWarning,
 			redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
 			err.Error()))
-		instance.Status.JobStatus = "Failed"
+		instance.Status.JobStatus = redhatcomv1alpha1.JobStatusFailed
 		return ctrl.Result{}, err
 	}
 
@@ -231,7 +236,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
-	instance.Status.JobStatus = "Succeeded"
+	instance.Status.JobStatus = redhatcomv1alpha1.JobStatusSucceeded
 
 	r.Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
 	return ctrl.Result{}, nil
