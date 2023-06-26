@@ -31,9 +31,20 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # quay.io/openstack-k8s-operators/openstack-ansibleee-operator-bundle:$VERSION and quay.io/openstack-k8s-operators/openstack-ansibleee-operator-catalog:$VERSION.
 IMAGE_TAG_BASE ?= quay.io/openstack-k8s-operators/openstack-ansibleee-operator
 
+# If the DEBUG flag is set we need to build images from different base
+# and mark them appropriatelly, as they will contain additional utilities.
+# Images build from debug base are going to use '-debug' postfix in their tags.
+# https://console.cloud.google.com/gcr/images/distroless/global/static
+DEBUG ?= false
+
+ifeq (${DEBUG}, true)
+OPERATOR_BASE_IMAGE_TAG = debug-nonroot
+IMAGE_TAG_POSTFIX = -debug
+endif
+
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
+BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)$(IMAGE_TAG_POSTFIX)
 
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
 BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
@@ -56,7 +67,8 @@ endif
 CRDDESC_OVERRIDE ?= :maxDescLen=0
 
 # Image URL to use all building/pushing image targets
-IMG ?= $(IMAGE_TAG_BASE):latest
+IMG ?= $(IMAGE_TAG_BASE):latest$(IMAGE_TAG_POSTFIX)
+
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.25
 GINKGO ?= $(LOCALBIN)/ginkgo
@@ -73,6 +85,7 @@ endif
 # Options are set to exit when a recipe line exits non-zero or a piped command fails.
 SHELL = /usr/bin/env bash -o pipefail
 .SHELLFLAGS = -ec
+
 
 .PHONY: all
 all: build
@@ -136,8 +149,12 @@ run: manifests generate fmt vet ## Run a controller from your host.
 	go run ./main.go
 
 .PHONY: docker-build
-docker-build: test ## Build docker image with the manager.
+docker-build: test ## Build docker image with the manager. Build from debug-nonroot if requested by 'DEBUG=true'.
+ifeq (${DEBUG}, true)
+	podman build -t ${IMG} . --build-arg OPERATOR_BASE_IMAGE_TAG=${OPERATOR_BASE_IMAGE_TAG}
+else
 	podman build -t ${IMG} .
+endif
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
@@ -278,7 +295,7 @@ endif
 BUNDLE_IMGS ?= $(BUNDLE_IMG)
 
 # The image tag given to the resulting catalog image (e.g. make catalog-build CATALOG_IMG=example.com/operator-catalog:v0.2.0).
-CATALOG_IMG ?= $(IMAGE_TAG_BASE)-index:v$(VERSION)
+CATALOG_IMG ?= $(IMAGE_TAG_BASE)-index:v$(VERSION)$(IMAGE_TAG_POSTFIX)
 
 # Set CATALOG_BASE_IMG to an existing catalog image tag to add $BUNDLE_IMGS to that image.
 ifneq ($(origin CATALOG_BASE_IMG), undefined)

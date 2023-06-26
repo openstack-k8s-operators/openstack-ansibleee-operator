@@ -1,5 +1,6 @@
 ARG GOLANG_BUILDER=golang:1.19
-ARG OPERATOR_BASE_IMAGE=gcr.io/distroless/static:nonroot
+ARG OPERATOR_BASE_IMAGE_TAG=nonroot
+ARG OPERATOR_BASE_IMAGE=gcr.io/distroless/static:${OPERATOR_BASE_IMAGE_TAG}
 
 # Build the manager binary
 FROM $GOLANG_BUILDER AS builder
