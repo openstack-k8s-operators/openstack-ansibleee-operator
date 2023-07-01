@@ -55,6 +55,26 @@ spec:
                 type: integer
               cmdLine:
                 type: string
+              dnsConfig:
+                properties:
+                  nameservers:
+                    items:
+                      type: string
+                    type: array
+                  options:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      type: object
+                    type: array
+                  searches:
+                    items:
+                      type: string
+                    type: array
+                type: object
               env:
                 items:
                   properties:
