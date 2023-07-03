@@ -296,6 +296,22 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		args = append(args, []string{"-i", identifier}...)
 	}
 
+	podSpec := corev1.PodSpec{
+		RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
+		Containers: []corev1.Container{{
+			ImagePullPolicy: "Always",
+			Image:           instance.Spec.Image,
+			Name:            instance.Spec.Name,
+			Args:            args,
+			Env:             instance.Spec.Env,
+		}},
+	}
+
+	if instance.Spec.DNSConfig != nil {
+		podSpec.DNSConfig = instance.Spec.DNSConfig
+		podSpec.DNSPolicy = "None"
+	}
+
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      instance.Name,
@@ -308,16 +324,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 					Annotations: annotations,
 					Labels:      ls,
 				},
-				Spec: corev1.PodSpec{
-					RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
-					Containers: []corev1.Container{{
-						ImagePullPolicy: "Always",
-						Image:           instance.Spec.Image,
-						Name:            instance.Spec.Name,
-						Args:            args,
-						Env:             instance.Spec.Env,
-					}},
-				},
+				Spec: podSpec,
 			},
 		},
 	}

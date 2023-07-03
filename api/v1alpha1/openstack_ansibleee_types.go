@@ -106,6 +106,9 @@ type OpenStackAnsibleEESpec struct {
 	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
 	// it will run with default serviceaccount
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+	// DNSConfig allows to specify custom dnsservers and search domains
+	// +kubebuilder:validation:Optional
+	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
