@@ -74,7 +74,7 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
+	// +kubebuilder:default=true
 	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
 	PreserveJobs bool `json:"preserveJobs"`
 	// UID is the userid that will be used to run the container.

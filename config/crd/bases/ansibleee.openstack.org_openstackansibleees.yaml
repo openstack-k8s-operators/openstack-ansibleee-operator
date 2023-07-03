@@ -1508,7 +1508,7 @@ spec:
               playbook:
                 type: string
               preserveJobs:
-                default: false
+                default: true
                 type: boolean
               restartPolicy:
                 default: Never
