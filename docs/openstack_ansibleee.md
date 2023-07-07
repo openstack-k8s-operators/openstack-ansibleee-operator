@@ -83,6 +83,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | initContainers | InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself | []corev1.Container | false |
 | serviceAccountName | ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount | string | false |
 | dnsConfig | DNSConfig allows to specify custom dnsservers and search domains | *corev1.PodDNSConfig | false |
+| debug | Debug run the pod in debug mode without executing the ansible-runner commands | bool | true |
 
 [Back to Custom Resources](#custom-resources)
 

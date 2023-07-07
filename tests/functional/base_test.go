@@ -54,3 +54,22 @@ func CreateAnsibleee(name types.NamespacedName) client.Object {
 	}
 	return th.CreateUnstructured(raw)
 }
+
+func CreateAnsibleeeDebug(name types.NamespacedName) client.Object {
+	raw := map[string]interface{}{
+		"apiVersion": "ansibleee.openstack.org/v1alpha1",
+		"kind":       "OpenStackAnsibleEE",
+		"metadata": map[string]interface{}{
+			"name":      name.Name,
+			"namespace": name.Namespace,
+		},
+		"spec": map[string]interface{}{
+			// this can be removed as soon as webhook is enabled in the
+			// test env
+			"image":   "test-image",
+			"debug":   true,
+			"cmdLine": "echo THIS_SHOULDNT_PRINT",
+		},
+	}
+	return th.CreateUnstructured(raw)
+}

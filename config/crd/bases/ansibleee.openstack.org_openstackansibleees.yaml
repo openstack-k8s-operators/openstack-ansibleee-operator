@@ -55,6 +55,9 @@ spec:
                 type: integer
               cmdLine:
                 type: string
+              debug:
+                default: false
+                type: boolean
               dnsConfig:
                 properties:
                   nameservers:
