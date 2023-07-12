@@ -16,8 +16,8 @@ spec:
       kind: OpenStackAnsibleEE
       name: openstackansibleees.ansibleee.openstack.org
       specDescriptors:
-      - description: BackoffLimimt allows to define the maximum number of retried
-          executions (defaults to 6).
+      - description: BackoffLimit allows to define the maximum number of retried executions
+          (defaults to 6).
         displayName: Backoff Limit
         path: backoffLimit
         x-descriptors:

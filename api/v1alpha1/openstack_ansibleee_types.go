@@ -73,10 +73,11 @@ type OpenStackAnsibleEESpec struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:OnFailure","urn:alm:descriptor:com.tectonic.ui:select:Never"}
 	// +kubebuilder:default:="Never"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
-	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=true
 	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
-	PreserveJobs bool `json:"preserveJobs"`
+	// PreserveJobs default: true
+	// +kubebuilder:validation:Enum:=true;false
+	// +kubebuilder:default:=true
+	PreserveJobs bool `json:"preserveJobs,omitempty"`
 	// UID is the userid that will be used to run the container.
 	// +kubebuilder:default:=1001
 	UID int64 `json:"uid,omitempty"`
@@ -85,7 +86,7 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// ExtraMounts containing conf files and credentials
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
-	// BackoffLimimt allows to define the maximum number of retried executions (defaults to 6).
+	// BackoffLimit allows to define the maximum number of retried executions (defaults to 6).
 	// +kubebuilder:default:=6
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
@@ -217,7 +218,7 @@ func NewOpenStackAnsibleEE(name string) OpenStackAnsibleEESpec {
 		Name:             name,
 		Image:            util.GetEnvVar("ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
 		EnvConfigMapName: "openstack-aee-default-env",
-		PreserveJobs:     false,
+		PreserveJobs:     true,
 		RestartPolicy:    "Never",
 		UID:              1001,
 		BackoffLimit:     &backoff,
