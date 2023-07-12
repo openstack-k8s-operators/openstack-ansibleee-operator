@@ -6,7 +6,7 @@ An operator to deploy and run an OpenStack Ansible Execution Environment contain
 
 It uses operator-sdk to build and run.
 
-To build and push to a docker repository
+To build and push to a container registry
 
 ```bash
 make docker-build docker-push IMG="<your image name>"
@@ -30,13 +30,13 @@ Once the operator has been deployed succesfully to the openshift/kubernetes clus
 
 There are some examples on the examples directory.
 
-The first one is ansibleee-playbook-local.yaml. This wil execute locally the playbook "test.yaml", which will run some checks on the container where ansible-runner is being executed.
+The first one is openstack-ansibleee-playbook-local.yaml. This wil execute locally an example playbook, provided inline, which will print an "hello world" message using ansible debug module.
 
 ```bash
 oc apply -f examples/openstack-ansibleee-playbook-local.yaml
 ```
 
-There are other examples that also execute locally the playbook "test.yaml", but that serve as extraMounts demonstration: ansibleee-extravolumes.yaml and ansibleee-extravolumes_2_secret.yaml that need the secrets ceph-secret-example.yaml and ceph-secret-example2.yaml created:
+There are other examples that also execute locally the playbook "test.yaml", but that serve as extraMounts demonstration: openstack-ansibleee-extravolumes.yaml and openstack-ansibleee-extravolumes_2_secret.yaml that need the secrets ceph-secret-example.yaml and ceph-secret-example2.yaml created:
 
 ```bash
 oc apply -f ceph-secret-example.yaml
@@ -44,9 +44,9 @@ oc apply -f ceph-secret-example2.yaml
 oc apply -f examples/openstack-ansibleee-extravolumes.yaml
 ```
 
-There are also a number of examples that feature remote execution. By default, all of them expect a compute node to be available in 10.0.0.4, adjust the inventory accordingly for your environment. This setup is compatible with the libvirt development environment deployment described in [libvirt_podified_standalone](https://gitlab.cee.redhat.com/rhos-upgrades/data-plane-adoption-dev/-/blob/main/libvirt_podified_standalone.md).
+There are also a number of examples that feature remote execution. By default, all of them expect a compute node to be available in 10.0.0.4, adjust the inventory accordingly for your environment.
 
-The first remote example is ansibleee-playbook.yaml. This runs one of the standalone playbooks that is included in the default image.
+The first remote example is openstack-ansibleee-playbook.yaml. This runs one of the standalone playbooks that is included in the default image.
 
 To access an external node, you need to provide the ssh private key so ansible can connect to the node. This is being expected to be provided by a "ssh-key-secret" Secret with this format:
 
@@ -67,7 +67,7 @@ Once the key has been created, the CR should run the deploy-edpm-os-configure.ym
 oc apply -f examples/openstack-ansibleee-playbook.yaml
 ```
 
-The second remote example is ansibleee-role.yaml, which will run a certain number of tasks from specific standalone roles:
+The second remote example is openstack-ansibleee-role.yaml, which will run a certain number of tasks from specific standalone roles:
 
 ```bash
 oc apply -f examples/openstack-ansibleee-role.yaml
@@ -84,9 +84,6 @@ oc apply -f examples/openstack-ansibleee-play.yaml
 
 The following has been verified on
 [openshift-local](https://developers.redhat.com/products/openshift-local/overview).
-
-The Makefile assumes you have docker installed. If you're using
-podman, then adjust accordingly (e.g. symlink docker to podman).
 
 Create the CRD managed by the operator. This must be deleted and re-created any time the api changes.
 
@@ -109,18 +106,48 @@ Once the operator is running, create the examle CR to run the test playbook.
 oc create -f examples/openstack-ansibleee-playbook-local.yaml
 ```
 
-The operator will create a ansible pod and run the playbook. It will
-then move to a completed state.
+The operator will create an OpenStackAnsibleEE resource which will create a job. That job will spawn a pod using an ansible runner that will execute the given playbook. When the playbook is done, the pod will move to a `Completed` state.
+
+You can get the OpenStackAnsibleEE resource created with the `oc get openstackansibleee` (or `osaee`) command.
 
 ```bash
-$ oc get pods | grep ansible
-ansibleee-playbook-local-q4pt9         0/1     Completed   0          24m
+$ oc get osaee
+NAME                       NETWORKATTACHMENTS   STATUS   MESSAGE
+ansibleee-playbook-local                        True     AnsibleExecutionJob complete
+```
+
+After knowing the name of the OpenStackAnsibleEE resource, you can search for its pod by filtering the `openstackansibleee_cr` label.
+
+```bash
+$ oc get pods -l openstackansibleee_cr=ansibleee-playbook-local
+NAME                             READY   STATUS      RESTARTS   AGE
+ansibleee-playbook-local-lbl6c   0/1     Completed   0          44s
 ```
 
 To see the result of the playbook run, use `oc logs`.
 
 ```bash
-oc logs $(oc get pods | grep ansible | awk {'print $1'})
+oc logs -l openstackansibleee_cr=ansibleee-playbook-local
+No config file found; using defaults
+
+PLAY [Print hello world] *******************************************************
+
+TASK [Gathering Facts] *********************************************************
+Wednesday 12 July 2023  15:43:22 +0000 (0:00:00.022)       0:00:00.022 ********
+ok: [localhost]
+
+TASK [Using debug statement] ***************************************************
+Wednesday 12 July 2023  15:43:23 +0000 (0:00:01.320)       0:00:01.342 ********
+ok: [localhost] => {
+    "msg": "Hello, world this is openstack-ansibleee-play.yaml"
+}
+
+PLAY RECAP *********************************************************************
+localhost                  : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+Wednesday 12 July 2023  15:43:24 +0000 (0:00:00.077)       0:00:01.420 ********
+===============================================================================
+Gathering Facts --------------------------------------------------------- 1.32s
+Using debug statement --------------------------------------------------- 0.08s
 ```
 
 ## Using openstack-ansibleee-operator with EDPM Ansible
