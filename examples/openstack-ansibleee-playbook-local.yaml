@@ -4,10 +4,17 @@ metadata:
   name: ansibleee-playbook-local
   namespace: openstack
 spec:
-  playbook: "test.yaml"
-  # args: ["ansible-runner", "run", "/runner", "-vvv", "-p", "test.yaml"]
+  play: |
+    - name: Print hello world
+      hosts: all
+      tasks:
+      - name: Using debug statement
+        ansible.builtin.debug:
+          msg: "Hello, world! This is openstack-ansibleee-play.yaml"
   inventory: |
     all:
+      vars:
+        ansible_connection: local
       hosts:
         localhost
   env:
