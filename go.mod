@@ -10,9 +10,8 @@ require (
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.11.0
 	github.com/onsi/gomega v1.27.8
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230707063813-c894bf75835d
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230707063813-c894bf75835d
-	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230707063813-c894bf75835d
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230711124224-54bd95cadcf3
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230711124224-54bd95cadcf3
 	github.com/openstack-k8s-operators/lib-common/modules/test-operators v0.0.0-20230707063813-c894bf75835d
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
@@ -54,6 +53,7 @@ require (
 	github.com/openstack-k8s-operators/infra-operator/apis v0.0.0-20230609175832-5a9a30056080 // indirect
 	github.com/openstack-k8s-operators/keystone-operator/api v0.0.0-20230612072624-8ebcfc19377a // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.0.0-20230606033311-3b01713e4d45 // indirect
+	github.com/openstack-k8s-operators/lib-common/modules/test v0.0.0-20230711124224-54bd95cadcf3 // indirect
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.0.0-20230602100742-579cb85d242d // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.14.0 // indirect

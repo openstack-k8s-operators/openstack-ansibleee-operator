@@ -24,7 +24,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	. "github.com/openstack-k8s-operators/lib-common/modules/test/helpers"
+	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
 )
 
