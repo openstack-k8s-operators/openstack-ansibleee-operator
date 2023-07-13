@@ -1509,6 +1509,9 @@ spec:
                 type: string
               preserveJobs:
                 default: true
+                enum:
+                - true
+                - false
                 type: boolean
               restartPolicy:
                 default: Never

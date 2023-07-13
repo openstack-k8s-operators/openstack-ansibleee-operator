@@ -72,11 +72,11 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | envConfigMapName | EnvConfigMapName is the name of the k8s config map that contains the ansible env variables | string | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
 | restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: Never | string | false |
-| preserveJobs | PreserveJobs - do not delete jobs after they finished e.g. to check logs | bool | true |
+| preserveJobs | PreserveJobs - do not delete jobs after they finished e.g. to check logs PreserveJobs default: true | bool | false |
 | uid | UID is the userid that will be used to run the container. | int64 | false |
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
-| backoffLimit | BackoffLimimt allows to define the maximum number of retried executions (defaults to 6). | *int32 | false |
+| backoffLimit | BackoffLimit allows to define the maximum number of retried executions (defaults to 6). | *int32 | false |
 | roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
