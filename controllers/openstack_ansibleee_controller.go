@@ -296,6 +296,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		args = append(args, []string{"-i", identifier}...)
 	}
 
+	// Override args list if we are in a debug mode
+	if instance.Spec.Debug {
+		args = []string{"sleep", "1d"}
+	}
 	podSpec := corev1.PodSpec{
 		RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 		Containers: []corev1.Container{{

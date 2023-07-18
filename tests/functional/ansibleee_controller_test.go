@@ -30,163 +30,181 @@ import (
 
 var _ = Describe("Ansibleee controller", func() {
 	When("Ansibleee CR instance is created", func() {
-		BeforeEach(func() {
-			DeferCleanup(th.DeleteInstance, CreateAnsibleee(ansibleeeName))
-		})
+		Context("in a normal model", func() {
+			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateAnsibleee(ansibleeeName))
+			})
 
-		It("runs a job and reports when it succeeds", func() {
-			th.ExpectConditionWithDetails(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionFalse,
-				condition.RequestedReason,
-				"AnsibleExecutionJob is running",
-			)
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				condition.ReadyCondition,
-				corev1.ConditionFalse,
-			)
-			ansibleee := GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
-			Expect(ansibleee.Status.Hash).To(HaveKey("input"))
-			Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
-
-			// simulate that the job succeeds
-			th.SimulateJobSuccess(ansibleeeName)
-
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionTrue,
-			)
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				condition.ReadyCondition,
-				corev1.ConditionTrue,
-			)
-			ansibleee = GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
-			Expect(ansibleee.Status.Hash).To(HaveKey("input"))
-			Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
-		})
-
-		It("runs a job and reports if it fails", func() {
-			th.ExpectConditionWithDetails(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionFalse,
-				condition.RequestedReason,
-				"AnsibleExecutionJob is running",
-			)
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				condition.ReadyCondition,
-				corev1.ConditionFalse,
-			)
-			ansibleee := GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
-			Expect(ansibleee.Status.Hash).To(HaveKey("input"))
-			Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
-
-			// simulate that the job fails
-			th.SimulateJobFailure(ansibleeeName)
-
-			th.ExpectConditionWithDetails(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionFalse,
-				condition.ErrorReason,
-				fmt.Sprintf(
-					"AnsibleExecutionJob error occured job.name %s job.namespace %s failed",
-					ansibleee.Name, ansibleeeName.Namespace,
-				),
-			)
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				condition.ReadyCondition,
-				corev1.ConditionFalse,
-			)
-			ansibleee = GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
-			Expect(ansibleee.Status.Hash).To(HaveKey("input"))
-			Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
-		})
-
-		It("re-runs the job if the input of the job changes", func() {
-			th.ExpectConditionWithDetails(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionFalse,
-				condition.RequestedReason,
-				"AnsibleExecutionJob is running",
-			)
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				condition.ReadyCondition,
-				corev1.ConditionFalse,
-			)
-			// simulate that the job succeeds
-			th.SimulateJobSuccess(ansibleeeName)
-
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionTrue,
-			)
-			ansibleee := GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
-			Expect(ansibleee.Status.Hash).To(HaveKey("input"))
-			originalInputHash := ansibleee.Status.Hash["input"]
-			Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
-			originalJobHash := ansibleee.Status.Hash["ansibleee"]
-
-			// change some input to the Ansibleee CR
-			Eventually(func(g Gomega) {
+			It("runs a job and reports when it succeeds", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
 				ansibleee := GetAnsibleee(ansibleeeName)
-				ansibleee.Spec.Args = []string{"--debug"}
+				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
-				g.Expect(k8sClient.Update(ctx, ansibleee)).To(Succeed())
-			}, timeout, interval).Should(Succeed())
+				// simulate that the job succeeds
+				th.SimulateJobSuccess(ansibleeeName)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionTrue,
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionTrue,
+				)
+				ansibleee = GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
+			})
 
-			logger.Info("Updated Ansibleee CR")
+			It("runs a job and reports if it fails", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				ansibleee := GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
-			// A new job should be started
-			th.ExpectConditionWithDetails(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionFalse,
-				condition.RequestedReason,
-				"AnsibleExecutionJob is running",
-			)
-			ansibleee = GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				// simulate that the job fails
+				th.SimulateJobFailure(ansibleeeName)
 
-			// simulate that the second job succeeds
-			th.SimulateJobSuccess(ansibleeeName)
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.ErrorReason,
+					fmt.Sprintf(
+						"AnsibleExecutionJob error occured job.name %s job.namespace %s failed",
+						ansibleee.Name, ansibleeeName.Namespace,
+					),
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				ansibleee = GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
+			})
 
-			th.ExpectCondition(
-				ansibleeeName,
-				ConditionGetterFunc(AnsibleeeConditionGetter),
-				v1alpha1.AnsibleExecutionJobReadyCondition,
-				corev1.ConditionTrue,
-			)
-			ansibleee = GetAnsibleee(ansibleeeName)
-			Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
-			Expect(ansibleee.Status.Hash["input"]).NotTo(Equal(originalInputHash))
-			Expect(ansibleee.Status.Hash["ansibleee"]).NotTo(Equal(originalJobHash))
+			It("re-runs the job if the input of the job changes", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				// simulate that the job succeeds
+				th.SimulateJobSuccess(ansibleeeName)
+
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionTrue,
+				)
+				ansibleee := GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				originalInputHash := ansibleee.Status.Hash["input"]
+				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
+				originalJobHash := ansibleee.Status.Hash["ansibleee"]
+				// change some input to the Ansibleee CR
+				Eventually(func(g Gomega) {
+					ansibleee := GetAnsibleee(ansibleeeName)
+					ansibleee.Spec.Args = []string{"--debug"}
+
+					g.Expect(k8sClient.Update(ctx, ansibleee)).To(Succeed())
+				}, timeout, interval).Should(Succeed())
+
+				logger.Info("Updated Ansibleee CR")
+
+				// A new job should be started
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				ansibleee = GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+
+				// simulate that the second job succeeds
+				th.SimulateJobSuccess(ansibleeeName)
+
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionTrue,
+				)
+				ansibleee = GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.Hash["input"]).NotTo(Equal(originalInputHash))
+				Expect(ansibleee.Status.Hash["ansibleee"]).NotTo(Equal(originalJobHash))
+			})
+		})
+
+		Context("in a debug mode", func() {
+			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateAnsibleeeDebug(ansibleeeName))
+			})
+			It("it sets instance.Env.Debug element to 'True'", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				Expect(GetAnsibleee(ansibleeeName).Spec.Debug).To(BeTrue())
+			})
+
 		})
 	})
 })

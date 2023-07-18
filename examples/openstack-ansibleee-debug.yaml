@@ -1,0 +1,41 @@
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: ansibleee-playbook
+  namespace: openstack
+spec:
+  playbook: deploy-edpm-os-configure.yml
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  inventory: |
+    Compute:
+      hosts:
+        compute-0:
+          ansible_host: 10.0.0.4
+      vars:
+        ansible_ssh_user: root
+    allovercloud:
+      children:
+        Compute:
+    overcloud:
+      children:
+        Compute:
+  env:
+    - name: ANSIBLE_FORCE_COLOR
+      value: "True"
+    - name: ANSIBLE_SSH_ARGS
+      value: "-C -o ControlMaster=auto -o ControlPersist=80s"
+    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
+      value: "True"
+  extraMounts:
+    - volumes:
+      - name: sshkey
+        secret:
+          secretName: ssh-key-secret
+          items:
+          - key: ssh-privatekey
+            path: ssh_key
+      mounts:
+      - name: sshkey
+        mountPath: /runner/env/ssh_key
+        subPath: ssh_key
+  debug: true

@@ -110,6 +110,10 @@ type OpenStackAnsibleEESpec struct {
 	// DNSConfig allows to specify custom dnsservers and search domains
 	// +kubebuilder:validation:Optional
 	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:default=false
+	// Debug run the pod in debug mode without executing the ansible-runner commands
+	Debug bool `json:"debug"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
