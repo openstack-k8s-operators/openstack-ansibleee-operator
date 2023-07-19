@@ -9,7 +9,7 @@
 apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
-  name: ansibleee-play
+  name: ansibleee-play-debug
   namespace: openstack
 spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
@@ -20,44 +20,48 @@ spec:
       tasks:
       - name: Using debug statement
         ansible.builtin.debug:
-          msg: "Hello, world this is ansibleee-play.yaml"
+          msg: "Hello, world this is ansibleee-play-debug.yaml"
+  debug: true
 status:
-  JobStatus: Succeeded
+  JobStatus: Running
 ---
 apiVersion: v1
 kind: Pod
 metadata:
-  generateName: ansibleee-play-
-  labels:
-    app: openstackansibleee
-    job-name: ansibleee-play
+  generateName: ansibleee-play-debug-
   namespace: openstack
+  labels:
+    job-name: ansibleee-play-debug
 status:
-  phase: Succeeded
+  phase: Running
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
   labels:
     app: openstackansibleee
-    job-name: ansibleee-play
-  name: ansibleee-play
+    job-name: ansibleee-play-debug
+  name: ansibleee-play-debug
   namespace: openstack
-status:
-  succeeded: 1
 ---
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 namespaced: true
 commands:
   - script: |
-      pod=$(oc get pods -n openstack -l app=openstackansibleee,job-name=ansibleee-play -o name)
+      pod=$(oc get pods -n openstack -l app=openstackansibleee,job-name=ansibleee-play-debug -o name)
       description=$(oc describe -n openstack "$pod")
-      logs=$(echo "$description" | grep 'Hello, world this is ansibleee-play.yaml')
+      playbook_present=$(echo "$description" | grep 'Hello, world this is ansibleee-play-debug.yaml')
+      cmdline_present=$(echo "$description" | grep 'Hello, world this is ansibleee-play-debug.yaml')
       echo Pod name: $pod
       echo Description: $description
-      if [ -n "$logs" ]; then
+      if [ -n "$playbook_present" ]; then
         exit 0
       else
         exit 1
+      fi
+      if [ -z "$cmdline_present" ]; then
+        exit 1
+      else
+        exit 0
       fi

@@ -299,6 +299,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	// Override args list if we are in a debug mode
 	if instance.Spec.Debug {
 		args = []string{"sleep", "1d"}
+		r.Log.Info(fmt.Sprintf("Instance %s will be running in debug mode.", instance.Name))
 	}
 	podSpec := corev1.PodSpec{
 		RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
@@ -354,7 +355,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		// we need to ensure that Play and Role are empty before addPlaybook
 		addPlaybook(instance, h, job, hashes)
 	}
-	if len(instance.Spec.CmdLine) > 0 {
+	if len(instance.Spec.CmdLine) > 0 && !instance.Spec.Debug {
+		// RUNNER_CMDLINE environment variable should only be set
+		// if the operator isn't running in a debug mode.
 		addCmdLine(instance, h, job, hashes)
 	}
 	if len(labels["deployIdentifier"]) > 0 {

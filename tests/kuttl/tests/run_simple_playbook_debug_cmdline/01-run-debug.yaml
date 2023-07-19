@@ -1,0 +1,16 @@
+apiVersion: ansibleee.openstack.org/v1alpha1
+kind: OpenStackAnsibleEE
+metadata:
+  name: ansibleee-play-debug
+  namespace: openstack
+spec:
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  play: |
+    - name: Print hello world
+      hosts: localhost
+      tasks:
+      - name: Using debug statement
+        ansible.builtin.debug:
+          msg: "Hello, world this is ansibleee-play-debug.yaml"
+  debug: true
+  cmdLine: "echo This shouldn't be printed."
