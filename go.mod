@@ -12,7 +12,7 @@ require (
 	github.com/onsi/gomega v1.27.8
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230719071653-691d140d1bf1
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230719071653-691d140d1bf1
-	github.com/openstack-k8s-operators/lib-common/modules/test-operators v0.0.0-20230707063813-c894bf75835d
+	github.com/openstack-k8s-operators/lib-common/modules/test-operators 0c6dc38ee63c
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.6
