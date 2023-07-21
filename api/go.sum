@@ -228,10 +228,10 @@ github.com/onsi/ginkgo/v2 v2.11.0 h1:WgqUCUt/lT6yXoQ8Wef0fsNn5cAuMK7+KT9UFRz2tcU
 github.com/onsi/ginkgo/v2 v2.11.0/go.mod h1:ZhrRA5XmEE3x3rhlzamx/JJvujdZoJ2uvgI7kR0iZvM=
 github.com/onsi/gomega v1.27.9 h1:qIyVWbOsvQEye2QCqLsNSeH/5L1RS9vS382erEWfT3o=
 github.com/onsi/gomega v1.27.9/go.mod h1:RsS8tutOdbdgzbPtzzATp12yT7kM5I5aElG3evPbQ0M=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230719071653-691d140d1bf1 h1:X6IrW7wM+y1amFABVrznDb39QB+cw/ntiBsPDUYDqyQ=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.0.0-20230719071653-691d140d1bf1/go.mod h1:dNAK6CsALqy945AP+JPMvOCN0J1uS4Rg/Cqioqgp018=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230719071653-691d140d1bf1 h1:igHqYRwCu5gcTIfrexV6/8MWgNG3qamqrwU7lEvDa0s=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.0.0-20230719071653-691d140d1bf1/go.mod h1:ySo425CgN/BFrhUCUn3Wut+cwYyNR9tNk3dCK3DYGZ4=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0 h1:F1iYRBwa0cZ2VHw8Zs4frqSWQ1B/tiCuSwH/DuHb8VM=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.1.0/go.mod h1:3hAC5Ce0AOSt85BqD6DgTKNkJHmpXwqbwL8mVWRJQqo=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.1.0 h1:rHn0wlwBBggRl65gWDniF97XW+1XB2+4PsGZS2RIJ5E=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.1.0/go.mod h1:KDe/7CC/9iIEaQSBI8Z5lLKP9t+x3IUHznpRNMf8MU0=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=

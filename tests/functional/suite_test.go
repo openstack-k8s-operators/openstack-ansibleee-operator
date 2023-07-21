@@ -26,7 +26,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	. "github.com/openstack-k8s-operators/lib-common/modules/test-operators/helpers"
+	. "github.com/openstack-k8s-operators/lib-common/modules/test/helpers"
 
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
