@@ -28,7 +28,7 @@ const (
 	// Container image fall-back defaults
 
 	// OpenStackAnsibleEEContainerImage is the fall-back container image for OpenStackAnsibleEE
-	OpenStackAnsibleEEContainerImage = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest"
+	OpenStackAnsibleEEContainerImage = "quay.io/openstack-k8s-operators/openstack-ansibleee-runner:v0.1.0"
 )
 
 const (
