@@ -50,10 +50,11 @@ namespaced: true
 commands:
   - script: |
       pod=$(oc get pods -n openstack -l app=openstackansibleee,job-name=ansibleee-play-debug -o name)
-      description=$(oc describe -n openstack "$pod" | grep 'Hello, world this is ansibleee-play-debug.yaml')
+      description=$(oc describe -n openstack "$pod")
+      playbook_present=$(echo "$description" | grep 'Hello, world this is ansibleee-play-debug.yaml')
       echo Pod name: $pod
       echo Description: $description
-      if [ -n "$description" ]; then
+      if [ -n "$playbook_present" ]; then
         exit 0
       else
         exit 1
