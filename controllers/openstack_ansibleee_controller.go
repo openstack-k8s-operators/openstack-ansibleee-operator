@@ -468,7 +468,7 @@ func addPlaybook(
 	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
 	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
 	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
-	hashes["playbooks"], err = calculateHash(instance.Spec.Play)
+	hashes["playbooks"], err = calculateHash(instance.Spec.Playbook)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
 	}
