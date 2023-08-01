@@ -90,7 +90,7 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:default:=6
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
-	// Role is the description of an Ansible Role
+	// Role is a structured Ansible Play
 	// If both Play and Role are specified, Play takes precedence
 	// +kubebuilder:validation:Optional
 	Role *Role `json:"roles,omitempty"`
@@ -171,7 +171,7 @@ type Config struct {
 	MountPath string `json:"mountpath"`
 }
 
-// Role describes the format of an ansible playbook destinated to run roles
+// Role is a structured ansible play designed to run pre-defined roles
 type Role struct {
 	// +kubebuilder:default:="Run Standalone Role"
 	Name string `json:"name,omitempty" yaml:"name,omitempty"`

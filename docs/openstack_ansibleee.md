@@ -77,7 +77,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
 | extraMounts | ExtraMounts containing conf files and credentials | []storage.VolMounts | false |
 | backoffLimit | BackoffLimit allows to define the maximum number of retried executions (defaults to 6). | *int32 | false |
-| roles | Role is the description of an Ansible Role If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
+| roles | Role is a structured Ansible Play If both Play and Role are specified, Play takes precedence | *[Role](#role) | false |
 | networkAttachments | NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network | []string | false |
 | cmdLine | CmdLine is the command line passed to ansible-runner | string | false |
 | initContainers | InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself | []corev1.Container | false |
@@ -102,7 +102,7 @@ OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
 
 #### Role
 
-Role describes the format of an ansible playbook destinated to run roles
+Role is a structured ansible play designed to run pre-defined roles
 
 | Field | Description | Scheme | Required |
 | ----- | ----------- | ------ | -------- |
