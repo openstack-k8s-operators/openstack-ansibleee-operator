@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"fmt"
+	"regexp"
 	"time"
 
 	yaml "gopkg.in/yaml.v3"
@@ -30,6 +31,7 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
+	"github.com/go-playground/validator/v10"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	job "github.com/openstack-k8s-operators/lib-common/modules/common/job"
@@ -259,6 +261,17 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	annotations map[string]string) (*batchv1.Job, error) {
 	labels := instance.GetObjectMeta().GetLabels()
 	var deployIdentifier string
+
+	// Setting up input validation, including custom validators
+	validate := validator.New()
+
+	if valErr := validate.RegisterValidation("play", isPlay); valErr != nil {
+		return nil, fmt.Errorf("error registering input validation")
+	}
+	if valErr := validate.RegisterValidation("fqcn", isFQCN); valErr != nil {
+		return nil, fmt.Errorf("error registering input validation")
+	}
+
 	if len(labels["deployIdentifier"]) > 0 {
 		deployIdentifier = labels["deployIdentifier"]
 	} else {
@@ -289,6 +302,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		args = []string{"sleep", "1d"}
 		r.Log.Info(fmt.Sprintf("Instance %s will be running in debug mode.", instance.Name))
 	}
+
 	podSpec := corev1.PodSpec{
 		RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 		Containers: []corev1.Container{{
@@ -336,12 +350,29 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	}
 
 	if len(instance.Spec.Play) > 0 {
+		valErr := validate.Var(instance.Spec.Play, "play")
+		if valErr != nil {
+			return nil, fmt.Errorf(
+				"error checking sanity of an inline play: %s %w",
+				instance.Spec.Play, valErr)
+		}
 		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
+		if validate.Var(playbook, "fqcn") != nil {
+			// First we check if the playbook isn't imported from a collection
+			// if it is not we assume the variable holds a path.
+			valErr := validate.Var(playbook, "filepath")
+			if valErr != nil {
+				return nil, fmt.Errorf(
+					"error checking sanity of playbook name/path: %s %w",
+					playbook, valErr)
+			}
+		}
+
 		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
 	}
 
@@ -496,4 +527,23 @@ func (r *OpenStackAnsibleEEReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		For(&redhatcomv1alpha1.OpenStackAnsibleEE{}).
 		Owns(&batchv1.Job{}).
 		Complete(r)
+}
+
+// isPlay checks if the free form document has attributes of ansible play
+// Specifically if it is a parsable yaml with list as a root element
+func isPlay(document validator.FieldLevel) bool {
+	var play []map[string]interface{}
+	err := yaml.Unmarshal([]byte(document.Field().String()), &play)
+	return err == nil
+}
+
+// isFQCN checks if the string matches regular expression of ansible FQCN
+// The function doesn't check if the collection exists or is accessible
+// function only accepts FQCNs as defined by
+// https://galaxy.ansible.com/docs/contributing/namespaces.html#namespace-limitations
+// Regex derive
+func isFQCN(name validator.FieldLevel) bool {
+	pattern, compileErr := regexp.Compile(`^\w+(\.\w+){2,}$`)
+	match := pattern.Match([]byte(name.Field().String()))
+	return match && compileErr == nil
 }

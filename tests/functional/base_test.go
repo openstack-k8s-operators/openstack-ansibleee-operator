@@ -25,6 +25,17 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+const (
+	// This constant must NOT use tabs, as it as raw string passed to the ansible-runner
+	play = `
+- name: Print hello world
+  hosts: all
+  tasks:
+    - name: Using debug statement
+      ansible.builtin.debug:
+        msg: "Hello, world this is ansibleee-play.yaml"`
+)
+
 func GetAnsibleee(name types.NamespacedName) *v1alpha1.OpenStackAnsibleEE {
 	instance := &v1alpha1.OpenStackAnsibleEE{}
 	Eventually(func(g Gomega) {
@@ -55,7 +66,9 @@ func CreateAnsibleee(name types.NamespacedName) client.Object {
 	return th.CreateUnstructured(raw)
 }
 
-func CreateAnsibleeeDebug(name types.NamespacedName) client.Object {
+func CreateAnsibleeeWithParams(
+	name types.NamespacedName, playbook string, image string, play string,
+	debug bool, cmdline string) client.Object {
 	raw := map[string]interface{}{
 		"apiVersion": "ansibleee.openstack.org/v1alpha1",
 		"kind":       "OpenStackAnsibleEE",
@@ -66,10 +79,13 @@ func CreateAnsibleeeDebug(name types.NamespacedName) client.Object {
 		"spec": map[string]interface{}{
 			// this can be removed as soon as webhook is enabled in the
 			// test env
-			"image":   "test-image",
-			"debug":   true,
-			"cmdLine": "echo THIS_SHOULDNT_PRINT",
+			"image":    image,
+			"playbook": playbook,
+			"play":     play,
+			"debug":    debug,
+			"cmdline":  cmdline,
 		},
 	}
+
 	return th.CreateUnstructured(raw)
 }
