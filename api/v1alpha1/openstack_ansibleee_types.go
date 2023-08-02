@@ -50,10 +50,10 @@ type OpenStackAnsibleEESpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Play is the playbook contents that ansible will run on execution.
+	// Play is an inline playbook contents that ansible will run on execution.
 	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`
-	// Playbook is the playbook that ansible will run on this execution
+	// Playbook is a path to the playbook that ansible will run on this execution
 	Playbook string `json:"playbook,omitempty"`
 	// Image is the container image that will execute the ansible command
 	Image string `json:"image,omitempty"`
