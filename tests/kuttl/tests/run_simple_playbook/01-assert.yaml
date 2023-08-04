@@ -10,7 +10,6 @@ apiVersion: ansibleee.openstack.org/v1alpha1
 kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-play
-  namespace: openstack
 spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   name: openstackansibleee
@@ -31,7 +30,6 @@ metadata:
   labels:
     app: openstackansibleee
     job-name: ansibleee-play
-  namespace: openstack
 status:
   phase: Succeeded
 ---
@@ -42,17 +40,15 @@ metadata:
     app: openstackansibleee
     job-name: ansibleee-play
   name: ansibleee-play
-  namespace: openstack
 status:
   succeeded: 1
 ---
 apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
-namespaced: true
 commands:
   - script: |
-      pod=$(oc get pods -n openstack -l app=openstackansibleee,job-name=ansibleee-play -o name)
-      description=$(oc describe -n openstack "$pod")
+      pod=$(oc get pods -n $NAMESPACE -l app=openstackansibleee,job-name=ansibleee-play -o name)
+      description=$(oc describe -n $NAMESPACE "$pod")
       logs=$(echo "$description" | grep 'Hello, world this is ansibleee-play.yaml')
       echo Pod name: $pod
       echo Description: $description
