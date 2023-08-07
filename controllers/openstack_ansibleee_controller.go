@@ -270,11 +270,12 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 	args := instance.Spec.Args
 
+	playbook := instance.Spec.Playbook
 	if len(args) == 0 {
-		if len(instance.Spec.Playbook) == 0 {
-			instance.Spec.Playbook = "playbook.yaml"
+		if len(playbook) == 0 {
+			playbook = "playbook.yaml"
 		}
-		args = []string{"ansible-runner", "run", "/runner", "-p", instance.Spec.Playbook}
+		args = []string{"ansible-runner", "run", "/runner", "-p", playbook}
 	}
 
 	hasIdentifier := false
@@ -342,15 +343,17 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	if len(instance.Spec.Inventory) > 0 {
 		addInventory(instance, h, job, hashes)
 	}
+
 	if len(instance.Spec.Play) > 0 {
 		addPlay(instance, h, job, hashes)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job, hashes)
-	} else if len(instance.Spec.Playbook) > 0 {
+	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
-		addPlaybook(instance, h, job, hashes)
+		addPlaybook(instance, playbook, h, job, hashes)
 	}
+
 	if len(instance.Spec.CmdLine) > 0 && !instance.Spec.Debug {
 		// RUNNER_CMDLINE environment variable should only be set
 		// if the operator isn't running in a debug mode.
@@ -458,6 +461,7 @@ func addPlay(
 
 func addPlaybook(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	playbook string,
 	h *helper.Helper,
 	job *batchv1.Job,
 	hashes map[string]string,
@@ -465,9 +469,9 @@ func addPlaybook(
 	var playEnvVar corev1.EnvVar
 	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
-	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
+	playEnvVar.Value = "\n" + playbook + "\n\n"
 	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
-	hashes["playbooks"], err = calculateHash(instance.Spec.Playbook)
+	hashes["playbooks"], err = calculateHash(playbook)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
 	}
