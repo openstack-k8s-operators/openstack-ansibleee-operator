@@ -420,7 +420,8 @@ func addRoles(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	job *batchv1.Job,
-	hashes map[string]string) {
+	hashes map[string]string,
+) {
 	var roles []*redhatcomv1alpha1.Role
 	roles = append(roles, instance.Spec.Role)
 	d, err := yaml.Marshal(&roles)
@@ -431,8 +432,7 @@ func addRoles(
 	var roleEnvVar corev1.EnvVar
 	roleEnvVar.Name = "RUNNER_PLAYBOOK"
 	roleEnvVar.Value = "\n" + string(d) + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, roleEnvVar)
-	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, roleEnvVar)
 	hashes["roles"], err = calculateHash(string(d))
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
@@ -443,13 +443,13 @@ func addPlay(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	job *batchv1.Job,
-	hashes map[string]string) {
+	hashes map[string]string,
+) {
 	var playEnvVar corev1.EnvVar
 	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
-	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
 	hashes["play"], err = calculateHash(instance.Spec.Play)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
@@ -460,13 +460,13 @@ func addPlaybook(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	job *batchv1.Job,
-	hashes map[string]string) {
+	hashes map[string]string,
+) {
 	var playEnvVar corev1.EnvVar
 	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
 	playEnvVar.Value = "\n" + instance.Spec.Playbook + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, playEnvVar)
-	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
 	hashes["playbooks"], err = calculateHash(instance.Spec.Playbook)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
@@ -477,13 +477,13 @@ func addInventory(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	job *batchv1.Job,
-	hashes map[string]string) {
+	hashes map[string]string,
+) {
 	var invEnvVar corev1.EnvVar
 	var err error
 	invEnvVar.Name = "RUNNER_INVENTORY"
 	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, invEnvVar)
-	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, invEnvVar)
 	hashes["inventory"], err = calculateHash(instance.Spec.Inventory)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
@@ -494,13 +494,13 @@ func addCmdLine(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	job *batchv1.Job,
-	hashes map[string]string) {
+	hashes map[string]string,
+) {
 	var cmdLineEnvVar corev1.EnvVar
 	var err error
 	cmdLineEnvVar.Name = "RUNNER_CMDLINE"
 	cmdLineEnvVar.Value = "\n" + instance.Spec.CmdLine + "\n\n"
-	instance.Spec.Env = append(instance.Spec.Env, cmdLineEnvVar)
-	job.Spec.Template.Spec.Containers[0].Env = instance.Spec.Env
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, cmdLineEnvVar)
 	hashes["cmdline"], err = calculateHash(instance.Spec.CmdLine)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
