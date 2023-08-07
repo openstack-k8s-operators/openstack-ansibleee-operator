@@ -1,7 +1,7 @@
 #
 # EXECUTION (from install_yamls repo root):
 #
-#   make openstack_ansibleee_kuttl
+#   make ansibleee_kuttl
 #
 # ASSUMPTIONS:
 #
@@ -16,9 +16,9 @@
 
 apiVersion: kuttl.dev/v1beta1
 kind: TestSuite
+namespace: ansibleee-kuttl-tests
 reportFormat: JSON
 reportName: kuttl-test-openstack-ansibleee
-namespace: openstack
 timeout: 180
 parallel: 1
 suppress:
