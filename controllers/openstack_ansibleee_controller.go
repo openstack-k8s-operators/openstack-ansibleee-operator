@@ -177,10 +177,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	if len(instance.Spec.EnvConfigMapName) == 0 {
-		instance.Spec.EnvConfigMapName = "openstack-aee-default-env"
-	}
-
 	configMap := &corev1.ConfigMap{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
 	if err != nil && !errors.IsNotFound(err) {
