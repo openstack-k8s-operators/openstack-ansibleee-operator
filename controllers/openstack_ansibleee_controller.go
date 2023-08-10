@@ -365,6 +365,8 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 	addMounts(instance, job)
 
+	hashPodSpec(h, podSpec, hashes)
+
 	inputHash, errorHash := hashOfInputHashes(hashes)
 	if errorHash != nil {
 		return nil, fmt.Errorf("error generating hash of input hashes: %w", errorHash)
@@ -474,6 +476,20 @@ func addPlaybook(
 	hashes["playbooks"], err = calculateHash(playbook)
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the hash")
+	}
+}
+
+func hashPodSpec(
+	h *helper.Helper,
+	podSpec corev1.PodSpec,
+	hashes map[string]string,
+) {
+	var err error
+	spec, _ := podSpec.Marshal()
+	hashes["podspec"], err = calculateHash(string(spec))
+
+	if err != nil {
+		h.GetLogger().Error(err, "Error calculating the PodSpec hash")
 	}
 }
 
