@@ -1,29 +1,16 @@
+# See the OWNERS docs at <https://go.k8s.io/owners>
+
 approvers:
-  - abays
-  - dprince
-  - jlarriba
-  - olliewalsh
-  - Sandeepyadav93
-  - stuggi
-  - viroel
-  - fao89
-  - slagle
-  - rebtoor
-  - kajinamit
-  - rabi
-  - bshephar
+
+- edpm-approvers
+- ci-approvers
+- openstack-approvers
+- compute-approvers
+- telemetry-approvers
 
 reviewers:
-  - abays
-  - dprince
-  - jlarriba
-  - olliewalsh
-  - Sandeepyadav93
-  - stuggi
-  - viroel
-  - fao89
-  - slagle
-  - rebtoor
-  - kajinamit
-  - rabi
-  - bshephar
+
+- edpm-approvers
+- ci-approvers
+- openstack-approvers
+- telemetry-approvers
