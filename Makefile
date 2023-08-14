@@ -342,6 +342,15 @@ gowork: ## Generate go.work file to support our multi module repository
 	go work use ./api
 	go work sync
 
+PHONY: force-bump
+force-bump: ## Force bump after tagging
+	for dep in $$(cat go.mod | grep  openstack-k8s-operators | grep -vE -- 'indirect|openstack-ansibleee-operator' | awk '{print $$1}'); do \
+		go get $$dep@main ; \
+	done
+	for dep in $$(cat api/go.mod | grep  openstack-k8s-operators | grep -vE -- 'indirect|openstack-ansibleee-operator' | awk '{print $$1}'); do \
+		cd ./api && go get $$dep@main && cd .. ; \
+	done
+
 .PHONY: tidy
 tidy: ## Run go mod tidy on every mod file in the repo
 	go mod tidy
