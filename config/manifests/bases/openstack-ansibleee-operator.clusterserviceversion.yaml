@@ -16,7 +16,7 @@ spec:
       displayName: OpenStack Ansible EE
       kind: OpenStackAnsibleEE
       name: openstackansibleees.ansibleee.openstack.org
-      version: v1alpha
+      version: v1alpha1
   description: The OpenStack Ansible Execution Environment Operator
   displayName: OpenStackAnsibleEE
   icon:
