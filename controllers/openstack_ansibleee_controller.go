@@ -336,13 +336,13 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	}
 
 	if len(instance.Spec.Play) > 0 {
-		addPlay(instance, h, job, hashes)
+		setRunnerPlaybookVar(instance, h, instance.Spec.Play, "play", job, hashes)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
-		addPlaybook(instance, playbook, h, job, hashes)
+		setRunnerPlaybookVar(instance, h, playbook, "playbooks", job, hashes)
 	}
 
 	if len(instance.Spec.CmdLine) > 0 && !instance.Spec.Debug {
@@ -425,48 +425,25 @@ func addRoles(
 		util.LogErrorForObject(h, err, err.Error(), instance)
 	}
 
-	var roleEnvVar corev1.EnvVar
-	roleEnvVar.Name = "RUNNER_PLAYBOOK"
-	roleEnvVar.Value = "\n" + string(d) + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, roleEnvVar)
-	hashes["roles"], err = calculateHash(string(d))
-	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
-	}
+	setRunnerPlaybookVar(instance, h, string(d), "roles", job, hashes)
 }
 
-func addPlay(
+func setRunnerPlaybookVar(
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	h *helper.Helper,
+	helper *helper.Helper,
+	playDefinition string,
+	playtype string,
 	job *batchv1.Job,
-	hashes map[string]string,
-) {
+	hashes map[string]string) {
+
 	var playEnvVar corev1.EnvVar
 	var err error
 	playEnvVar.Name = "RUNNER_PLAYBOOK"
-	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
+	playEnvVar.Value = "\n" + playDefinition + "\n\n"
 	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
-	hashes["play"], err = calculateHash(instance.Spec.Play)
+	hashes[playtype], err = calculateHash(playDefinition)
 	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
-	}
-}
-
-func addPlaybook(
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	playbook string,
-	h *helper.Helper,
-	job *batchv1.Job,
-	hashes map[string]string,
-) {
-	var playEnvVar corev1.EnvVar
-	var err error
-	playEnvVar.Name = "RUNNER_PLAYBOOK"
-	playEnvVar.Value = "\n" + playbook + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
-	hashes["playbooks"], err = calculateHash(playbook)
-	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
+		helper.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
