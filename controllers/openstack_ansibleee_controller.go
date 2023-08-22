@@ -133,9 +133,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	// Initialize Status fields
-	if instance.Status.Hash == nil {
-		instance.Status.Hash = map[string]string{}
-	}
+	util.InitMap(&instance.Status.Hash)
 	if instance.Status.NetworkAttachments == nil {
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
