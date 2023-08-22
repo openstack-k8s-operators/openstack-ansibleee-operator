@@ -278,17 +278,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		args = []string{"ansible-runner", "run", "/runner", "-p", playbook}
 	}
 
-	hasIdentifier := false
-	for _, arg := range args {
-		// ansible runner identifier
-		// https://ansible-runner.readthedocs.io/en/stable/intro/#artifactdir
-		if arg == "-i" || arg == "--ident" {
-			hasIdentifier = true
-			break
-		}
-	}
-
-	if !hasIdentifier {
+	// ansible runner identifier
+	// if the flag is set we use resource name as an argument
+	// https://ansible-runner.readthedocs.io/en/stable/intro/#artifactdir
+	if !(util.StringInSlice("-i", args) || util.StringInSlice("--ident", args)) {
 		identifier := instance.Name
 		args = append(args, []string{"-i", identifier}...)
 	}
