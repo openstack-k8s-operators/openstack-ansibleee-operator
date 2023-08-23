@@ -92,12 +92,12 @@ func main() {
 
 	cfg, err := config.GetConfig()
 	if err != nil {
-		setupLog.Error(err, "")
+		setupLog.Error(err, "Unable to get kubernetes configuration")
 		os.Exit(1)
 	}
 	kclient, err := kubernetes.NewForConfig(cfg)
 	if err != nil {
-		setupLog.Error(err, "")
+		setupLog.Error(err, "Unable to initialize kubernetes client")
 		os.Exit(1)
 	}
 
