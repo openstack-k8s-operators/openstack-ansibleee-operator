@@ -51,7 +51,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/openshift/api v3.9.0+incompatible // indirect
-	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230808142958-b6c74f5e1faf // indirect
+	github.com/openstack-k8s-operators/infra-operator/apis v0.1.1-0.20230823163208-3b334fc8de14 // indirect
 	github.com/openstack-k8s-operators/keystone-operator/api v0.1.0 // indirect
 	github.com/openstack-k8s-operators/lib-common/modules/openstack v0.1.0 // indirect
 	github.com/openstack-k8s-operators/mariadb-operator/api v0.1.0 // indirect
