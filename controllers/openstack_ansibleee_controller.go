@@ -133,9 +133,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	// Initialize Status fields
-	if instance.Status.Hash == nil {
-		instance.Status.Hash = map[string]string{}
-	}
+	util.InitMap(&instance.Status.Hash)
 	if instance.Status.NetworkAttachments == nil {
 		instance.Status.NetworkAttachments = map[string][]string{}
 	}
@@ -278,17 +276,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		args = []string{"ansible-runner", "run", "/runner", "-p", playbook}
 	}
 
-	hasIdentifier := false
-	for _, arg := range args {
-		// ansible runner identifier
-		// https://ansible-runner.readthedocs.io/en/stable/intro/#artifactdir
-		if arg == "-i" || arg == "--ident" {
-			hasIdentifier = true
-			break
-		}
-	}
-
-	if !hasIdentifier {
+	// ansible runner identifier
+	// if the flag is set we use resource name as an argument
+	// https://ansible-runner.readthedocs.io/en/stable/intro/#artifactdir
+	if !(util.StringInSlice("-i", args) || util.StringInSlice("--ident", args)) {
 		identifier := instance.Name
 		args = append(args, []string{"-i", identifier}...)
 	}
@@ -341,23 +332,23 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
 	if len(instance.Spec.Inventory) > 0 {
-		addInventory(instance, h, job, hashes)
+		setRunnerEnvVar(instance, h, "RUNNER_INVENTORY", instance.Spec.Inventory, "inventory", job, hashes)
 	}
 
 	if len(instance.Spec.Play) > 0 {
-		addPlay(instance, h, job, hashes)
+		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
 	} else if instance.Spec.Role != nil {
 		addRoles(instance, h, job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
-		addPlaybook(instance, playbook, h, job, hashes)
+		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
 	}
 
 	if len(instance.Spec.CmdLine) > 0 && !instance.Spec.Debug {
 		// RUNNER_CMDLINE environment variable should only be set
 		// if the operator isn't running in a debug mode.
-		addCmdLine(instance, h, job, hashes)
+		setRunnerEnvVar(instance, h, "RUNNER_CMDLINE", instance.Spec.CmdLine, "cmdline", job, hashes)
 	}
 	if len(labels["deployIdentifier"]) > 0 {
 		hashes["deployIdentifier"] = labels["deployIdentifier"]
@@ -434,49 +425,7 @@ func addRoles(
 		util.LogErrorForObject(h, err, err.Error(), instance)
 	}
 
-	var roleEnvVar corev1.EnvVar
-	roleEnvVar.Name = "RUNNER_PLAYBOOK"
-	roleEnvVar.Value = "\n" + string(d) + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, roleEnvVar)
-	hashes["roles"], err = calculateHash(string(d))
-	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
-	}
-}
-
-func addPlay(
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	h *helper.Helper,
-	job *batchv1.Job,
-	hashes map[string]string,
-) {
-	var playEnvVar corev1.EnvVar
-	var err error
-	playEnvVar.Name = "RUNNER_PLAYBOOK"
-	playEnvVar.Value = "\n" + instance.Spec.Play + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
-	hashes["play"], err = calculateHash(instance.Spec.Play)
-	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
-	}
-}
-
-func addPlaybook(
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	playbook string,
-	h *helper.Helper,
-	job *batchv1.Job,
-	hashes map[string]string,
-) {
-	var playEnvVar corev1.EnvVar
-	var err error
-	playEnvVar.Name = "RUNNER_PLAYBOOK"
-	playEnvVar.Value = "\n" + playbook + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, playEnvVar)
-	hashes["playbooks"], err = calculateHash(playbook)
-	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
-	}
+	setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", string(d), "roles", job, hashes)
 }
 
 func hashPodSpec(
@@ -493,37 +442,23 @@ func hashPodSpec(
 	}
 }
 
-func addInventory(
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	h *helper.Helper,
+// set value of runner environment variable and compute the hash
+func setRunnerEnvVar(instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	helper *helper.Helper,
+	varName string,
+	varValue string,
+	hashType string,
 	job *batchv1.Job,
-	hashes map[string]string,
-) {
-	var invEnvVar corev1.EnvVar
-	var err error
-	invEnvVar.Name = "RUNNER_INVENTORY"
-	invEnvVar.Value = "\n" + instance.Spec.Inventory + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, invEnvVar)
-	hashes["inventory"], err = calculateHash(instance.Spec.Inventory)
-	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
-	}
-}
+	hashes map[string]string) {
 
-func addCmdLine(
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	h *helper.Helper,
-	job *batchv1.Job,
-	hashes map[string]string,
-) {
-	var cmdLineEnvVar corev1.EnvVar
+	var envVar corev1.EnvVar
 	var err error
-	cmdLineEnvVar.Name = "RUNNER_CMDLINE"
-	cmdLineEnvVar.Value = "\n" + instance.Spec.CmdLine + "\n\n"
-	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, cmdLineEnvVar)
-	hashes["cmdline"], err = calculateHash(instance.Spec.CmdLine)
+	envVar.Name = varName
+	envVar.Value = "\n" + varValue + "\n\n"
+	job.Spec.Template.Spec.Containers[0].Env = append(job.Spec.Template.Spec.Containers[0].Env, envVar)
+	hashes[hashType], err = calculateHash(varValue)
 	if err != nil {
-		h.GetLogger().Error(err, "Error calculating the hash")
+		helper.GetLogger().Error(err, "Error calculating the hash")
 	}
 }
 
