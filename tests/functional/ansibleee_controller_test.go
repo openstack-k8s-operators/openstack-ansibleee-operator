@@ -17,8 +17,6 @@ limitations under the License.
 package functional_test
 
 import (
-	"fmt"
-
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -103,10 +101,7 @@ var _ = Describe("Ansibleee controller", func() {
 					v1alpha1.AnsibleExecutionJobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					fmt.Sprintf(
-						"AnsibleExecutionJob error occured job.name %s job.namespace %s failed",
-						ansibleee.Name, ansibleeeName.Namespace,
-					),
+					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -299,10 +294,7 @@ var _ = Describe("Ansibleee controller", func() {
 					v1alpha1.AnsibleExecutionJobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					fmt.Sprintf(
-						"AnsibleExecutionJob error occured job.name %s job.namespace %s failed",
-						ansibleee.Name, ansibleeeName.Namespace,
-					),
+					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
