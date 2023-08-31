@@ -90,10 +90,6 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:default:=6
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:number"}
 	BackoffLimit *int32 `json:"backoffLimit,omitempty"`
-	// Role is the description of an Ansible Role
-	// If both Play and Role are specified, Play takes precedence
-	// +kubebuilder:validation:Optional
-	Role *Role `json:"roles,omitempty"`
 	// +kubebuilder:validation:Optional
 	// NetworkAttachments is a list of NetworkAttachment resource names to expose the services to the given network
 	NetworkAttachments []string `json:"networkAttachments,omitempty"`
@@ -169,45 +165,6 @@ type Config struct {
 	Name string `json:"name"`
 	// MountPoint is the directory of the container where the ConfigMap will be mounted
 	MountPath string `json:"mountpath"`
-}
-
-// Role describes the format of an ansible playbook destinated to run roles
-type Role struct {
-	// +kubebuilder:default:="Run Standalone Role"
-	Name string `json:"name,omitempty" yaml:"name,omitempty"`
-	// +kubebuilder:default:="{{ primary_role_name | default([]) }}:{{ deploy_target_host | default('overcloud') }}"
-	Hosts string `json:"hosts,omitempty" yaml:"hosts,omitempty"`
-	// +kubebuilder:default:=linear
-	// strategy defaults to linear
-	Strategy string `json:"strategy,omitempty" yaml:"strategy,omitempty"`
-	// +kubebuilder:default:=true
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// any_errors_fatal defaults to true
-	AnyErrorsFatal bool `json:"any_errors_fatal,omitempty" yaml:"any_errors_fatal,omitempty"`
-	// +kubebuilder:default:=false
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// become defaults to false
-	Become bool `json:"become,omitempty" yaml:"become,omitempty"`
-	// +kubebuilder:default:=false
-	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:booleanSwitch"}
-	// gather_facts defaults to false
-	GatherFacts bool   `json:"gather_facts,omitempty" yaml:"gather_facts,omitempty"`
-	Tasks       []Task `json:"tasks,omitempty" yaml:"tasks,omitempty"`
-}
-
-// Task describes a task centered exclusively in running import_role
-type Task struct {
-	Name       string     `json:"name" yaml:"name"`
-	ImportRole ImportRole `json:"import_role" yaml:"import_role"`
-	Vars       []string   `json:"vars,omitempty" yaml:"vars,omitempty"`
-	When       string     `json:"when,omitempty" yaml:"when,omitempty"`
-	Tags       []string   `json:"tags,omitempty" yaml:"tags,omitempty"`
-}
-
-// ImportRole contains the actual rolename and tasks file name to execute
-type ImportRole struct {
-	Name      string `json:"name" yaml:"name"`
-	TasksFrom string `json:"tasks_from,omitempty" yaml:"tasks_from,omitempty"`
 }
 
 func init() {
