@@ -210,7 +210,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	if err != nil {
-		err = fmt.Errorf("job.name %s job.namespace %s failed", jobDef.Name, jobDef.Namespace)
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
 			condition.ErrorReason,
