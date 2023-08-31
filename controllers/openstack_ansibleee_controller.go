@@ -357,8 +357,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 				instance.Spec.Play, valErr)
 		}
 		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
-	} else if instance.Spec.Role != nil {
-		addRoles(instance, h, job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
@@ -441,22 +439,6 @@ func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job)
 
 	job.Spec.Template.Spec.Containers[0].VolumeMounts = volumeMounts
 	job.Spec.Template.Spec.Volumes = volumes
-}
-
-func addRoles(
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
-	h *helper.Helper,
-	job *batchv1.Job,
-	hashes map[string]string,
-) {
-	var roles []*redhatcomv1alpha1.Role
-	roles = append(roles, instance.Spec.Role)
-	d, err := yaml.Marshal(&roles)
-	if err != nil {
-		util.LogErrorForObject(h, err, err.Error(), instance)
-	}
-
-	setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", string(d), "roles", job, hashes)
 }
 
 func hashPodSpec(
