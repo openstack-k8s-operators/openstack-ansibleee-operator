@@ -42,6 +42,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
 	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
@@ -56,8 +57,12 @@ const (
 type OpenStackAnsibleEEReconciler struct {
 	client.Client
 	Kclient kubernetes.Interface
-	Log     logr.Logger
 	Scheme  *runtime.Scheme
+}
+
+// GetLogger returns a logger object with a prefix of "controller.name" and additional controller context fields
+func (r *OpenStackAnsibleEEReconciler) GetLogger(ctx context.Context) logr.Logger {
+	return log.FromContext(ctx).WithName("Controllers").WithName("OpenStackAnsibleEE")
 }
 
 // +kubebuilder:rbac:groups=ansibleee.openstack.org,resources=openstackansibleees,verbs=get;list;watch;create;update;patch;delete
@@ -78,6 +83,7 @@ type OpenStackAnsibleEEReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.12.2/pkg/reconcile
 func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.Request) (result ctrl.Result, _err error) {
+	Log := r.GetLogger(ctx)
 
 	instance, err := r.getOpenStackAnsibleeeInstance(ctx, req)
 	if err != nil || instance.Name == "" {
@@ -89,12 +95,12 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Client,
 		r.Kclient,
 		r.Scheme,
-		r.Log,
+		Log,
 	)
 
 	if err != nil {
 		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
-		r.Log.Error(err, fmt.Sprintf("Unable to acquire helper for  OpenStackAnsibleEE %s", instance.Name))
+		Log.Error(err, fmt.Sprintf("Unable to acquire helper for  OpenStackAnsibleEE %s", instance.Name))
 		return ctrl.Result{}, err
 	}
 
@@ -114,7 +120,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			r.Log.Error(_err, "PatchInstance error")
+			Log.Error(_err, "PatchInstance error")
 			_err = err
 			return
 		}
@@ -173,7 +179,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	currentJobHash := instance.Status.Hash[ansibleeeJobType]
 
 	// Define a new job
-	jobDef, err := r.jobForOpenStackAnsibleEE(instance, helper, serviceAnnotations)
+	jobDef, err := r.jobForOpenStackAnsibleEE(ctx, instance, helper, serviceAnnotations)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -181,7 +187,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	configMap := &corev1.ConfigMap{}
 	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
 	if err != nil && !errors.IsNotFound(err) {
-		r.Log.Error(err, err.Error())
+		Log.Error(err, err.Error())
 		return ctrl.Result{}, err
 	} else if err == nil {
 		addEnvFrom(instance, jobDef)
@@ -223,17 +229,19 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	if ansibleeeJob.HasChanged() {
 		instance.Status.Hash[ansibleeeJobType] = ansibleeeJob.GetHash()
-		r.Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash[ansibleeeJobType]))
+		Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash[ansibleeeJobType]))
 	}
 
 	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = redhatcomv1alpha1.JobStatusSucceeded
 
-	r.Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
+	Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
 	return ctrl.Result{}, nil
 }
 
 func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, error) {
+	Log := r.GetLogger(ctx)
+
 	// Fetch the OpenStackAnsibleEE instance
 	instance := &redhatcomv1alpha1.OpenStackAnsibleEE{}
 
@@ -243,11 +251,11 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 			// Request object not found, could have been deleted after reconcile request.
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
-			r.Log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted")
+			Log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted")
 			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, nil
 		}
 		// Error reading the object - requeue the request.
-		r.Log.Error(err, err.Error())
+		Log.Error(err, err.Error())
 		return instance, err
 	}
 
@@ -255,10 +263,11 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 }
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
-func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
+func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Context,
 	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	annotations map[string]string) (*batchv1.Job, error) {
+	Log := r.GetLogger(ctx)
 	labels := instance.GetObjectMeta().GetLabels()
 	var deployIdentifier string
 
@@ -300,7 +309,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 	// Override args list if we are in a debug mode
 	if instance.Spec.Debug {
 		args = []string{"sleep", "1d"}
-		r.Log.Info(fmt.Sprintf("Instance %s will be running in debug mode.", instance.Name))
+		Log.Info(fmt.Sprintf("Instance %s will be running in debug mode.", instance.Name))
 	}
 
 	podSpec := corev1.PodSpec{
