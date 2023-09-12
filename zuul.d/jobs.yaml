@@ -27,8 +27,6 @@
       - renovate.json
 
 - job:
-    name: ansibleee-operator-crc-podified-edpm-deployment
-    parent: cifmw-crc-podified-edpm-deployment
-    vars:
-      bmo_setup: true
+    name: ansibleee-operator-podified-multinode-edpm-deployment-crc
+    parent: podified-multinode-edpm-deployment-crc
     irrelevant-files: *openstack_if

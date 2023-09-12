@@ -4,6 +4,6 @@
     github-check:
       jobs:
         - ansibleee-operator-content-provider
-        - ansibleee-operator-crc-podified-edpm-deployment:
+        - ansibleee-operator-podified-multinode-edpm-deployment-crc:
             dependencies:
               - ansibleee-operator-content-provider
