@@ -1,9 +1,5 @@
 ---
 - project:
     name: openstack-k8s-operators/openstack-ansibleee-operator
-    github-check:
-      jobs:
-        - ansibleee-operator-content-provider
-        - ansibleee-operator-podified-multinode-edpm-deployment-crc:
-            dependencies:
-              - ansibleee-operator-content-provider
+    templates:
+      - podified-multinode-edpm-baremetal-pipeline
