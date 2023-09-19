@@ -177,7 +177,7 @@ func NewOpenStackAnsibleEE(name string) OpenStackAnsibleEESpec {
 	backoff := int32(6)
 	return OpenStackAnsibleEESpec{
 		Name:             name,
-		Image:            util.GetEnvVar("ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
+		Image:            util.GetEnvVar("RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
 		EnvConfigMapName: "openstack-aee-default-env",
 		PreserveJobs:     true,
 		RestartPolicy:    "Never",
@@ -195,7 +195,7 @@ func (instance OpenStackAnsibleEE) IsReady() bool {
 func SetupDefaults() {
 	// Acquire environmental defaults and initialize OpenStackAnsibleEE defaults with them
 	openstackAnsibleEEDefaults := OpenStackAnsibleEEDefaults{
-		ContainerImageURL: util.GetEnvVar("ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
+		ContainerImageURL: util.GetEnvVar("RELATED_IMAGE_ANSIBLEEE_IMAGE_URL_DEFAULT", OpenStackAnsibleEEContainerImage),
 	}
 
 	SetupOpenStackAnsibleEEDefaults(openstackAnsibleEEDefaults)

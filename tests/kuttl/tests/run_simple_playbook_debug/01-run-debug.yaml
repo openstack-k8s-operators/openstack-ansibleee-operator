@@ -3,7 +3,6 @@ kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-play-debug
 spec:
-  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   play: |
     - name: Print hello world
       hosts: localhost
