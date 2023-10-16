@@ -384,6 +384,21 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(
 
 	addMounts(instance, job)
 
+	// if we have any extra vars for ansible to use set them in the RUNNER_EXTRA_VARS
+	if len(instance.Spec.ExtraVars) > 0 {
+		parsedExtraVars := ""
+		// unmarshal nested data structures
+		for variable, val := range instance.Spec.ExtraVars {
+			var tmp interface{}
+			err := yaml.Unmarshal(val, &tmp)
+			if err != nil {
+				return nil, err
+			}
+			parsedExtraVars += fmt.Sprintf("%s: %s\n", variable, tmp)
+		}
+		setRunnerEnvVar(instance, h, "RUNNER_EXTRA_VARS", parsedExtraVars, "extraVars", job, hashes)
+	}
+
 	hashPodSpec(h, podSpec, hashes)
 
 	inputHash, errorHash := hashOfInputHashes(hashes)

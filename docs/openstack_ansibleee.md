@@ -69,6 +69,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | serviceAccountName | ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount | string | false |
 | dnsConfig | DNSConfig allows to specify custom dnsservers and search domains | *corev1.PodDNSConfig | false |
 | debug | Debug run the pod in debug mode without executing the ansible-runner commands | bool | true |
+| extraVars | Extra vars to be passed to ansible process during execution. This can be used to override default values in plays. | map[string]json.RawMessage | false |
 
 [Back to Custom Resources](#custom-resources)
 

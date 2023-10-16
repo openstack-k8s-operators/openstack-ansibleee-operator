@@ -17,6 +17,8 @@ limitations under the License.
 package functional_test
 
 import (
+	"encoding/json"
+
 	corev1 "k8s.io/api/core/v1"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -187,7 +189,7 @@ var _ = Describe("Ansibleee controller", func() {
 		Context("with invalid playbook name/path", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "/", "test-image", "", false, ""))
+					ansibleeeName, "/", "test-image", "", false, "", map[string]interface{}{}))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(
@@ -204,7 +206,7 @@ var _ = Describe("Ansibleee controller", func() {
 		Context("in a debug mode", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", "", true, "echo THIS_SHOULDNT_PRINT"))
+					ansibleeeName, "", "test-image", "", true, "echo THIS_SHOULDNT_PRINT", map[string]interface{}{}))
 			})
 			It("sets instance.Env.Debug element to 'True'", func() {
 				th.ExpectConditionWithDetails(
@@ -223,7 +225,7 @@ var _ = Describe("Ansibleee controller", func() {
 		Context("with an inline play", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", play, false, ""))
+					ansibleeeName, "", "test-image", play, false, "", map[string]interface{}{}))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(
@@ -307,6 +309,33 @@ var _ = Describe("Ansibleee controller", func() {
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 			})
+		})
+
+		Context("with extra vars", func() {
+			extraVars := map[string]interface{}{
+				"foo":  "bar",
+				"fizz": map[string]interface{}{"buzz": true},
+			}
+			BeforeEach(func() {
+				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
+					ansibleeeName, "", "test-image", "", true, "", extraVars))
+			})
+			It("sets accepts extraVars as part of the spec", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1alpha1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				marshalled := map[string]json.RawMessage{
+					"foo":  json.RawMessage([]byte("\"bar\"")),
+					"fizz": json.RawMessage([]byte("{\"buzz\":true}")),
+				}
+				Expect(GetAnsibleee(ansibleeeName).Spec.ExtraVars).To(Equal(marshalled))
+			})
+
 		})
 
 	})

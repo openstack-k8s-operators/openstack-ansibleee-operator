@@ -17,6 +17,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	condition "github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/util"
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
@@ -110,6 +112,11 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:default=false
 	// Debug run the pod in debug mode without executing the ansible-runner commands
 	Debug bool `json:"debug"`
+	// +kubebuilder:validation:Optional
+	// +kubebuilder:pruning:PreserveUnknownFields
+	// +kubebuilder:validation:Schemaless
+	// Extra vars to be passed to ansible process during execution. This can be used to override default values in plays.
+	ExtraVars map[string]json.RawMessage `json:"extraVars,omitempty"`
 }
 
 // OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
