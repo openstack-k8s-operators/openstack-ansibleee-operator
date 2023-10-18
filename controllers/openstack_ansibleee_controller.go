@@ -19,6 +19,7 @@ package controllers
 import (
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	yaml "gopkg.in/yaml.v3"
@@ -483,19 +484,19 @@ func calculateHash(envVar string) (string, error) {
 }
 
 func hashOfInputHashes(hashes map[string]string) (string, error) {
-	var stringConcat string
 	var err error
-	if len(hashes) != 0 {
-		for key, value := range hashes {
-			// exclude hash defined by the job itself
-			if key != "job" {
-				stringConcat += stringConcat + value
+	var hash string
+	var builder strings.Builder
+	for key, value := range hashes {
+		// exclude hash defined by the job itself
+		if key != "job" {
+			_, err := builder.WriteString(value)
+			if err != nil {
+				return hash, err
 			}
 		}
-	} else {
-		stringConcat = ""
 	}
-	hash, err := util.ObjectHash(stringConcat)
+	hash, err = util.ObjectHash(builder.String())
 	if err != nil {
 		return hash, err
 	}
