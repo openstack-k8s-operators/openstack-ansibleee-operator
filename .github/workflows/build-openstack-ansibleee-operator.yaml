@@ -1,10 +1,10 @@
 name: OpenStackAnsibleEE Operator image builder
 
 on:
-  - push:
-      branches:
-        - '*'
-  - workflow_dispatch
+  push:
+    branches:
+      - '*'
+  workflow_dispatch:
 
 env:
   imageregistry: 'quay.io'
