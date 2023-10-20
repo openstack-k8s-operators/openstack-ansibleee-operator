@@ -1,11 +1,11 @@
 name: Release OpenStackAnsibleEE Operator
 
 on:
-  - release:
-      types:
-        - released
-        - prereleased
-  - workflow_dispatch
+  release:
+    types:
+      - released
+      - prereleased
+  workflow_dispatch:
 
 env:
   imageregistry: 'quay.io'
