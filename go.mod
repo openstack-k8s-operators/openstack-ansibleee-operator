@@ -11,8 +11,8 @@ require (
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.13.0
 	github.com/onsi/gomega v1.28.0
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231018065241-6e3a5f39ef22
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231018065241-6e3a5f39ef22
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231019091705-f3aa3d057b0f
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231019091705-f3aa3d057b0f
 	github.com/openstack-k8s-operators/openstack-ansibleee-operator/api v0.0.0-00010101000000-000000000000
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.26.9
