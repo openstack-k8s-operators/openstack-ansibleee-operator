@@ -3,3 +3,6 @@
     name: openstack-k8s-operators/openstack-ansibleee-operator
     templates:
       - podified-multinode-edpm-baremetal-pipeline
+    github-check:
+      jobs:
+        - data-plane-adoption-github-rdo-centos-9-crc-single-node
