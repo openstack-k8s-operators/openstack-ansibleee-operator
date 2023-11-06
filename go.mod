@@ -9,7 +9,7 @@ replace github.com/openstack-k8s-operators/openstack-ansibleee-operator/api => .
 
 require (
 	github.com/go-logr/logr v1.3.0
-	github.com/go-playground/validator/v10 v10.15.5
+	github.com/go-playground/validator/v10 v10.16.0
 	github.com/google/uuid v1.4.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
 	github.com/onsi/ginkgo/v2 v2.13.0
