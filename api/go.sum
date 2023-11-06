@@ -228,10 +228,10 @@ github.com/onsi/ginkgo/v2 v2.13.0 h1:0jY9lJquiL8fcf3M4LAXN5aMlS/b2BV86HFFPCPMgE4
 github.com/onsi/ginkgo/v2 v2.13.0/go.mod h1:TE309ZR8s5FsKKpuB1YAQYBzCaAfUgatB/xlT/ETL/o=
 github.com/onsi/gomega v1.29.0 h1:KIA/t2t5UBzoirT4H9tsML45GEbo3ouUnBHsCfD2tVg=
 github.com/onsi/gomega v1.29.0/go.mod h1:9sxs+SwGrKI0+PWe4Fxa9tFQQBG5xSsSbMXOI8PPpoQ=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231027113646-46f2fdbf77f1 h1:2bUnS5bGT77jBguPF2zyivaHhcfWti/yB9TUXN803hY=
-github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231027113646-46f2fdbf77f1/go.mod h1:NvjAETczXby5m3IvylR3YaOiEBWkmWbHBx/UrnUVtfA=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231027113646-46f2fdbf77f1 h1:XeHpej7gpMu3rMy97+JPm8BUXsxbCwK/prYXmQsIhco=
-github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231027113646-46f2fdbf77f1/go.mod h1:zoThLQNL2Sbp3KAj3OaBNm+gbkEeblQW8tKLFiU4xFs=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231102083359-58e12a1299b2 h1:U4hwPDoo9k2wo6PldPyJbgfvo9Mdyuhum7vLWTHez1c=
+github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20231102083359-58e12a1299b2/go.mod h1:NvjAETczXby5m3IvylR3YaOiEBWkmWbHBx/UrnUVtfA=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231102083359-58e12a1299b2 h1:4XQVtWvaw8DamAXzG6SCFOQF49z+BeacLJKS6I7q9GA=
+github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20231102083359-58e12a1299b2/go.mod h1:zoThLQNL2Sbp3KAj3OaBNm+gbkEeblQW8tKLFiU4xFs=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
