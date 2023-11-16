@@ -46,7 +46,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	setupLog = ctrl.Log.WithName("Setup").WithName("Controllers").WithName("OpenStackAnsibleEE")
 )
 
 func init() {
@@ -70,7 +70,7 @@ func main() {
 			"Enabling this will ensure there is only one active controller manager.")
 	devMode, err := strconv.ParseBool(os.Getenv("DEV_MODE"))
 	if err != nil {
-		devMode = false
+		devMode = true
 	}
 	opts := zap.Options{
 		Development: devMode,
@@ -115,7 +115,6 @@ func main() {
 		Client:  mgr.GetClient(),
 		Scheme:  mgr.GetScheme(),
 		Kclient: kclient,
-		Log:     ctrl.Log.WithName("controllers").WithName("OpenStackAnsibleEE"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "OpenStackAnsibleEE")
 		os.Exit(1)
