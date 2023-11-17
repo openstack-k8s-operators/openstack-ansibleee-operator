@@ -1,0 +1,21 @@
+#
+# Check for:
+#
+# - No Ansibleee-play pod
+# - No Ansibleee-play job
+#
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: ansibleee-play-extravars-
+  labels:
+    app: openstackansibleee
+    job-name: ansibleee-play-extravars
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: openstackansibleee
+    job-name: ansibleee-play-extravars
+  name: ansibleee-play-extravars

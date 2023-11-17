@@ -890,6 +890,8 @@ spec:
                   - volumes
                   type: object
                 type: array
+              extraVars:
+                x-kubernetes-preserve-unknown-fields: true
               image:
                 type: string
               initContainers:
