@@ -1519,7 +1519,7 @@ spec:
                 - false
                 type: boolean
               restartPolicy:
-                default: Never
+                default: OnFailure
                 enum:
                 - OnFailure
                 - Never

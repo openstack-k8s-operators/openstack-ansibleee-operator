@@ -70,10 +70,10 @@ type OpenStackAnsibleEESpec struct {
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
 	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be "OnFailure" or "Never".
-	// RestartPolicy default: Never
+	// RestartPolicy default: OnFailure
 	// +kubebuilder:validation:Enum:=OnFailure;Never
 	// +operator-sdk:csv:customresourcedefinitions:type=spec,xDescriptors={"urn:alm:descriptor:com.tectonic.ui:select:OnFailure","urn:alm:descriptor:com.tectonic.ui:select:Never"}
-	// +kubebuilder:default:="Never"
+	// +kubebuilder:default:="OnFailure"
 	RestartPolicy string `json:"restartPolicy,omitempty"`
 	// PreserveJobs - do not delete jobs after they finished e.g. to check logs
 	// PreserveJobs default: true

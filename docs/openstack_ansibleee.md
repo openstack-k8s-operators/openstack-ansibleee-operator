@@ -57,7 +57,7 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | name | Name is the name of the internal container inside the pod | string | false |
 | envConfigMapName | EnvConfigMapName is the name of the k8s config map that contains the ansible env variables | string | false |
 | env | Env is a list containing the environment variables to pass to the pod | []corev1.EnvVar | false |
-| restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: Never | string | false |
+| restartPolicy | RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be \"OnFailure\" or \"Never\". RestartPolicy default: OnFailure | string | false |
 | preserveJobs | PreserveJobs - do not delete jobs after they finished e.g. to check logs PreserveJobs default: true | bool | false |
 | uid | UID is the userid that will be used to run the container. | int64 | false |
 | inventory | Inventory is the inventory that the ansible playbook will use to launch the job. | string | false |
