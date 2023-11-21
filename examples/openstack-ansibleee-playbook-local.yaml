@@ -22,8 +22,6 @@ spec:
       value: "True"
     - name: ANSIBLE_SSH_ARGS
       value: "-C -o ControlMaster=auto -o ControlPersist=80s"
-    - name: ANSIBLE_ENABLE_TASK_DEBUGGER
-      value: "True"
   extraMounts:
     - extraVolType: Ceph
       volumes:
