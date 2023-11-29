@@ -269,7 +269,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	annotations map[string]string) (*batchv1.Job, error) {
 	Log := r.GetLogger(ctx)
 	labels := instance.GetObjectMeta().GetLabels()
-	var deployIdentifier string
 
 	// Setting up input validation, including custom validators
 	validate := validator.New()
@@ -281,12 +280,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 		return nil, fmt.Errorf("error registering input validation")
 	}
 
-	if len(labels["deployIdentifier"]) > 0 {
-		deployIdentifier = labels["deployIdentifier"]
-	} else {
-		deployIdentifier = ""
-	}
-	ls := labelsForOpenStackAnsibleEE(instance.Name, deployIdentifier)
+	ls := labelsForOpenStackAnsibleEE(instance.Name, labels)
 
 	args := instance.Spec.Args
 
@@ -428,12 +422,16 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 
 // labelsForOpenStackAnsibleEE returns the labels for selecting the resources
 // belonging to the given openstackansibleee CR name.
-func labelsForOpenStackAnsibleEE(name string, deployIdentifier string) map[string]string {
-	return map[string]string{
+func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[string]string {
+	ls := map[string]string{
 		"app":                   "openstackansibleee",
-		"deployIdentifier":      deployIdentifier,
 		"openstackansibleee_cr": name,
+		"osaee":                 "true",
 	}
+	for key, val := range labels {
+		ls[key] = val
+	}
+	return ls
 }
 
 func addEnvFrom(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
