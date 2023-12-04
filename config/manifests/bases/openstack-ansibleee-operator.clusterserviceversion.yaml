@@ -69,7 +69,7 @@ spec:
   links:
   - name: OpenStack Ansible EE Operator
     url: https://github.com/openstack-k8s-operators/openstack-ansibleee-operator
-  maturity: alpha
+  maturity: beta
   provider:
     name: Red Hat Inc.
     url: https://redhat.com/

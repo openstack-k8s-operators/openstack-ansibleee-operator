@@ -101,7 +101,7 @@ help: ## Display this help.
 manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
 	rm -rf api/bases && cp -a config/crd/bases api/
-	$(CRD_MARKDOWN) -f api/v1alpha1/openstack_ansibleee_types.go -n OpenStackAnsibleEE > docs/openstack_ansibleee.md
+	$(CRD_MARKDOWN) -f api/v1beta1/openstack_ansibleee_types.go -n OpenStackAnsibleEE > docs/openstack_ansibleee.md
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.

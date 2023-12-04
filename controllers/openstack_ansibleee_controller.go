@@ -45,7 +45,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/storage"
-	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 )
 
 const (
@@ -109,7 +109,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	defer func() {
 		// update the overall status condition if service is ready
 		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
+			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, ansibleeev1.AnsibleExecutionJobReadyMessage)
 		} else {
 			// something is not ready so reset the Ready condition
 			instance.Status.Conditions.MarkUnknown(
@@ -131,7 +131,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		instance.Status.Conditions = condition.Conditions{}
 
 		cl := condition.CreateList(
-			condition.UnknownCondition(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, condition.InitReason, redhatcomv1alpha1.AnsibleExecutionJobInitMessage),
+			condition.UnknownCondition(ansibleeev1.AnsibleExecutionJobReadyCondition, condition.InitReason, ansibleeev1.AnsibleExecutionJobInitMessage),
 		)
 
 		instance.Status.Conditions.Init(&cl)
@@ -208,22 +208,22 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+			ansibleeev1.AnsibleExecutionJobReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			redhatcomv1alpha1.AnsibleExecutionJobWaitingMessage))
-		instance.Status.JobStatus = redhatcomv1alpha1.JobStatusRunning
+			ansibleeev1.AnsibleExecutionJobWaitingMessage))
+		instance.Status.JobStatus = ansibleeev1.JobStatusRunning
 		return ctrlResult, nil
 	}
 
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			redhatcomv1alpha1.AnsibleExecutionJobReadyCondition,
+			ansibleeev1.AnsibleExecutionJobReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			redhatcomv1alpha1.AnsibleExecutionJobErrorMessage,
+			ansibleeev1.AnsibleExecutionJobErrorMessage,
 			err.Error()))
-		instance.Status.JobStatus = redhatcomv1alpha1.JobStatusFailed
+		instance.Status.JobStatus = ansibleeev1.JobStatusFailed
 		return ctrl.Result{}, err
 	}
 
@@ -232,18 +232,18 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash[ansibleeeJobType]))
 	}
 
-	instance.Status.Conditions.MarkTrue(redhatcomv1alpha1.AnsibleExecutionJobReadyCondition, redhatcomv1alpha1.AnsibleExecutionJobReadyMessage)
-	instance.Status.JobStatus = redhatcomv1alpha1.JobStatusSucceeded
+	instance.Status.Conditions.MarkTrue(ansibleeev1.AnsibleExecutionJobReadyCondition, ansibleeev1.AnsibleExecutionJobReadyMessage)
+	instance.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 
 	Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
 	return ctrl.Result{}, nil
 }
 
-func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*redhatcomv1alpha1.OpenStackAnsibleEE, error) {
+func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context.Context, req ctrl.Request) (*ansibleeev1.OpenStackAnsibleEE, error) {
 	Log := r.GetLogger(ctx)
 
 	// Fetch the OpenStackAnsibleEE instance
-	instance := &redhatcomv1alpha1.OpenStackAnsibleEE{}
+	instance := &ansibleeev1.OpenStackAnsibleEE{}
 
 	err := r.Get(ctx, req.NamespacedName, instance)
 	if err != nil {
@@ -252,7 +252,7 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
 			// Return and don't requeue
 			Log.Info("OpenStackAnsibleEE resource not found. Ignoring since object must be deleted")
-			return &redhatcomv1alpha1.OpenStackAnsibleEE{}, nil
+			return &ansibleeev1.OpenStackAnsibleEE{}, nil
 		}
 		// Error reading the object - requeue the request.
 		Log.Error(err, err.Error())
@@ -264,7 +264,7 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 
 // jobForOpenStackAnsibleEE returns a openstackansibleee Job object
 func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Context,
-	instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+	instance *ansibleeev1.OpenStackAnsibleEE,
 	h *helper.Helper,
 	annotations map[string]string) (*batchv1.Job, error) {
 	Log := r.GetLogger(ctx)
@@ -434,7 +434,7 @@ func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[stri
 	return ls
 }
 
-func addEnvFrom(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addEnvFrom(instance *ansibleeev1.OpenStackAnsibleEE, job *batchv1.Job) {
 	job.Spec.Template.Spec.Containers[0].EnvFrom = []corev1.EnvFromSource{
 		{
 			ConfigMapRef: &corev1.ConfigMapEnvSource{
@@ -444,7 +444,7 @@ func addEnvFrom(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job
 	}
 }
 
-func addMounts(instance *redhatcomv1alpha1.OpenStackAnsibleEE, job *batchv1.Job) {
+func addMounts(instance *ansibleeev1.OpenStackAnsibleEE, job *batchv1.Job) {
 	var volumeMounts []corev1.VolumeMount
 	var volumes []corev1.Volume
 
@@ -478,7 +478,7 @@ func hashPodSpec(
 }
 
 // set value of runner environment variable and compute the hash
-func setRunnerEnvVar(instance *redhatcomv1alpha1.OpenStackAnsibleEE,
+func setRunnerEnvVar(instance *ansibleeev1.OpenStackAnsibleEE,
 	helper *helper.Helper,
 	varName string,
 	varValue string,
@@ -528,7 +528,7 @@ func hashOfInputHashes(hashes map[string]string) (string, error) {
 // SetupWithManager sets up the controller with the Manager.
 func (r *OpenStackAnsibleEEReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&redhatcomv1alpha1.OpenStackAnsibleEE{}).
+		For(&ansibleeev1.OpenStackAnsibleEE{}).
 		Owns(&batchv1.Job{}).
 		Complete(r)
 }

@@ -20,7 +20,7 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -36,8 +36,8 @@ const (
         msg: "Hello, world this is ansibleee-play.yaml"`
 )
 
-func GetAnsibleee(name types.NamespacedName) *v1alpha1.OpenStackAnsibleEE {
-	instance := &v1alpha1.OpenStackAnsibleEE{}
+func GetAnsibleee(name types.NamespacedName) *v1beta1.OpenStackAnsibleEE {
+	instance := &v1beta1.OpenStackAnsibleEE{}
 	Eventually(func(g Gomega) {
 		g.Expect(k8sClient.Get(ctx, name, instance)).Should(Succeed())
 	}, timeout, interval).Should(Succeed())
@@ -51,7 +51,7 @@ func AnsibleeeConditionGetter(name types.NamespacedName) condition.Conditions {
 
 func CreateAnsibleee(name types.NamespacedName) client.Object {
 	raw := map[string]interface{}{
-		"apiVersion": "ansibleee.openstack.org/v1alpha1",
+		"apiVersion": "ansibleee.openstack.org/v1beta1",
 		"kind":       "OpenStackAnsibleEE",
 		"metadata": map[string]interface{}{
 			"name":      name.Name,
@@ -71,7 +71,7 @@ func CreateAnsibleeeWithParams(
 	debug bool, cmdline string, extraVars map[string]interface{}) client.Object {
 
 	raw := map[string]interface{}{
-		"apiVersion": "ansibleee.openstack.org/v1alpha1",
+		"apiVersion": "ansibleee.openstack.org/v1beta1",
 		"kind":       "OpenStackAnsibleEE",
 		"metadata": map[string]interface{}{
 			"name":      name.Name,

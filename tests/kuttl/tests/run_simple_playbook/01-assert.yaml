@@ -6,7 +6,7 @@
 # - 1 Ansibleee-play job
 # - Correct output from ansible play
 #
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-play

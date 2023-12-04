@@ -11,14 +11,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /mutate-ansibleee-openstack-org-v1alpha1-openstackansibleee
+      path: /mutate-ansibleee-openstack-org-v1beta1-openstackansibleee
   failurePolicy: Fail
   name: mopenstackansibleee.kb.io
   rules:
   - apiGroups:
     - ansibleee.openstack.org
     apiVersions:
-    - v1alpha1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -38,14 +38,14 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
-      path: /validate-ansibleee-openstack-org-v1alpha1-openstackansibleee
+      path: /validate-ansibleee-openstack-org-v1beta1-openstackansibleee
   failurePolicy: Fail
   name: vopenstackansibleee.kb.io
   rules:
   - apiGroups:
     - ansibleee.openstack.org
     apiVersions:
-    - v1alpha1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

@@ -37,7 +37,7 @@ import (
 
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	redhatcomv1alpha1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1alpha1"
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/controllers"
 
 	networkv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
@@ -52,7 +52,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(redhatcomv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(ansibleeev1.AddToScheme(scheme))
 	utilruntime.Must(networkv1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
@@ -121,7 +121,7 @@ func main() {
 	}
 
 	// Acquire environmental defaults and initialize operator defaults with them
-	redhatcomv1alpha1.SetupDefaults()
+	ansibleeev1.SetupDefaults()
 
 	// Setup webhooks if requested
 	checker := healthz.Ping
@@ -130,7 +130,7 @@ func main() {
 		srv := mgr.GetWebhookServer()
 		srv.TLSOpts = []func(config *tls.Config){disableHTTP2}
 
-		if err = (&redhatcomv1alpha1.OpenStackAnsibleEE{}).SetupWebhookWithManager(mgr); err != nil {
+		if err = (&ansibleeev1.OpenStackAnsibleEE{}).SetupWebhookWithManager(mgr); err != nil {
 			setupLog.Error(err, "unable to create webhook", "webhook", "OpenStackAnsibleEE")
 			os.Exit(1)
 		}
