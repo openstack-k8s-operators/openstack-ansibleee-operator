@@ -4,7 +4,7 @@ For enabling persistent logging, you need to mount `/runner/artifacts` into a [p
 
 #### Example:
 ```yaml
-apiVersion: ansibleee.openstack.org/v1alpha1
+apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-logs

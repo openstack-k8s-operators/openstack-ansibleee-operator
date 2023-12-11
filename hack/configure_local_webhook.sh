@@ -38,7 +38,7 @@ webhooks:
   - v1
   clientConfig:
     caBundle: ${CA_BUNDLE}
-    url: https://${CRC_IP}:9443/validate-ansibleee-openstack-org-v1alpha1-openstackansibleee
+    url: https://${CRC_IP}:9443/validate-ansibleee-openstack-org-v1beta1-openstackansibleee
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: vopenstackansibleee.kb.io
@@ -47,7 +47,7 @@ webhooks:
   - apiGroups:
     - ansibleee.openstack.org
     apiVersions:
-    - v1alpha1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE
@@ -66,7 +66,7 @@ webhooks:
   - v1
   clientConfig:
     caBundle: ${CA_BUNDLE}
-    url: https://${CRC_IP}:9443/mutate-ansibleee-openstack-org-v1alpha1-openstackansibleee
+    url: https://${CRC_IP}:9443/mutate-ansibleee-openstack-org-v1beta1-openstackansibleee
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: mopenstackansibleee.kb.io
@@ -75,7 +75,7 @@ webhooks:
   - apiGroups:
     - ansibleee.openstack.org
     apiVersions:
-    - v1alpha1
+    - v1beta1
     operations:
     - CREATE
     - UPDATE

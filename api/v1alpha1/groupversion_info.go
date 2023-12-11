@@ -20,6 +20,8 @@ limitations under the License.
 package v1alpha1
 
 import (
+	ansibleeev1 "github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/scheme"
 )
@@ -34,3 +36,20 @@ var (
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
+
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+//+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Ansible EE"
+// +kubebuilder:resource:shortName=osaee;osaees;osansible;osansibles
+//+kubebuilder:printcolumn:name="NetworkAttachments",type="string",JSONPath=".spec.networkAttachments",description="NetworkAttachments"
+//+kubebuilder:printcolumn:name="Status",type="string",JSONPath=".status.conditions[0].status",description="Status"
+//+kubebuilder:printcolumn:name="Message",type="string",JSONPath=".status.conditions[0].message",description="Message"
+
+// OpenStackAnsibleEE is the Schema for the openstackansibleees API
+type OpenStackAnsibleEE struct {
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec   ansibleeev1.OpenStackAnsibleEESpec   `json:"spec,omitempty"`
+	Status ansibleeev1.OpenStackAnsibleEEStatus `json:"status,omitempty"`
+}
