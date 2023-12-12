@@ -142,7 +142,6 @@ type OpenStackAnsibleEEStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
-// +kubebuilder:storageversion
 //+operator-sdk:csv:customresourcedefinitions:displayName="OpenStack Ansible EE"
 // +kubebuilder:resource:shortName=osaee;osaees;osansible;osansibles
 //+kubebuilder:printcolumn:name="NetworkAttachments",type="string",JSONPath=".spec.networkAttachments",description="NetworkAttachments"
