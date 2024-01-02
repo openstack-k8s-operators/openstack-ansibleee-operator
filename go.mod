@@ -8,7 +8,7 @@ replace golang.org/x/net => golang.org/x/net v0.19.0 //allow-merging
 replace github.com/openstack-k8s-operators/openstack-ansibleee-operator/api => ./api
 
 require (
-	github.com/go-logr/logr v1.3.0
+	github.com/go-logr/logr v1.4.1
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/google/uuid v1.5.0
 	github.com/k8snetworkplumbingwg/network-attachment-definition-client v1.4.0
