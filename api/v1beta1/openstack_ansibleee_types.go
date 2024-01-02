@@ -53,7 +53,6 @@ type OpenStackAnsibleEESpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Play is an inline playbook contents that ansible will run on execution.
-	// If both Play and Roles are specified, Play takes precedence
 	Play string `json:"play,omitempty"`
 	// Playbook is the playbook that ansible will run on this execution, accepts path or FQN from collection
 	Playbook string `json:"playbook,omitempty"`
