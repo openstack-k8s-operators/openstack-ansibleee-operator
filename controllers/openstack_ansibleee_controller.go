@@ -350,8 +350,31 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	if len(instance.Spec.ServiceAccountName) > 0 {
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
+	// Set primary inventory if specified as string
+	var existingInventoryMounts string = ""
 	if len(instance.Spec.Inventory) > 0 {
 		setRunnerEnvVar(instance, h, "RUNNER_INVENTORY", instance.Spec.Inventory, "inventory", job, hashes)
+		existingInventoryMounts = "/runner/inventory/inventory.yaml"
+	}
+	// Report additional inventory paths mounted as volumes
+	// AnsibleEE will later attempt to use them all together with the primary
+	// If any of the additional inventories uses location of the primary inventory
+	// provided by the dataplane operator raise an error.
+	if len(instance.Spec.ExtraMounts) > 0 {
+		for _, inventory := range instance.Spec.ExtraMounts {
+			for _, mount := range inventory.Mounts {
+				// Report when we mount other inventories as that alters ansible execution
+				if strings.HasPrefix(mount.MountPath, "/runner/inventory/") {
+					Log.Info(fmt.Sprintf("additional inventory %s mounted", mount.Name))
+					if searchIndex := strings.Index(existingInventoryMounts, mount.MountPath); searchIndex != -1 {
+						return nil, fmt.Errorf(
+							"inventory mount %s overrides existing inventory location",
+							mount.Name)
+					}
+					existingInventoryMounts = existingInventoryMounts + fmt.Sprintf(",%s", mount.MountPath)
+				}
+			}
+		}
 	}
 
 	if len(instance.Spec.Play) > 0 {
