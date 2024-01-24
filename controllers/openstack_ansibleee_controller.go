@@ -324,8 +324,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name,
-			Namespace: instance.Namespace,
+			Name:        instance.Name,
+			Namespace:   instance.Namespace,
+			Annotations: annotations,
+			Labels:      ls,
 		},
 		Spec: batchv1.JobSpec{
 			BackoffLimit: instance.Spec.BackoffLimit,
@@ -425,6 +427,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[string]string {
 	ls := map[string]string{
 		"app":                   "openstackansibleee",
+		"job-name":              name,
 		"openstackansibleee_cr": name,
 		"osaee":                 "true",
 	}
