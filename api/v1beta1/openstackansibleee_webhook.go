@@ -23,6 +23,8 @@ limitations under the License.
 package v1beta1
 
 import (
+	"fmt"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -79,7 +81,11 @@ var _ webhook.Validator = &OpenStackAnsibleEE{}
 func (r *OpenStackAnsibleEE) ValidateCreate() error {
 	openstackansibleeelog.Info("validate create", "name", r.Name)
 
-	// TODO(user): fill in your validation logic upon object creation.
+	for _, value := range r.Spec.Env {
+		if value.Name == "ANSIBLE_ENABLE_TASK_DEBUGGER" {
+			return fmt.Errorf("ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER")
+		}
+	}
 	return nil
 }
 
