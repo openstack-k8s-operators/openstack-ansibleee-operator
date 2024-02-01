@@ -1,0 +1,9 @@
+= OpenStack Ansible EE Operator
+:toc: left
+:toclevels: 5
+
+include::assemblies/index.adoc[leveloffset=+1]
+
+include::assemblies/logs.adoc[leveloffset=+1]
+
+include::assemblies/openstack_ansibleee.adoc[leveloffset=-1]
