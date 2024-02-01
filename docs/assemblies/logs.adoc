@@ -1,9 +1,12 @@
-# Persistent logs
+= Persistent logs
 
-For enabling persistent logging, you need to mount `/runner/artifacts` into a [persistent Volume](https://kubernetes.io/docs/concepts/storage/volumes/) through `extraMounts` field.
+For enabling persistent logging, you need to mount `/runner/artifacts` into a https://kubernetes.io/docs/concepts/storage/volumes/[persistent Volume] through `extraMounts` field.
 
-#### Example:
-```yaml
+[discrete]
+==== Example:
+
+[,yaml]
+----
 apiVersion: ansibleee.openstack.org/v1beta1
 kind: OpenStackAnsibleEE
 metadata:
@@ -25,4 +28,4 @@ spec:
       mounts:
       - name: ansible-logs
         mountPath: "/runner/artifacts"
-```
+----

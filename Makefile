@@ -81,6 +81,31 @@ SHELL = /usr/bin/env bash -o pipefail
 .PHONY: all
 all: build
 
+##@ Docs
+
+.PHONY: docs-dependencies
+docs-dependencies: .bundle
+
+.PHONY: .bundle
+.bundle:
+	if ! type bundle; then \
+		echo "Bundler not found. On Linux run 'sudo dnf install /usr/bin/bundle' to install it."; \
+		exit 1; \
+	fi
+
+	bundle config set --local path 'local/bundle'; bundle install
+
+.PHONY: docs
+docs: manifests docs-dependencies crd-to-markdown ## Build docs
+	$(CRD_MARKDOWN) -f api/v1beta1/openstack_ansibleee_types.go -n OpenStackAnsibleEE > docs/assemblies/openstack_ansibleee.md
+	bundle exec kramdoc --auto-ids docs/assemblies/openstack_ansibleee.md && rm docs/assemblies/openstack_ansibleee.md
+	sed -i "s/=== Custom/== Custom/g" docs/assemblies/openstack_ansibleee.adoc
+	cd docs; $(MAKE) html
+
+.PHONY: docs-clean
+docs-clean:
+	rm -r docs_build
+
 ##@ General
 
 # The help target prints out all targets with their descriptions organized
@@ -101,10 +126,9 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: gowork controller-gen crd-to-markdown ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: gowork controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd$(CRDDESC_OVERRIDE) webhook paths="./..." output:crd:artifacts:config=config/crd/bases && \
 	rm -rf api/bases && cp -a config/crd/bases api/
-	$(CRD_MARKDOWN) -f api/v1beta1/openstack_ansibleee_types.go -n OpenStackAnsibleEE > docs/openstack_ansibleee.md
 
 .PHONY: generate
 generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
