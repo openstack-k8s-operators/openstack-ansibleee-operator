@@ -68,7 +68,7 @@ func CreateAnsibleee(name types.NamespacedName) client.Object {
 
 func CreateAnsibleeeWithParams(
 	name types.NamespacedName, playbook string, image string, play string,
-	debug bool, cmdline string, extraVars map[string]interface{}) client.Object {
+	cmdline string, extraVars map[string]interface{}) client.Object {
 
 	raw := map[string]interface{}{
 		"apiVersion": "ansibleee.openstack.org/v1beta1",
@@ -83,7 +83,6 @@ func CreateAnsibleeeWithParams(
 			"image":     image,
 			"playbook":  playbook,
 			"play":      play,
-			"debug":     debug,
 			"cmdline":   cmdline,
 			"extraVars": extraVars,
 		},

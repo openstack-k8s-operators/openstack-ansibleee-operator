@@ -19,7 +19,6 @@ spec:
       - name: Using debug statement
         ansible.builtin.debug:
           msg: "Hello, world this is ansibleee-play-debug.yaml"
-  debug: true
 status:
   JobStatus: Running
 ---

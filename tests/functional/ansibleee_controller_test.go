@@ -189,7 +189,7 @@ var _ = Describe("Ansibleee controller", func() {
 		Context("with invalid playbook name/path", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "/", "test-image", "", false, "", map[string]interface{}{}))
+					ansibleeeName, "/", "test-image", "", "", map[string]interface{}{}))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(
@@ -203,29 +203,10 @@ var _ = Describe("Ansibleee controller", func() {
 			})
 		})
 
-		Context("in a debug mode", func() {
-			BeforeEach(func() {
-				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", "", true, "echo THIS_SHOULDNT_PRINT", map[string]interface{}{}))
-			})
-			It("sets instance.Env.Debug element to 'True'", func() {
-				th.ExpectConditionWithDetails(
-					ansibleeeName,
-					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
-					corev1.ConditionFalse,
-					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
-				)
-				Expect(GetAnsibleee(ansibleeeName).Spec.Debug).To(BeTrue())
-			})
-
-		})
-
 		Context("with an inline play", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", play, false, "", map[string]interface{}{}))
+					ansibleeeName, "", "test-image", play, "", map[string]interface{}{}))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(
@@ -318,7 +299,7 @@ var _ = Describe("Ansibleee controller", func() {
 			}
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", "", true, "", extraVars))
+					ansibleeeName, "", "test-image", "", "", extraVars))
 			})
 			It("sets accepts extraVars as part of the spec", func() {
 				th.ExpectConditionWithDetails(
