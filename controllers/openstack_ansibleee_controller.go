@@ -300,12 +300,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 		args = append(args, []string{"-i", identifier}...)
 	}
 
-	// Override args list if we are in a debug mode
-	if instance.Spec.Debug {
-		args = []string{"sleep", "1d"}
-		Log.Info(fmt.Sprintf("Instance %s will be running in debug mode.", instance.Name))
-	}
-
 	podSpec := corev1.PodSpec{
 		RestartPolicy: corev1.RestartPolicy(instance.Spec.RestartPolicy),
 		Containers: []corev1.Container{{
@@ -402,9 +396,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
 	}
 
-	if len(instance.Spec.CmdLine) > 0 && !instance.Spec.Debug {
-		// RUNNER_CMDLINE environment variable should only be set
-		// if the operator isn't running in a debug mode.
+	if len(instance.Spec.CmdLine) > 0 {
 		setRunnerEnvVar(instance, h, "RUNNER_CMDLINE", instance.Spec.CmdLine, "cmdline", job, hashes)
 	}
 	if len(labels["deployIdentifier"]) > 0 {

@@ -108,10 +108,6 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`
 	// +kubebuilder:validation:Optional
-	// +kubebuilder:default=false
-	// Debug run the pod in debug mode without executing the ansible-runner commands
-	Debug bool `json:"debug"`
-	// +kubebuilder:validation:Optional
 	// +kubebuilder:pruning:PreserveUnknownFields
 	// +kubebuilder:validation:Schemaless
 	// Extra vars to be passed to ansible process during execution. This can be used to override default values in plays.
