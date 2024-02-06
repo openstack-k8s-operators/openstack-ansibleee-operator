@@ -29,3 +29,19 @@ spec:
       - name: ansible-logs
         mountPath: "/runner/artifacts"
 ----
+
+= Logging of additional inventories
+
+Presence of additional inventory files, static or scripts, is reported with message:
+
+[,bash]
+----
+additional inventory <MOUNTNAME> mounted
+----
+
+Conflicts caused by mounting multiple inventories in a single location are reported as:
+
+[,bash]
+----
+inventory mount <MOUNTNAME> overrides existing inventory location
+----
