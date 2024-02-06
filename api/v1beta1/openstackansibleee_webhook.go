@@ -29,6 +29,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 // OpenStackAnsibleEEDefaults -
@@ -78,29 +79,29 @@ func (spec *OpenStackAnsibleEESpec) Default() {
 var _ webhook.Validator = &OpenStackAnsibleEE{}
 
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackAnsibleEE) ValidateCreate() error {
+func (r *OpenStackAnsibleEE) ValidateCreate() (admission.Warnings, error) {
 	openstackansibleeelog.Info("validate create", "name", r.Name)
 
 	for _, value := range r.Spec.Env {
 		if value.Name == "ANSIBLE_ENABLE_TASK_DEBUGGER" {
-			return fmt.Errorf("ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER")
+			return nil, fmt.Errorf("ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER")
 		}
 	}
-	return nil
+	return nil, nil
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackAnsibleEE) ValidateUpdate(old runtime.Object) error {
+func (r *OpenStackAnsibleEE) ValidateUpdate(old runtime.Object) (admission.Warnings, error) {
 	openstackansibleeelog.Info("validate update", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object update.
-	return nil
+	return nil, nil
 }
 
 // ValidateDelete implements webhook.Validator so a webhook will be registered for the type
-func (r *OpenStackAnsibleEE) ValidateDelete() error {
+func (r *OpenStackAnsibleEE) ValidateDelete() (admission.Warnings, error) {
 	openstackansibleeelog.Info("validate delete", "name", r.Name)
 
 	// TODO(user): fill in your validation logic upon object deletion.
-	return nil
+	return nil, nil
 }
