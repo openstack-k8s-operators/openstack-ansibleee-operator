@@ -6,4 +6,6 @@ include::assemblies/index.adoc[leveloffset=+1]
 
 include::assemblies/logs.adoc[leveloffset=+1]
 
+include::assemblies/multi_inv.adoc[leveloffset=+1]
+
 include::assemblies/openstack_ansibleee.adoc[leveloffset=-1]

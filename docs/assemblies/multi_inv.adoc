@@ -1,0 +1,37 @@
+= Providing multiple inventories
+
+AnsibleEE runner is capable of accepting and combining multiple inventory sources
+including files and scripts.
+
+Openstack-AnsibleEE-operator allows for provision of multiple inventories through
+the `extraMounts` field. Any file mounted, directly or indirecly, under the `/runner/inventory/` path
+will be used to create a combinded inventory for the job.
+
+Further information about AnsibleEE inventory processing is provided by https://ansible.readthedocs.io/projects/runner/en/latest/intro/#inventory[core AnsibleEE docs].
+
+[discrete]
+==== Example:
+
+[,yaml]
+----
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: ansibleee-logs
+  namespace: openstack
+spec:
+  playbook: "test.yaml"
+  image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
+  inventory: |
+          all:
+            hosts:
+              localhost
+  extraMounts:
+    - volumes:
+      - name: ansible-secondary-inventory
+        persistentVolumeClaim:
+          claimName: openstack-ansible-secondary-inventory
+      mounts:
+      - name: ansible-secondary-inventory
+        mountPath: "/runner/inventory/sub_inventory.sh"
+----

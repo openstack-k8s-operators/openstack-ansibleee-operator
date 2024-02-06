@@ -82,10 +82,11 @@ type OpenStackAnsibleEESpec struct {
 	// UID is the userid that will be used to run the container.
 	// +kubebuilder:default:=1001
 	UID int64 `json:"uid,omitempty"`
-	// Inventory is the inventory that the ansible playbook will use to launch the job.
+	// Inventory is the primary inventory that the ansible playbook will use to launch the job.
+	// Further inventories may be provided as ExtraMount in the `/runner/inventory/` path.
 	Inventory string `json:"inventory,omitempty"`
 	// +kubebuilder:validation:Optional
-	// ExtraMounts containing conf files and credentials
+	// ExtraMounts containing conf files, credentials and inventories
 	ExtraMounts []storage.VolMounts `json:"extraMounts,omitempty"`
 	// BackoffLimit allows to define the maximum number of retried executions (defaults to 6).
 	// +kubebuilder:default:=6

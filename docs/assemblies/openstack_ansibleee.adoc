@@ -138,12 +138,12 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | false
 
 | inventory
-| Inventory is the inventory that the ansible playbook will use to launch the job.
+| Inventory is the primary inventory that the ansible playbook will use to launch the job. Further inventories may be provided as ExtraMount in the `/runner/inventory/` path.
 | string
 | false
 
 | extraMounts
-| ExtraMounts containing conf files and credentials
+| ExtraMounts containing conf files, credentials and inventories
 | []storage.VolMounts
 | false
 
