@@ -9,6 +9,7 @@ on:
       - main
     paths:
       - .github/workflows/docs*
+      - api/v1beta1/**
       - docs/**
       - Gemfile
 jobs:
