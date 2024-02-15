@@ -97,7 +97,7 @@ func main() {
 		},
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "c8c223a1.openstack.org",
+		LeaderElectionID:       "258e89a9.openstack.org",
 		WebhookServer: webhook.NewServer(
 			webhook.Options{
 				Port:    9443,
