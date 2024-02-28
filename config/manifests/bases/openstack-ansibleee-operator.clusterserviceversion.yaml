@@ -56,6 +56,11 @@ spec:
         path: backoffLimit
         x-descriptors:
         - urn:alm:descriptor:com.tectonic.ui:number
+      - description: 'Image pull secrets for container images. Default: []'
+        displayName: Image Pull Secrets
+        path: imagePullSecrets
+        x-descriptors:
+        - urn:alm:descriptor:com.tectonic.ui:advanced
       - description: 'RestartPolicy is the policy applied to the Job on whether it
           needs to restart the Pod. It can be "OnFailure" or "Never". RestartPolicy
           default: Never'

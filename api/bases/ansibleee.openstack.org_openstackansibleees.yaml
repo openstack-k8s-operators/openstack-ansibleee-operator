@@ -891,6 +891,14 @@ spec:
                 x-kubernetes-preserve-unknown-fields: true
               image:
                 type: string
+              imagePullSecrets:
+                items:
+                  properties:
+                    name:
+                      type: string
+                  type: object
+                  x-kubernetes-map-type: atomic
+                type: array
               initContainers:
                 items:
                   properties:

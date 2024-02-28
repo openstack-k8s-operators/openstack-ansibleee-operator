@@ -344,6 +344,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	if len(instance.Spec.ServiceAccountName) > 0 {
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
+	if len(instance.Spec.ImagePullSecrets) > 0 {
+		job.Spec.Template.Spec.ImagePullSecrets = instance.Spec.ImagePullSecrets
+	}
 	// Set primary inventory if specified as string
 	var existingInventoryMounts string = ""
 	if len(instance.Spec.Inventory) > 0 {
