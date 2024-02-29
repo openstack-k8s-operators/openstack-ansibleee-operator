@@ -63,9 +63,12 @@ type OpenStackAnsibleEESpec struct {
 	// Name is the name of the internal container inside the pod
 	// +kubebuilder:default:="openstackansibleee"
 	Name string `json:"name,omitempty"`
-	// EnvConfigMapName is the name of the k8s config map that contains the ansible env variables
-	// +kubebuilder:default:="openstack-aee-default-env"
-	EnvConfigMapName string `json:"envConfigMapName,omitempty"`
+	// List of sources to populate environment variables in the container.
+	// The keys defined within a source must be a C_IDENTIFIER. All invalid keys
+	// will be reported as an event when the container is starting. When a key exists in multiple
+	// sources, the value associated with the last source will take precedence.
+	// Values defined by an Env with a duplicate key will take precedence.
+	EnvFrom []corev1.EnvFromSource `json:"envFrom,omitempty"`
 	// Env is a list containing the environment variables to pass to the pod
 	Env []corev1.EnvVar `json:"env,omitempty"`
 	// RestartPolicy is the policy applied to the Job on whether it needs to restart the Pod. It can be "OnFailure" or "Never".

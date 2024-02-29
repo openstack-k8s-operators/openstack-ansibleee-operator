@@ -139,9 +139,29 @@ spec:
                   - name
                   type: object
                 type: array
-              envConfigMapName:
-                default: openstack-aee-default-env
-                type: string
+              envFrom:
+                items:
+                  properties:
+                    configMapRef:
+                      properties:
+                        name:
+                          type: string
+                        optional:
+                          type: boolean
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    prefix:
+                      type: string
+                    secretRef:
+                      properties:
+                        name:
+                          type: string
+                        optional:
+                          type: boolean
+                      type: object
+                      x-kubernetes-map-type: atomic
+                  type: object
+                type: array
               extraMounts:
                 items:
                   properties:

@@ -27,7 +27,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
 
 	"context"
 
@@ -184,15 +183,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
-	configMap := &corev1.ConfigMap{}
-	err = r.Get(ctx, types.NamespacedName{Name: instance.Spec.EnvConfigMapName, Namespace: instance.Namespace}, configMap)
-	if err != nil && !errors.IsNotFound(err) {
-		Log.Error(err, err.Error())
-		return ctrl.Result{}, err
-	} else if err == nil {
-		addEnvFrom(instance, jobDef)
-	}
-
 	ansibleeeJob := job.NewJob(
 		jobDef,
 		ansibleeeJobType,
@@ -344,6 +334,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	if len(instance.Spec.ServiceAccountName) > 0 {
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
+	if len(instance.Spec.EnvFrom) > 0 {
+		job.Spec.Template.Spec.Containers[0].EnvFrom = instance.Spec.EnvFrom
+	}
 	// Set primary inventory if specified as string
 	var existingInventoryMounts string = ""
 	if len(instance.Spec.Inventory) > 0 {
@@ -450,16 +443,6 @@ func labelsForOpenStackAnsibleEE(name string, labels map[string]string) map[stri
 		ls[key] = val
 	}
 	return ls
-}
-
-func addEnvFrom(instance *ansibleeev1.OpenStackAnsibleEE, job *batchv1.Job) {
-	job.Spec.Template.Spec.Containers[0].EnvFrom = []corev1.EnvFromSource{
-		{
-			ConfigMapRef: &corev1.ConfigMapEnvSource{
-				LocalObjectReference: corev1.LocalObjectReference{Name: instance.Spec.EnvConfigMapName},
-			},
-		},
-	}
 }
 
 func addMounts(instance *ansibleeev1.OpenStackAnsibleEE, job *batchv1.Job) {

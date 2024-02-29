@@ -126,6 +126,13 @@ func (in *OpenStackAnsibleEESpec) DeepCopyInto(out *OpenStackAnsibleEESpec) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.EnvFrom != nil {
+		in, out := &in.EnvFrom, &out.EnvFrom
+		*out = make([]v1.EnvFromSource, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
+	}
 	if in.Env != nil {
 		in, out := &in.Env, &out.Env
 		*out = make([]v1.EnvVar, len(*in))
