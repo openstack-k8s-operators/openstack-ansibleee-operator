@@ -345,9 +345,9 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 		job.Spec.Template.Spec.ServiceAccountName = instance.Spec.ServiceAccountName
 	}
 	// Set primary inventory if specified as string
-	var existingInventoryMounts string = ""
+	existingInventoryMounts := ""
 	if len(instance.Spec.Inventory) > 0 {
-		setRunnerEnvVar(instance, h, "RUNNER_INVENTORY", instance.Spec.Inventory, "inventory", job, hashes)
+		setRunnerEnvVar(h, "RUNNER_INVENTORY", instance.Spec.Inventory, "inventory", job, hashes)
 		existingInventoryMounts = "/runner/inventory/inventory.yaml"
 	}
 	// Report additional inventory paths mounted as volumes
@@ -378,7 +378,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 				"error checking sanity of an inline play: %s %w",
 				instance.Spec.Play, valErr)
 		}
-		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
+		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
 		// we need to ensure that Play and Role are empty before addPlaybook
@@ -393,11 +393,11 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 			}
 		}
 
-		setRunnerEnvVar(instance, h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
+		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
 	}
 
 	if len(instance.Spec.CmdLine) > 0 {
-		setRunnerEnvVar(instance, h, "RUNNER_CMDLINE", instance.Spec.CmdLine, "cmdline", job, hashes)
+		setRunnerEnvVar(h, "RUNNER_CMDLINE", instance.Spec.CmdLine, "cmdline", job, hashes)
 	}
 	if len(labels["deployIdentifier"]) > 0 {
 		hashes["deployIdentifier"] = labels["deployIdentifier"]
@@ -417,7 +417,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 			}
 			parsedExtraVars += fmt.Sprintf("%s: %s\n", variable, tmp)
 		}
-		setRunnerEnvVar(instance, h, "RUNNER_EXTRA_VARS", parsedExtraVars, "extraVars", job, hashes)
+		setRunnerEnvVar(h, "RUNNER_EXTRA_VARS", parsedExtraVars, "extraVars", job, hashes)
 	}
 
 	hashPodSpec(h, podSpec, hashes)
@@ -496,7 +496,7 @@ func hashPodSpec(
 }
 
 // set value of runner environment variable and compute the hash
-func setRunnerEnvVar(instance *ansibleeev1.OpenStackAnsibleEE,
+func setRunnerEnvVar(
 	helper *helper.Helper,
 	varName string,
 	varValue string,
