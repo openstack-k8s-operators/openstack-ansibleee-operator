@@ -17,7 +17,7 @@ limitations under the License.
 package functional_test
 
 import (
-	. "github.com/onsi/gomega"
+	. "github.com/onsi/gomega" //revive:disable:dot-imports
 
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"

@@ -24,9 +24,9 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/google/uuid"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
+	. "github.com/onsi/ginkgo/v2" //revive:disable:dot-imports
+	. "github.com/onsi/gomega"    //revive:disable:dot-imports
+	"github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
 
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes"
@@ -60,7 +60,7 @@ var (
 	testEnv       *envtest.Environment
 	ctx           context.Context
 	cancel        context.CancelFunc
-	th            *TestHelper
+	th            *helpers.TestHelper
 	logger        logr.Logger
 	ansibleeeName types.NamespacedName
 )
@@ -99,7 +99,7 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	Expect(k8sClient).NotTo(BeNil())
 
-	th = NewTestHelper(ctx, k8sClient, timeout, interval, logger)
+	th = helpers.NewTestHelper(ctx, k8sClient, timeout, interval, logger)
 	Expect(th).NotTo(BeNil())
 
 	// Start the controller-manager in a goroutine
