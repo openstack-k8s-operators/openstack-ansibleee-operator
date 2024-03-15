@@ -424,6 +424,155 @@ var _ = Describe("Ansibleee controller", func() {
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 			})
 		})
+
+		Context("with multiple inventories", func() {
+			BeforeEach(func() {
+				extraMounts := []map[string]interface{}{
+					{
+						"mounts": []interface{}{
+							map[string]interface{}{
+								"mountPath": "/runner/env/ssh_key",
+								"name":      "ssh-key",
+								"subPath":   "ssh_key",
+							},
+							map[string]interface{}{
+								"mountPath": "/runner/inventory/inventory-0",
+								"name":      "inventory-0",
+								"subPath":   "inventory-0",
+							},
+							map[string]interface{}{
+								"mountPath": "/runner/inventory/inventory-1",
+								"name":      "inventory-1",
+								"subPath":   "inventory-1",
+							},
+						},
+						"volumes": []map[string]interface{}{
+							{
+								"name": "ssh-key",
+								"secret": map[string]interface{}{
+									"items": []map[string]string{
+										{
+											"key":  "ssh-privatekey",
+											"path": "ssh_key",
+										},
+									},
+									"secretName": "dataplane-ansible-ssh-private-key-secret",
+								},
+							},
+							{
+								"name": "inventory-0",
+								"secret": map[string]interface{}{
+									"items": []map[string]string{
+										{
+											"key":  "inventory",
+											"path": "inventory-0",
+										},
+									},
+									"secretName": "dataplane",
+								},
+							},
+							{
+								"name": "inventory-1",
+								"secret": map[string]interface{}{
+									"items": []map[string]string{
+										{
+											"key":  "inventory",
+											"path": "inventory-1",
+										},
+									},
+									"secretName": "dataplane",
+								},
+							},
+						},
+					},
+				}
+				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
+					ansibleeeName, "", "test-image", play, "", map[string]interface{}{}, extraMounts))
+			})
+			It("runs a job and reports when it succeeds", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1beta1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				ansibleee := GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
+
+				// simulate that the job succeeds
+				th.SimulateJobSuccess(ansibleeeName)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1beta1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionTrue,
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionTrue,
+				)
+				ansibleee = GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
+			})
+
+			It("runs a job and reports if it fails", func() {
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1beta1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.RequestedReason,
+					"AnsibleExecutionJob is running",
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				ansibleee := GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
+
+				// simulate that the job fails
+				th.SimulateJobFailure(ansibleeeName)
+
+				th.ExpectConditionWithDetails(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					v1beta1.AnsibleExecutionJobReadyCondition,
+					corev1.ConditionFalse,
+					condition.ErrorReason,
+					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
+				)
+				th.ExpectCondition(
+					ansibleeeName,
+					ConditionGetterFunc(AnsibleeeConditionGetter),
+					condition.ReadyCondition,
+					corev1.ConditionFalse,
+				)
+				ansibleee = GetAnsibleee(ansibleeeName)
+				Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
+				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
+				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
+			})
+		})
+
 		Context("with extra vars", func() {
 			extraVars := map[string]interface{}{
 				"foo":  "bar",
