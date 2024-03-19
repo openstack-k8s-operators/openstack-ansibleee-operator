@@ -68,7 +68,7 @@ func CreateAnsibleee(name types.NamespacedName) client.Object {
 
 func CreateAnsibleeeWithParams(
 	name types.NamespacedName, playbook string, image string, play string,
-	cmdline string, extraVars map[string]interface{}) client.Object {
+	cmdline string, extraVars map[string]interface{}, extraMounts []map[string]interface{}) client.Object {
 
 	raw := map[string]interface{}{
 		"apiVersion": "ansibleee.openstack.org/v1beta1",
@@ -80,11 +80,12 @@ func CreateAnsibleeeWithParams(
 		"spec": map[string]interface{}{
 			// this can be removed as soon as webhook is enabled in the
 			// test env
-			"image":     image,
-			"playbook":  playbook,
-			"play":      play,
-			"cmdline":   cmdline,
-			"extraVars": extraVars,
+			"image":       image,
+			"playbook":    playbook,
+			"play":        play,
+			"cmdline":     cmdline,
+			"extraVars":   extraVars,
+			"extraMounts": extraMounts,
 		},
 	}
 
