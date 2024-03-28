@@ -105,6 +105,11 @@ type OpenStackAnsibleEESpec struct {
 	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
 	// it will run with default serviceaccount
 	ServiceAccountName string `json:"serviceAccountName,omitempty"`
+	// ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this Job.
+	// If specified, these secrets will be passed to individual puller implementations for them to use.
+	// More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+	// +kubebuilder:validation:Optional
+	ImagePullSecrets []corev1.LocalObjectReference `json:"imagePullSecrets,omitempty"`
 	// DNSConfig allows to specify custom dnsservers and search domains
 	// +kubebuilder:validation:Optional
 	DNSConfig *corev1.PodDNSConfig `json:"dnsConfig,omitempty"`

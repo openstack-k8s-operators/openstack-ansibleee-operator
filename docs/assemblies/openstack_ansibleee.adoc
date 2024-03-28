@@ -172,6 +172,11 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | string
 | false
 
+| imagePullSecrets
+| ImagePullSecrets is an optional list of references to secrets in the same namespace to use for pulling any of the images used by this Job. If specified, these secrets will be passed to individual puller implementations for them to use. More info: https://kubernetes.io/docs/concepts/containers/images#specifying-imagepullsecrets-on-a-pod
+| []corev1.LocalObjectReference
+| false
+
 | dnsConfig
 | DNSConfig allows to specify custom dnsservers and search domains
 | *corev1.PodDNSConfig

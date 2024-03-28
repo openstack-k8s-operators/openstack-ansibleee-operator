@@ -157,6 +157,11 @@ func (in *OpenStackAnsibleEESpec) DeepCopyInto(out *OpenStackAnsibleEESpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.ImagePullSecrets != nil {
+		in, out := &in.ImagePullSecrets, &out.ImagePullSecrets
+		*out = make([]v1.LocalObjectReference, len(*in))
+		copy(*out, *in)
+	}
 	if in.DNSConfig != nil {
 		in, out := &in.DNSConfig, &out.DNSConfig
 		*out = new(v1.PodDNSConfig)
