@@ -19,6 +19,7 @@ package controllers
 import (
 	"fmt"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -407,11 +408,16 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 
 	// if we have any extra vars for ansible to use set them in the RUNNER_EXTRA_VARS
 	if len(instance.Spec.ExtraVars) > 0 {
+		keys := make([]string, 0, len(instance.Spec.ExtraVars))
+		for k := range instance.Spec.ExtraVars {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
 		parsedExtraVars := ""
 		// unmarshal nested data structures
-		for variable, val := range instance.Spec.ExtraVars {
+		for _, variable := range keys {
 			var tmp interface{}
-			err := yaml.Unmarshal(val, &tmp)
+			err := yaml.Unmarshal(instance.Spec.ExtraVars[variable], &tmp)
 			if err != nil {
 				return nil, err
 			}
