@@ -20,6 +20,7 @@ spec:
         ansible.builtin.debug:
           msg: "Hello, world this is ansibleee-play.yaml"
 status:
+  observedGeneration: 1
   JobStatus: Succeeded
 ---
 apiVersion: v1

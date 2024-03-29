@@ -118,6 +118,8 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
 
+		instance.Status.ObservedGeneration = instance.Generation
+
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
 			Log.Error(_err, "PatchInstance error")

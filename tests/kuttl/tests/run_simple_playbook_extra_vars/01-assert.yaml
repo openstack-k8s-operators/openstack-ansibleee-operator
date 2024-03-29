@@ -26,6 +26,7 @@ spec:
       is_it_here: true
       why: "because"
 status:
+  observedGeneration: 1
   JobStatus: Succeeded
 ---
 apiVersion: v1
