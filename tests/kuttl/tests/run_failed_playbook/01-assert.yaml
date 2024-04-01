@@ -1,0 +1,115 @@
+#
+# Check for:
+#
+# - 1 OpenStackAnsibleEE CR
+# - 1 failed-play pod
+# - 1 failed-play job
+# - Correct output from ansible play
+#
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: failed-play
+spec:
+  name: openstackansibleee
+  play: |
+    - name: Execution failure
+      hosts: localhost
+      tasks:
+      - name: Copy absent file
+        ansible.builtin.shell: |
+            set -euxo pipefail
+            cp absent failed_op
+  preserveJobs: true
+status:
+  JobStatus: Failed
+  conditions:
+  - message: 'AnsibleExecutionJob error occured Internal error occurred: Job Failed.
+      Check job logs'
+    reason: Error
+    severity: Warning
+    status: "False"
+    type: Ready
+  - message: 'AnsibleExecutionJob error occured Internal error occurred: Job Failed.
+      Check job logs'
+    reason: Error
+    severity: Warning
+    status: "False"
+    type: AnsibleExecutionJobReady
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  generateName: failed-play-
+  labels:
+    app: openstackansibleee
+    job-name: failed-play
+status:
+  phase: Failed
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app: openstackansibleee
+    job-name: failed-play
+    openstackansibleee_cr: failed-play
+    osaee: "true"
+  name: failed-play
+spec:
+  backoffLimit: 3
+  completionMode: NonIndexed
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: openstackansibleee
+        batch.kubernetes.io/job-name: failed-play
+        job-name: failed-play
+        openstackansibleee_cr: failed-play
+        osaee: "true"
+    spec:
+      containers:
+      - args:
+        - ansible-runner
+        - run
+        - /runner
+        - -p
+        - playbook.yaml
+        - -i
+        - failed-play
+        env:
+        - name: RUNNER_PLAYBOOK
+          value: |2+
+
+            - name: Execution failure
+              hosts: localhost
+              tasks:
+              - name: Copy absent file
+                ansible.builtin.shell: |
+                    set -euxo pipefail
+                    cp absent failed_op
+
+
+        - name: RUNNER_EXTRA_VARS
+          value: |2+
+
+            aaa: %!s(int=1)
+            bbb: %!s(int=2)
+            ccc: %!s(int=3)
+
+
+        imagePullPolicy: Always
+        name: openstackansibleee
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+status:
+  conditions:
+  - message: Job has reached the specified backoff limit
+    reason: BackoffLimitExceeded
+    status: "True"
+    type: Failed
+  failed: 4
