@@ -23,7 +23,7 @@ spec:
   preserveJobs: true
 status:
   JobStatus: Failed
-  JobGeneration: 1
+  JobGeneration: 2
   conditions:
   - message: 'AnsibleExecutionJob error occured Internal error occurred: Job Failed.
       Check job logs'
@@ -58,7 +58,7 @@ metadata:
     osaee: "true"
   name: failed-play
 spec:
-  backoffLimit: 3
+  backoffLimit: 1
   completionMode: NonIndexed
   completions: 1
   parallelism: 1
@@ -99,6 +99,7 @@ spec:
             aaa: %!s(int=1)
             bbb: %!s(int=2)
             ccc: %!s(int=3)
+            ddd: %!s(int=4)
 
 
         imagePullPolicy: Always
@@ -113,4 +114,4 @@ status:
     reason: BackoffLimitExceeded
     status: "True"
     type: Failed
-  failed: 4
+  failed: 2

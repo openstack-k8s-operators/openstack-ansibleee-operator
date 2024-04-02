@@ -53,6 +53,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -72,6 +73,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
 			})
@@ -93,6 +95,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -115,6 +118,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 			})
@@ -145,6 +149,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				originalInputHash := ansibleee.Status.Hash["input"]
 				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
@@ -170,6 +175,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 
 				// simulate that the second job succeeds
 				th.SimulateJobSuccess(ansibleeeName)
@@ -182,6 +188,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash["input"]).NotTo(Equal(originalInputHash))
 				Expect(ansibleee.Status.Hash["ansibleee"]).NotTo(Equal(originalJobHash))
 			})
@@ -227,6 +234,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -246,6 +254,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
 			})
@@ -267,6 +276,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -289,6 +299,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 			})
@@ -358,6 +369,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -377,6 +389,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
 			})
@@ -398,6 +411,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -420,6 +434,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 			})
@@ -506,6 +521,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -525,6 +541,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Succeeded"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).To(HaveKey("ansibleee"))
 			})
@@ -546,6 +563,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 
@@ -568,6 +586,7 @@ var _ = Describe("Ansibleee controller", func() {
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Failed"))
+				Expect(ansibleee.Status.JobGeneration).To(Equal(int64(1)))
 				Expect(ansibleee.Status.Hash).To(HaveKey("input"))
 				Expect(ansibleee.Status.Hash).NotTo(HaveKey("ansibleee"))
 			})

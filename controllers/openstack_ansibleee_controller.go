@@ -202,6 +202,10 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		currentJobHash,
 	)
 
+	if len(currentJobHash) > 0 && ansibleeeJob.HasChanged() {
+		instance.Status.JobGeneration++
+	}
+
 	ctrlResult, err := ansibleeeJob.DoJob(
 		ctx,
 		helper,

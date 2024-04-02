@@ -1,0 +1,19 @@
+apiVersion: ansibleee.openstack.org/v1beta1
+kind: OpenStackAnsibleEE
+metadata:
+  name: failed-play
+spec:
+  play: |
+    - name: Execution failure
+      hosts: localhost
+      tasks:
+      - name: Copy absent file
+        ansible.builtin.shell: |
+            set -euxo pipefail
+            cp absent failed_op
+  extraVars:
+    ddd: 4
+    aaa: 1
+    ccc: 3
+    bbb: 2
+  backoffLimit: 1

@@ -134,6 +134,10 @@ type OpenStackAnsibleEEStatus struct {
 	// +kubebuilder:default:=Pending
 	// JobStatus status of the executed job (Pending/Running/Succeeded/Failed)
 	JobStatus string `json:"JobStatus,omitempty" optional:"true"`
+
+	// +kubebuilder:default:=1
+	// JobGeneration track the amount of job generations
+	JobGeneration int64 `json:"JobGeneration,omitempty"`
 }
 
 //+kubebuilder:object:root=true

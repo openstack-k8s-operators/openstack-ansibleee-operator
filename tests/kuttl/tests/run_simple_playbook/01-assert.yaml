@@ -21,6 +21,7 @@ spec:
           msg: "Hello, world this is ansibleee-play.yaml"
 status:
   JobStatus: Succeeded
+  JobGeneration: 1
 ---
 apiVersion: v1
 kind: Pod

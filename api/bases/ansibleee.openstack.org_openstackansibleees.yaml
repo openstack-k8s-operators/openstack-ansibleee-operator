@@ -1545,6 +1545,10 @@ spec:
             type: object
           status:
             properties:
+              JobGeneration:
+                default: 1
+                format: int64
+                type: integer
               JobStatus:
                 default: Pending
                 enum:
