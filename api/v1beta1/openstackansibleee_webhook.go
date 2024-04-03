@@ -24,8 +24,14 @@ package v1beta1
 
 import (
 	"fmt"
+	"regexp"
 
+	"github.com/go-playground/validator/v10"
+	"gopkg.in/yaml.v2"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
 	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
@@ -81,13 +87,78 @@ var _ webhook.Validator = &OpenStackAnsibleEE{}
 // ValidateCreate implements webhook.Validator so a webhook will be registered for the type
 func (r *OpenStackAnsibleEE) ValidateCreate() (admission.Warnings, error) {
 	openstackansibleeelog.Info("validate create", "name", r.Name)
+	var errors field.ErrorList
 
-	for _, value := range r.Spec.Env {
-		if value.Name == "ANSIBLE_ENABLE_TASK_DEBUGGER" {
-			return nil, fmt.Errorf("ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER")
-		}
+	errors = append(errors, r.Spec.ValidateCreate()...)
+	if len(errors) != 0 {
+		openstackansibleeelog.Info("validation failed", "name", r.Name)
+		return nil, apierrors.NewInvalid(
+			schema.GroupKind{Group: "ansibleee.openstack.org", Kind: "OpenStakAnsibleEE"},
+			r.Name,
+			errors,
+		)
 	}
 	return nil, nil
+}
+
+func (spec *OpenStackAnsibleEESpec) ValidateCreate() field.ErrorList {
+	// Setting up input validation, including custom validators
+	validate := validator.New()
+	var errors field.ErrorList
+	if valErr := validate.RegisterValidation("play", isPlay); valErr != nil {
+		errors = append(errors,
+			field.InternalError(
+				field.NewPath("spec"),
+				fmt.Errorf("error registering input validation")))
+	}
+	if valErr := validate.RegisterValidation("fqcn", isFQCN); valErr != nil {
+		errors = append(errors,
+			field.InternalError(
+				field.NewPath("spec"),
+				fmt.Errorf("error registering input validation")))
+	}
+	if len(spec.Play) > 0 {
+		valErr := validate.Var(spec.Play, "play")
+		if valErr != nil {
+			errors = append(errors, field.Invalid(
+				field.NewPath("spec.play"),
+				spec.Play,
+				fmt.Sprintf(
+					"error checking sanity of an inline play: %s %s",
+					spec.Play, valErr),
+			))
+		}
+	} else if len(spec.Playbook) > 0 {
+		// As we set "playbook.yaml" as default
+		// we need to ensure that Play and Role are empty before addPlaybook
+		if validate.Var(spec.Playbook, "fqcn") != nil {
+			// First we check if the playbook isn't imported from a collection
+			// if it is not we assume the variable holds a path.
+			valErr := validate.Var(spec.Playbook, "filepath")
+			if valErr != nil {
+				errors = append(errors, field.Invalid(
+					field.NewPath("spec.playbook"),
+					spec.Playbook,
+					fmt.Sprintf(
+						"error checking sanity of playbook name/path: %s %s",
+						spec.Playbook, valErr),
+				))
+			}
+		}
+
+	}
+
+	for _, value := range spec.Env {
+		if value.Name == "ANSIBLE_ENABLE_TASK_DEBUGGER" {
+			errors = append(errors, field.Invalid(
+				field.NewPath("spec.env"),
+				spec.Env,
+				fmt.Sprintf("ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER"),
+			))
+		}
+	}
+
+	return errors
 }
 
 // ValidateUpdate implements webhook.Validator so a webhook will be registered for the type
@@ -104,4 +175,23 @@ func (r *OpenStackAnsibleEE) ValidateDelete() (admission.Warnings, error) {
 
 	// TODO(user): fill in your validation logic upon object deletion.
 	return nil, nil
+}
+
+// isPlay checks if the free form document has attributes of ansible play
+// Specifically if it is a parsable yaml with list as a root element
+func isPlay(document validator.FieldLevel) bool {
+	var play []map[string]interface{}
+	err := yaml.Unmarshal([]byte(document.Field().String()), &play)
+	return err == nil
+}
+
+// isFQCN checks if the string matches regular expression of ansible FQCN
+// The function doesn't check if the collection exists or is accessible
+// function only accepts FQCNs as defined by
+// https://old-galaxy.ansible.com/docs/contributing/namespaces.html#namespace-limitations
+// Regex derived from ansible-lint rule
+func isFQCN(name validator.FieldLevel) bool {
+	pattern, compileErr := regexp.Compile(`^\w+(\.\w+){2,}$`)
+	match := pattern.Match([]byte(name.Field().String()))
+	return match && compileErr == nil
 }

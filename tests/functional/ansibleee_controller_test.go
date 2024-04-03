@@ -188,23 +188,6 @@ var _ = Describe("Ansibleee controller", func() {
 
 		})
 
-		Context("with invalid playbook name/path", func() {
-			BeforeEach(func() {
-				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "/", "test-image", "", "", map[string]interface{}{}, []map[string]interface{}{}))
-			})
-			It("runs a job and reports when it succeeds", func() {
-				th.ExpectConditionWithDetails(
-					ansibleeeName,
-					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
-					corev1.ConditionUnknown,
-					condition.InitReason,
-					"AnsibleExecutionJob not started",
-				)
-			})
-		})
-
 		Context("with an inline play", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(

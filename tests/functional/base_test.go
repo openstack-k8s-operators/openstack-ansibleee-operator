@@ -34,6 +34,15 @@ const (
     - name: Using debug statement
       ansible.builtin.debug:
         msg: "Hello, world this is ansibleee-play.yaml"`
+
+	// This constant is meant to represent malformed inline play
+	malformedPlay = `
+	- name: Print hello world
+	  hosts: all
+	  tasks:
+		- name: Using debug statement
+		  ansible.builtin.debug:
+			msg: "Hello, world this is ansibleee-play.yaml"`
 )
 
 func GetAnsibleee(name types.NamespacedName) *v1beta1.OpenStackAnsibleEE {

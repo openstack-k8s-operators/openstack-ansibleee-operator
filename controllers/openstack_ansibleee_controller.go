@@ -18,7 +18,6 @@ package controllers
 
 import (
 	"fmt"
-	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -33,7 +32,6 @@ import (
 	"context"
 
 	"github.com/go-logr/logr"
-	"github.com/go-playground/validator/v10"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
 	helper "github.com/openstack-k8s-operators/lib-common/modules/common/helper"
 	job "github.com/openstack-k8s-operators/lib-common/modules/common/job"
@@ -271,16 +269,6 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	Log := r.GetLogger(ctx)
 	labels := instance.GetObjectMeta().GetLabels()
 
-	// Setting up input validation, including custom validators
-	validate := validator.New()
-
-	if valErr := validate.RegisterValidation("play", isPlay); valErr != nil {
-		return nil, fmt.Errorf("error registering input validation")
-	}
-	if valErr := validate.RegisterValidation("fqcn", isFQCN); valErr != nil {
-		return nil, fmt.Errorf("error registering input validation")
-	}
-
 	ls := labelsForOpenStackAnsibleEE(instance.Name, labels)
 
 	args := instance.Spec.Args
@@ -373,27 +361,10 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	}
 
 	if len(instance.Spec.Play) > 0 {
-		valErr := validate.Var(instance.Spec.Play, "play")
-		if valErr != nil {
-			return nil, fmt.Errorf(
-				"error checking sanity of an inline play: %s %w",
-				instance.Spec.Play, valErr)
-		}
 		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
-		// we need to ensure that Play and Role are empty before addPlaybook
-		if validate.Var(playbook, "fqcn") != nil {
-			// First we check if the playbook isn't imported from a collection
-			// if it is not we assume the variable holds a path.
-			valErr := validate.Var(playbook, "filepath")
-			if valErr != nil {
-				return nil, fmt.Errorf(
-					"error checking sanity of playbook name/path: %s %w",
-					playbook, valErr)
-			}
-		}
-
+		// we need to ensure that Play is empty before adding playbook
 		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
 	}
 
@@ -555,23 +526,4 @@ func (r *OpenStackAnsibleEEReconciler) SetupWithManager(mgr ctrl.Manager) error 
 		For(&ansibleeev1.OpenStackAnsibleEE{}).
 		Owns(&batchv1.Job{}).
 		Complete(r)
-}
-
-// isPlay checks if the free form document has attributes of ansible play
-// Specifically if it is a parsable yaml with list as a root element
-func isPlay(document validator.FieldLevel) bool {
-	var play []map[string]interface{}
-	err := yaml.Unmarshal([]byte(document.Field().String()), &play)
-	return err == nil
-}
-
-// isFQCN checks if the string matches regular expression of ansible FQCN
-// The function doesn't check if the collection exists or is accessible
-// function only accepts FQCNs as defined by
-// https://galaxy.ansible.com/docs/contributing/namespaces.html#namespace-limitations
-// Regex derive
-func isFQCN(name validator.FieldLevel) bool {
-	pattern, compileErr := regexp.Compile(`^\w+(\.\w+){2,}$`)
-	match := pattern.Match([]byte(name.Field().String()))
-	return match && compileErr == nil
 }
