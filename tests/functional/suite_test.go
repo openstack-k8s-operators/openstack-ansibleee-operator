@@ -37,6 +37,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
@@ -78,6 +79,10 @@ var _ = BeforeSuite(func() {
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
 		ErrorIfCRDPathMissing: true,
+		WebhookInstallOptions: envtest.WebhookInstallOptions{
+			Paths:            []string{filepath.Join("..", "..", "config", "webhook")},
+			LocalServingHost: "127.0.0.1",
+		},
 	}
 
 	ctx, cancel = context.WithCancel(context.TODO())
@@ -101,6 +106,7 @@ var _ = BeforeSuite(func() {
 
 	th = helpers.NewTestHelper(ctx, k8sClient, timeout, interval, logger)
 	Expect(th).NotTo(BeNil())
+	webhookInstallOptions := &testEnv.WebhookInstallOptions
 
 	// Start the controller-manager in a goroutine
 	k8sManager, err := ctrl.NewManager(cfg, ctrl.Options{
@@ -112,8 +118,17 @@ var _ = BeforeSuite(func() {
 			BindAddress: "0",
 		},
 		LeaderElection: false,
+		WebhookServer: webhook.NewServer(
+			webhook.Options{
+				Host:    webhookInstallOptions.LocalServingHost,
+				Port:    webhookInstallOptions.LocalServingPort,
+				CertDir: webhookInstallOptions.LocalServingCertDir,
+			}),
 	})
 	Expect(err).ToNot(HaveOccurred())
+
+	err = (&ansibleeev1.OpenStackAnsibleEE{}).SetupWebhookWithManager(k8sManager)
+	Expect(err).NotTo(HaveOccurred())
 
 	kclient, err := kubernetes.NewForConfig(cfg)
 	Expect(err).ToNot(HaveOccurred(), "failed to create kclient")
