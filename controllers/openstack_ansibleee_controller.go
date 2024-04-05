@@ -103,42 +103,43 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		return ctrl.Result{}, err
 	}
 
+	// initialize status if Conditions is nil, but do not reset if it already
+	// exists
+	isNewInstance := instance.Status.Conditions == nil
+	if isNewInstance {
+		instance.Status.Conditions = condition.Conditions{}
+	}
+
+	// Save a copy of the condtions so that we can restore the LastTransitionTime
+	// when a condition's state doesn't change.
+	savedConditions := instance.Status.Conditions.DeepCopy()
+
 	// Always patch the instance status when exiting this function so we can
 	// persist any changes.
 	defer func() {
-		// update the overall status condition if service is ready
-		if instance.IsReady() {
-			instance.Status.Conditions.MarkTrue(condition.ReadyCondition, ansibleeev1.AnsibleExecutionJobReadyMessage)
-		} else {
-			// something is not ready so reset the Ready condition
-			instance.Status.Conditions.MarkUnknown(
-				condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage)
-			// and recalculate it based on the state of the rest of the conditions
-			instance.Status.Conditions.Set(instance.Status.Conditions.Mirror(condition.ReadyCondition))
+		condition.RestoreLastTransitionTimes(
+			&instance.Status.Conditions, savedConditions)
+		if instance.Status.Conditions.IsUnknown(condition.ReadyCondition) {
+			instance.Status.Conditions.Set(
+				instance.Status.Conditions.Mirror(condition.ReadyCondition))
 		}
-
 		err := helper.PatchInstance(ctx, instance)
 		if err != nil {
-			Log.Error(_err, "PatchInstance error")
 			_err = err
 			return
 		}
 	}()
 
 	// Initialize Status
-	if instance.Status.Conditions == nil {
-		instance.Status.Conditions = condition.Conditions{}
 
-		cl := condition.CreateList(
-			condition.UnknownCondition(ansibleeev1.AnsibleExecutionJobReadyCondition, condition.InitReason, ansibleeev1.AnsibleExecutionJobInitMessage),
-		)
+	cl := condition.CreateList(
+		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
+		condition.UnknownCondition(ansibleeev1.AnsibleExecutionJobReadyCondition, condition.InitReason, ansibleeev1.AnsibleExecutionJobInitMessage),
+	)
 
-		instance.Status.Conditions.Init(&cl)
-
-		// Register overall status immediately to have an early feedback e.g.
-		// in the cli
-		return ctrl.Result{}, nil
-	}
+	instance.Status.Conditions.Init(&cl)
+	// Bump the ObservedGeneration as the new Reconciliation started
+	instance.Status.ObservedGeneration = instance.Generation
 
 	// Initialize Status fields
 	util.InitMap(&instance.Status.Hash)
@@ -234,6 +235,12 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	instance.Status.Conditions.MarkTrue(ansibleeev1.AnsibleExecutionJobReadyCondition, ansibleeev1.AnsibleExecutionJobReadyMessage)
 	instance.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 
+	// We reached the end of the Reconcile, update the Ready condition based on
+	// the sub conditions
+	if instance.Status.Conditions.AllSubConditionIsTrue() {
+		instance.Status.Conditions.MarkTrue(
+			condition.ReadyCondition, condition.ReadyMessage)
+	}
 	Log.Info(fmt.Sprintf("Reconciled AnsibleEE '%s' successfully", instance.Name))
 	return ctrl.Result{}, nil
 }

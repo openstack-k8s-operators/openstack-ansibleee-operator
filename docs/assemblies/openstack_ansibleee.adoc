@@ -212,6 +212,11 @@ OpenStackAnsibleEEStatus defines the observed state of OpenStackAnsibleEE
 | JobStatus status of the executed job (Pending/Running/Succeeded/Failed)
 | string
 | false
+
+| observedGeneration
+| ObservedGeneration - the most recent generation observed for this service. If the observed generation is less than the spec generation, then the controller has not processed the latest changes injected by the opentack-operator in the top-level CR (e.g. the ContainerImage)
+| int64
+| false
 |===
 
 <<custom-resources,Back to Custom Resources>>
