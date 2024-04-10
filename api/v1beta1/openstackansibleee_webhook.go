@@ -27,7 +27,7 @@ import (
 	"regexp"
 
 	"github.com/go-playground/validator/v10"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -153,7 +153,7 @@ func (spec *OpenStackAnsibleEESpec) ValidateCreate() field.ErrorList {
 			errors = append(errors, field.Invalid(
 				field.NewPath("spec.env"),
 				spec.Env,
-				fmt.Sprintf("ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER"),
+				"ansible-runner does not support ANSIBLE_ENABLE_TASK_DEBUGGER",
 			))
 		}
 	}
