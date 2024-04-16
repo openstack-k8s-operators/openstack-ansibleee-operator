@@ -275,6 +275,11 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 	annotations map[string]string) (*batchv1.Job, error) {
 	Log := r.GetLogger(ctx)
 	labels := instance.GetObjectMeta().GetLabels()
+	instanceAnnotations := instance.GetObjectMeta().GetAnnotations()
+
+	for key, val := range instanceAnnotations {
+		annotations[key] = val
+	}
 
 	ls := labelsForOpenStackAnsibleEE(instance.Name, labels)
 
