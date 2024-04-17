@@ -6,8 +6,8 @@ require (
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/onsi/ginkgo/v2 v2.17.1
 	github.com/onsi/gomega v1.32.0
-	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240408095526-357d8fffa034
-	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240408095526-357d8fffa034
+	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240412091425-bb628ded5eb8
+	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240412091425-bb628ded5eb8
 	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/api v0.28.8
 	k8s.io/apimachinery v0.28.8
