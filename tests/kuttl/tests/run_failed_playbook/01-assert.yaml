@@ -24,18 +24,18 @@ spec:
 status:
   JobStatus: Failed
   conditions:
-  - message: 'AnsibleExecutionJob error occurred Internal error occurred: Job has reached the specified backoff limit.
+  - message: 'Job error occurred Internal error occurred: Job has reached the specified backoff limit.
       Check job logs'
     reason: Error
     severity: Warning
     status: "False"
     type: Ready
-  - message: 'AnsibleExecutionJob error occurred Internal error occurred: Job has reached the specified backoff limit.
+  - message: 'Job error occurred Internal error occurred: Job has reached the specified backoff limit.
       Check job logs'
     reason: Error
     severity: Warning
     status: "False"
-    type: AnsibleExecutionJobReady
+    type: JobReady
 ---
 apiVersion: v1
 kind: Pod

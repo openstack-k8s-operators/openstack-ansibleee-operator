@@ -134,7 +134,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	cl := condition.CreateList(
 		condition.UnknownCondition(condition.ReadyCondition, condition.InitReason, condition.ReadyInitMessage),
-		condition.UnknownCondition(ansibleeev1.AnsibleExecutionJobReadyCondition, condition.InitReason, ansibleeev1.AnsibleExecutionJobInitMessage),
+		condition.UnknownCondition(condition.JobReadyCondition, condition.InitReason, condition.JobReadyInitMessage),
 	)
 
 	instance.Status.Conditions.Init(&cl)
@@ -208,20 +208,20 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	if (ctrlResult != ctrl.Result{}) {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			ansibleeev1.AnsibleExecutionJobReadyCondition,
+			condition.JobReadyCondition,
 			condition.RequestedReason,
 			condition.SeverityInfo,
-			ansibleeev1.AnsibleExecutionJobWaitingMessage))
+			condition.JobReadyRunningMessage))
 		instance.Status.JobStatus = ansibleeev1.JobStatusRunning
 		return ctrlResult, nil
 	}
 
 	if err != nil {
 		instance.Status.Conditions.Set(condition.FalseCondition(
-			ansibleeev1.AnsibleExecutionJobReadyCondition,
+			condition.JobReadyCondition,
 			condition.ErrorReason,
 			condition.SeverityWarning,
-			ansibleeev1.AnsibleExecutionJobErrorMessage,
+			condition.JobReadyErrorMessage,
 			err.Error()))
 		instance.Status.JobStatus = ansibleeev1.JobStatusFailed
 		return ctrl.Result{}, err
@@ -232,7 +232,7 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		Log.Info(fmt.Sprintf("AnsibleEE CR '%s' - Job %s hash added - %s", instance.Name, jobDef.Name, instance.Status.Hash[ansibleeeJobType]))
 	}
 
-	instance.Status.Conditions.MarkTrue(ansibleeev1.AnsibleExecutionJobReadyCondition, ansibleeev1.AnsibleExecutionJobReadyMessage)
+	instance.Status.Conditions.MarkTrue(condition.JobReadyCondition, condition.JobReadyMessage)
 	instance.Status.JobStatus = ansibleeev1.JobStatusSucceeded
 
 	// We reached the end of the Reconcile, update the Ready condition based on
