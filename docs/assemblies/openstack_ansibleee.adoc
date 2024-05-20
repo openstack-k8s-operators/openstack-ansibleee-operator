@@ -167,6 +167,11 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 | []corev1.Container
 | false
 
+| resources
+| Compute Resources required by this ansibleee job. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+| corev1.ResourceRequirements
+| false
+
 | serviceAccountName
 | ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying, it will run with default serviceaccount
 | string

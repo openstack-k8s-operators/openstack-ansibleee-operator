@@ -101,6 +101,10 @@ type OpenStackAnsibleEESpec struct {
 	// +kubebuilder:validation:Optional
 	// InitContainers allows the passing of an array of containers that will be executed before the ansibleee execution itself
 	InitContainers []corev1.Container `json:"initContainers,omitempty"`
+	// Compute Resources required by this ansibleee job.
+	// More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+	// +kubebuilder:validation:Optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
 	// +kubebuilder:validation:Optional
 	// ServiceAccountName allows to specify what ServiceAccountName do we want the ansible execution run with. Without specifying,
 	// it will run with default serviceaccount

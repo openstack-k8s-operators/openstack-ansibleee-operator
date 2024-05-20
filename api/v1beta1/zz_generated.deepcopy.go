@@ -157,6 +157,7 @@ func (in *OpenStackAnsibleEESpec) DeepCopyInto(out *OpenStackAnsibleEESpec) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	in.Resources.DeepCopyInto(&out.Resources)
 	if in.DNSConfig != nil {
 		in, out := &in.DNSConfig, &out.DNSConfig
 		*out = new(v1.PodDNSConfig)

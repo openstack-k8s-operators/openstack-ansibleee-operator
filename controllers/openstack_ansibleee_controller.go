@@ -304,6 +304,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 			Name:            instance.Spec.Name,
 			Args:            args,
 			Env:             instance.Spec.Env,
+			Resources:       instance.Spec.Resources,
 		}},
 	}
 
