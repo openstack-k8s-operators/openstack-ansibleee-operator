@@ -4,7 +4,7 @@ metadata:
   name: ansibleee-play-debug
 spec:
   play: |
-    - name: Print hello world
+      name: Print hello world
       hosts: localhost
       tasks:
       - name: Using debug statement

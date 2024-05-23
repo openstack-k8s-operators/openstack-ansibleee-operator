@@ -13,13 +13,13 @@ metadata:
 spec:
   name: openstackansibleee
   play: |
-    - name: Execution failure
-      hosts: localhost
-      tasks:
-      - name: Copy absent file
-        ansible.builtin.shell: |
-            set -euxo pipefail
-            cp absent failed_op
+    name: Execution failure
+    hosts: localhost
+    tasks:
+    - name: Copy absent file
+      ansible.builtin.shell: |
+        set -euxo pipefail
+        cp absent failed_op
   preserveJobs: true
 status:
   JobStatus: Failed
@@ -83,13 +83,13 @@ spec:
         - name: RUNNER_PLAYBOOK
           value: |2+
 
-            - name: Execution failure
-              hosts: localhost
-              tasks:
-              - name: Copy absent file
-                ansible.builtin.shell: |
-                    set -euxo pipefail
-                    cp absent failed_op
+            name: Execution failure
+            hosts: localhost
+            tasks:
+            - name: Copy absent file
+              ansible.builtin.shell: |
+                set -euxo pipefail
+                cp absent failed_op
 
 
         - name: RUNNER_EXTRA_VARS

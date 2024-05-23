@@ -6,7 +6,7 @@ metadata:
 spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
   play: |
-    - name: Print hello world
+      name: Print hello world
       hosts: all
       tasks:
       - name: Using debug statement

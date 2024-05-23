@@ -5,7 +5,7 @@ metadata:
   namespace: openstack
 spec:
   play: |
-    - name: Print hello world
+      name: Print hello world
       hosts: all
       tasks:
       - name: Using debug statement

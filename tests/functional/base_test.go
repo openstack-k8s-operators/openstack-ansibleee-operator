@@ -28,7 +28,7 @@ import (
 const (
 	// This constant must NOT use tabs, as it as raw string passed to the ansible-runner
 	play = `
-- name: Print hello world
+  name: Print hello world
   hosts: all
   tasks:
     - name: Using debug statement
@@ -77,8 +77,8 @@ func CreateAnsibleee(name types.NamespacedName) client.Object {
 
 func CreateAnsibleeeWithParams(
 	name types.NamespacedName, playbook string, image string, play string,
-	cmdline string, extraVars map[string]interface{}, extraMounts []map[string]interface{}) client.Object {
-
+	cmdline string, extraVars map[string]interface{}, extraMounts []map[string]interface{},
+) client.Object {
 	raw := map[string]interface{}{
 		"apiVersion": "ansibleee.openstack.org/v1beta1",
 		"kind":       "OpenStackAnsibleEE",

@@ -145,7 +145,6 @@ func (spec *OpenStackAnsibleEESpec) ValidateCreate() field.ErrorList {
 				))
 			}
 		}
-
 	}
 
 	for _, value := range spec.Env {
@@ -180,7 +179,7 @@ func (r *OpenStackAnsibleEE) ValidateDelete() (admission.Warnings, error) {
 // isPlay checks if the free form document has attributes of ansible play
 // Specifically if it is a parsable yaml with list as a root element
 func isPlay(document validator.FieldLevel) bool {
-	var play []map[string]interface{}
+	var play map[string]interface{}
 	err := yaml.Unmarshal([]byte(document.Field().String()), &play)
 	return err == nil
 }
