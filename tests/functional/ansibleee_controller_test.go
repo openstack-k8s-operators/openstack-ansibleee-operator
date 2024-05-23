@@ -105,7 +105,7 @@ var _ = Describe("Ansibleee controller", func() {
 					v1beta1.AnsibleExecutionJobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
+					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -262,7 +262,7 @@ var _ = Describe("Ansibleee controller", func() {
 					v1beta1.AnsibleExecutionJobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
+					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -393,7 +393,7 @@ var _ = Describe("Ansibleee controller", func() {
 					v1beta1.AnsibleExecutionJobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
+					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -541,7 +541,7 @@ var _ = Describe("Ansibleee controller", func() {
 					v1beta1.AnsibleExecutionJobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occured Internal error occurred: Job Failed. Check job logs",
+					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,

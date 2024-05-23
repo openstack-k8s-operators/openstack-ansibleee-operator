@@ -43,5 +43,5 @@ const (
 	AnsibleExecutionJobWaitingMessage = "AnsibleExecutionJob is running"
 
 	// AnsibleExecutionJobErrorMessage
-	AnsibleExecutionJobErrorMessage = "AnsibleExecutionJob error occured %s"
+	AnsibleExecutionJobErrorMessage = "AnsibleExecutionJob error occurred %s"
 )

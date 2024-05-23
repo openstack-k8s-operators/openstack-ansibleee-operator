@@ -24,13 +24,13 @@ spec:
 status:
   JobStatus: Failed
   conditions:
-  - message: 'AnsibleExecutionJob error occured Internal error occurred: Job Failed.
+  - message: 'AnsibleExecutionJob error occurred Internal error occurred: Job has reached the specified backoff limit.
       Check job logs'
     reason: Error
     severity: Warning
     status: "False"
     type: Ready
-  - message: 'AnsibleExecutionJob error occured Internal error occurred: Job Failed.
+  - message: 'AnsibleExecutionJob error occurred Internal error occurred: Job has reached the specified backoff limit.
       Check job logs'
     reason: Error
     severity: Warning
