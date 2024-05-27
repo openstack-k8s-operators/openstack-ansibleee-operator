@@ -105,7 +105,7 @@ func (spec *OpenStackAnsibleEESpec) ValidateCreate() field.ErrorList {
 	// Setting up input validation, including custom validators
 	validate := validator.New()
 	var errors field.ErrorList
-	if valErr := validate.RegisterValidation("play", isPlay); valErr != nil {
+	if valErr := validate.RegisterValidation("play", isPlaybook); valErr != nil {
 		errors = append(errors,
 			field.InternalError(
 				field.NewPath("spec"),
@@ -145,7 +145,6 @@ func (spec *OpenStackAnsibleEESpec) ValidateCreate() field.ErrorList {
 				))
 			}
 		}
-
 	}
 
 	for _, value := range spec.Env {
@@ -177,11 +176,11 @@ func (r *OpenStackAnsibleEE) ValidateDelete() (admission.Warnings, error) {
 	return nil, nil
 }
 
-// isPlay checks if the free form document has attributes of ansible play
+// isPlaybook checks if the free form document has attributes of ansible playbook
 // Specifically if it is a parsable yaml with list as a root element
-func isPlay(document validator.FieldLevel) bool {
-	var play []map[string]interface{}
-	err := yaml.Unmarshal([]byte(document.Field().String()), &play)
+func isPlaybook(document validator.FieldLevel) bool {
+	var playbook []map[string]interface{}
+	err := yaml.Unmarshal([]byte(document.Field().String()), &playbook)
 	return err == nil
 }
 
