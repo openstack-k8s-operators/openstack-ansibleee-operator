@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/go-playground/validator/v10 v10.20.0
-	github.com/onsi/ginkgo/v2 v2.18.0
+	github.com/onsi/ginkgo/v2 v2.19.0
 	github.com/onsi/gomega v1.33.1
 	github.com/openstack-k8s-operators/lib-common/modules/common v0.3.1-0.20240523061957-78c308214ae3
 	github.com/openstack-k8s-operators/lib-common/modules/storage v0.3.1-0.20240523061957-78c308214ae3
