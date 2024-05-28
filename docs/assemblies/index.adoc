@@ -126,7 +126,7 @@ You can get the OpenStackAnsibleEE resource created with the `oc get openstackan
 ----
 $ oc get osaee
 NAME                       NETWORKATTACHMENTS   STATUS   MESSAGE
-ansibleee-playbook-local                        True     AnsibleExecutionJob complete
+ansibleee-playbook-local                        True     Job completed
 ----
 
 After knowing the name of the OpenStackAnsibleEE resource, you can search for its pod by filtering the `openstackansibleee_cr` label.

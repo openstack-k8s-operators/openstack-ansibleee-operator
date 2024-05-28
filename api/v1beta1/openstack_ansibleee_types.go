@@ -182,7 +182,7 @@ func init() {
 
 // IsReady - returns true if the OpenStackAnsibleEE is ready
 func (instance OpenStackAnsibleEE) IsReady() bool {
-	return instance.Status.Conditions.IsTrue(AnsibleExecutionJobReadyCondition)
+	return instance.Status.Conditions.IsTrue(condition.JobReadyCondition)
 }
 
 // SetupDefaults - initializes any CRD field defaults based on environment variables (the defaulting mechanism itself is implemented via webhooks)

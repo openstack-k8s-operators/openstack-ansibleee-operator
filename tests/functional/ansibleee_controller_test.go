@@ -27,7 +27,6 @@ import (
 
 	//revive:disable-next-line:dot-imports
 	. "github.com/openstack-k8s-operators/lib-common/modules/common/test/helpers"
-	"github.com/openstack-k8s-operators/openstack-ansibleee-operator/api/v1beta1"
 )
 
 var _ = Describe("Ansibleee controller", func() {
@@ -40,10 +39,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -61,7 +60,7 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectCondition(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionTrue,
 				)
 				th.ExpectCondition(
@@ -80,10 +79,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -102,10 +101,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
+					"Job error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -123,10 +122,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -140,7 +139,7 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectCondition(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionTrue,
 				)
 				ansibleee := GetAnsibleee(ansibleeeName)
@@ -163,10 +162,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
 				Expect(ansibleee.Status.JobStatus).To(Equal("Running"))
@@ -177,7 +176,7 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectCondition(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionTrue,
 				)
 				ansibleee = GetAnsibleee(ansibleeeName)
@@ -197,10 +196,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -218,7 +217,7 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectCondition(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionTrue,
 				)
 				th.ExpectCondition(
@@ -237,10 +236,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -259,10 +258,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
+					"Job error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -328,10 +327,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -349,7 +348,7 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectCondition(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionTrue,
 				)
 				th.ExpectCondition(
@@ -368,10 +367,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -390,10 +389,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
+					"Job error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -476,10 +475,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -497,7 +496,7 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectCondition(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionTrue,
 				)
 				th.ExpectCondition(
@@ -516,10 +515,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -538,10 +537,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.ErrorReason,
-					"AnsibleExecutionJob error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
+					"Job error occurred Internal error occurred: Job Attempt #1 Failed. Check job logs",
 				)
 				th.ExpectCondition(
 					ansibleeeName,
@@ -569,10 +568,10 @@ var _ = Describe("Ansibleee controller", func() {
 				th.ExpectConditionWithDetails(
 					ansibleeeName,
 					ConditionGetterFunc(AnsibleeeConditionGetter),
-					v1beta1.AnsibleExecutionJobReadyCondition,
+					condition.JobReadyCondition,
 					corev1.ConditionFalse,
 					condition.RequestedReason,
-					"AnsibleExecutionJob is running",
+					"Job in progress",
 				)
 				marshalled := map[string]json.RawMessage{
 					"foo":  json.RawMessage([]byte("\"bar\"")),
