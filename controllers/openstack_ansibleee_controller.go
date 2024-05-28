@@ -217,10 +217,17 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 	}
 
 	if err != nil {
+		var errorReason condition.Reason
+		errorReason = condition.ErrorReason
+		severity := condition.SeverityWarning
+		if ansibleeeJob.HasReachedLimit() {
+			errorReason = condition.JobReasonBackoffLimitExceeded
+			severity = condition.SeverityError
+		}
 		instance.Status.Conditions.Set(condition.FalseCondition(
 			condition.JobReadyCondition,
-			condition.ErrorReason,
-			condition.SeverityWarning,
+			errorReason,
+			severity,
 			condition.JobReadyErrorMessage,
 			err.Error()))
 		instance.Status.JobStatus = ansibleeev1.JobStatusFailed

@@ -26,14 +26,14 @@ status:
   conditions:
   - message: 'Job error occurred Internal error occurred: Job has reached the specified backoff limit.
       Check job logs'
-    reason: Error
-    severity: Warning
+    reason: BackoffLimitExceeded
+    severity: Error
     status: "False"
     type: Ready
   - message: 'Job error occurred Internal error occurred: Job has reached the specified backoff limit.
       Check job logs'
-    reason: Error
-    severity: Warning
+    reason: BackoffLimitExceeded
+    severity: Error
     status: "False"
     type: JobReady
 ---
