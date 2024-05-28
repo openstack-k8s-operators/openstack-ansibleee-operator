@@ -43,6 +43,7 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 commands:
   - script: |
+      set -euxo pipefail
       pod=$(oc get pods -n $NAMESPACE -l app=openstackansibleee,job-name=ansibleee-play-debug -o name)
       description=$(oc describe -n $NAMESPACE "$pod")
       playbook_present=$(echo "$description" | grep 'Hello, world this is ansibleee-play-debug.yaml')
@@ -53,12 +54,9 @@ commands:
       else
         exit 1
       fi
----
 # when using image digests the containerImage URLs are SHA's so we verify them with a script
-apiVersion: kuttl.dev/v1beta1
-kind: TestAssert
-commands:
   - script: |
+      set -euxo pipefail
       tupleTemplate='{{ range (index .spec.template.spec.containers 1).env }}{{ .name }}{{ "#" }}{{ .value}}{{"\n"}}{{ end }}'
       imageTuples=$(oc get -n openstack-operators deployment openstack-ansibleee-operator-controller-manager -o go-template="$tupleTemplate")
       # format of imageTuple is: RELATED_IMAGE_ANSIBLEEE_<service>#<image URL with SHA> separated by newlines
