@@ -4,7 +4,7 @@ metadata:
   name: ansibleee-playbook-local
   namespace: openstack
 spec:
-  play: |
+  playbookContents: |
     - name: Print hello world
       hosts: all
       tasks:

@@ -3,7 +3,7 @@ kind: OpenStackAnsibleEE
 metadata:
   name: ansibleee-play-extravars
 spec:
-  play: |
+  playbookContents: |
     - name: Print hello world
       hosts: localhost
       tasks:

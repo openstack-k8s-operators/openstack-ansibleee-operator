@@ -187,10 +187,10 @@ var _ = Describe("Ansibleee controller", func() {
 
 		})
 
-		Context("with an inline play", func() {
+		Context("with an inline playbook", func() {
 			BeforeEach(func() {
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", play, "", map[string]interface{}{}, []map[string]interface{}{}))
+					ansibleeeName, "", "test-image", playbookContents, "", map[string]interface{}{}, []map[string]interface{}{}))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(
@@ -321,7 +321,7 @@ var _ = Describe("Ansibleee controller", func() {
 					},
 				}
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", play, "", map[string]interface{}{}, extraMounts))
+					ansibleeeName, "", "test-image", playbookContents, "", map[string]interface{}{}, extraMounts))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(
@@ -469,7 +469,7 @@ var _ = Describe("Ansibleee controller", func() {
 					},
 				}
 				DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
-					ansibleeeName, "", "test-image", play, "", map[string]interface{}{}, extraMounts))
+					ansibleeeName, "", "test-image", playbookContents, "", map[string]interface{}{}, extraMounts))
 			})
 			It("runs a job and reports when it succeeds", func() {
 				th.ExpectConditionWithDetails(

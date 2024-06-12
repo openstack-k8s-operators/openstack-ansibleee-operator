@@ -27,7 +27,7 @@ import (
 
 const (
 	// This constant must NOT use tabs, as it as raw string passed to the ansible-runner
-	play = `
+	playbookContents = `
 - name: Print hello world
   hosts: all
   tasks:
@@ -36,7 +36,7 @@ const (
         msg: "Hello, world this is ansibleee-play.yaml"`
 
 	// This constant is meant to represent malformed inline play
-	malformedPlay = `
+	malformedPlaybook = `
 	- name: Print hello world
 	  hosts: all
 	  tasks:
@@ -76,7 +76,7 @@ func CreateAnsibleee(name types.NamespacedName) client.Object {
 }
 
 func CreateAnsibleeeWithParams(
-	name types.NamespacedName, playbook string, image string, play string,
+	name types.NamespacedName, playbook string, image string, playbookContents string,
 	cmdline string, extraVars map[string]interface{}, extraMounts []map[string]interface{}) client.Object {
 
 	raw := map[string]interface{}{
@@ -89,12 +89,12 @@ func CreateAnsibleeeWithParams(
 		"spec": map[string]interface{}{
 			// this can be removed as soon as webhook is enabled in the
 			// test env
-			"image":       image,
-			"playbook":    playbook,
-			"play":        play,
-			"cmdline":     cmdline,
-			"extraVars":   extraVars,
-			"extraMounts": extraMounts,
+			"image":            image,
+			"playbook":         playbook,
+			"playbookContents": playbookContents,
+			"cmdline":          cmdline,
+			"extraVars":        extraVars,
+			"extraMounts":      extraMounts,
 		},
 	}
 

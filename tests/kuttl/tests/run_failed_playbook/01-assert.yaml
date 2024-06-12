@@ -12,7 +12,7 @@ metadata:
   name: failed-play
 spec:
   name: openstackansibleee
-  play: |
+  playbookContents: |
     - name: Execution failure
       hosts: localhost
       tasks:
