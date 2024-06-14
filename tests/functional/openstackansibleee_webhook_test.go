@@ -31,13 +31,13 @@ var _ = Describe("OpenStackAnsibleEE Webhook", func() {
 				[]map[string]interface{}{}))
 		})
 	})
-	When("User creates ansibleee resource with a valid inline play", func() {
+	When("User creates ansibleee resource with a valid inline playbook", func() {
 		It("should be accepted", func() {
 			DeferCleanup(th.DeleteInstance, CreateAnsibleeeWithParams(
 				ansibleeeName,
 				"",
 				"test-image",
-				play,
+				playbookContents,
 				"",
 				map[string]interface{}{},
 				[]map[string]interface{}{},
@@ -85,10 +85,10 @@ var _ = Describe("OpenStackAnsibleEE Webhook", func() {
 						"spec": map[string]interface{}{
 							// this can be removed as soon as webhook is enabled in the
 							// test env
-							"image":    "test-image",
-							"playbook": "",
-							"play":     malformedPlay,
-							"cmdline":  "",
+							"image":            "test-image",
+							"playbook":         "",
+							"playbookContents": malformedPlaybook,
+							"cmdline":          "",
 						},
 					}
 					unstructuredObj := &unstructured.Unstructured{Object: newInstance}

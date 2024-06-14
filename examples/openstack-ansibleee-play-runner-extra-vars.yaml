@@ -5,7 +5,7 @@ metadata:
   namespace: openstack
 spec:
   image: quay.io/openstack-k8s-operators/openstack-ansibleee-runner:latest
-  play: |
+  playbookContents: |
     - name: Print hello world
       hosts: all
       tasks:

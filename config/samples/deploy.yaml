@@ -1481,7 +1481,7 @@ spec:
                 items:
                   type: string
                 type: array
-              play:
+              playbookContents:
                 type: string
               playbook:
                 type: string

@@ -17,6 +17,7 @@ limitations under the License.
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
@@ -28,8 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-
-	"context"
 
 	"github.com/go-logr/logr"
 	"github.com/openstack-k8s-operators/lib-common/modules/common/condition"
@@ -96,7 +95,6 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		r.Scheme,
 		Log,
 	)
-
 	if err != nil {
 		// helper might be nil, so can't use util.LogErrorForObject since it requires helper as first arg
 		Log.Error(err, fmt.Sprintf("Unable to acquire helper for  OpenStackAnsibleEE %s", instance.Name))
@@ -279,7 +277,8 @@ func (r *OpenStackAnsibleEEReconciler) getOpenStackAnsibleeeInstance(ctx context
 func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Context,
 	instance *ansibleeev1.OpenStackAnsibleEE,
 	h *helper.Helper,
-	annotations map[string]string) (*batchv1.Job, error) {
+	annotations map[string]string,
+) (*batchv1.Job, error) {
 	Log := r.GetLogger(ctx)
 	labels := instance.GetObjectMeta().GetLabels()
 
@@ -338,7 +337,7 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 		},
 	}
 
-	//Populate hash
+	// Populate hash
 	hashes := make(map[string]string)
 
 	if len(instance.Spec.InitContainers) > 0 {
@@ -374,11 +373,11 @@ func (r *OpenStackAnsibleEEReconciler) jobForOpenStackAnsibleEE(ctx context.Cont
 		}
 	}
 
-	if len(instance.Spec.Play) > 0 {
-		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", instance.Spec.Play, "play", job, hashes)
+	if len(instance.Spec.PlaybookContents) > 0 {
+		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", instance.Spec.PlaybookContents, "playbookContents", job, hashes)
 	} else if len(playbook) > 0 {
 		// As we set "playbook.yaml" as default
-		// we need to ensure that Play is empty before adding playbook
+		// we need to ensure that PlaybookContents is empty before adding playbook
 		setRunnerEnvVar(h, "RUNNER_PLAYBOOK", playbook, "playbooks", job, hashes)
 	}
 
@@ -480,7 +479,6 @@ func hashPodSpec(
 	var err error
 	spec, _ := podSpec.Marshal()
 	hashes["podspec"], err = calculateHash(string(spec))
-
 	if err != nil {
 		h.GetLogger().Error(err, "Error calculating the PodSpec hash")
 	}
@@ -493,8 +491,8 @@ func setRunnerEnvVar(
 	varValue string,
 	hashType string,
 	job *batchv1.Job,
-	hashes map[string]string) {
-
+	hashes map[string]string,
+) {
 	var envVar corev1.EnvVar
 	var err error
 	envVar.Name = varName

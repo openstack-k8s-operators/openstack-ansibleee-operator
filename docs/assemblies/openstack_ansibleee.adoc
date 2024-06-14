@@ -87,8 +87,8 @@ OpenStackAnsibleEESpec defines the desired state of OpenStackAnsibleEE
 |===
 | Field | Description | Scheme | Required
 
-| play
-| Play is an inline playbook contents that ansible will run on execution.
+| playbookContents
+| PlaybookContents is an inline playbook contents that ansible will run on execution.
 | string
 | false
 

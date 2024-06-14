@@ -12,7 +12,7 @@ metadata:
   name: ansibleee-play
 spec:
   name: openstackansibleee
-  play: |
+  playbookContents: |
     - name: Print hello world
       hosts: localhost
       tasks:

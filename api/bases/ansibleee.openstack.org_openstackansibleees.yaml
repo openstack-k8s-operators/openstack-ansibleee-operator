@@ -1520,9 +1520,9 @@ spec:
                 items:
                   type: string
                 type: array
-              play:
-                type: string
               playbook:
+                type: string
+              playbookContents:
                 type: string
               preserveJobs:
                 default: true
