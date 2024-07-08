@@ -77,9 +77,6 @@ spec:
       version: v1beta1
   description: The OpenStack Ansible Execution Environment Operator
   displayName: OpenStackAnsibleEE
-  icon:
-  - base64data: ""
-    mediatype: ""
   install:
     spec:
       deployments: null
