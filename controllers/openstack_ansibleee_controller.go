@@ -150,13 +150,14 @@ func (r *OpenStackAnsibleEEReconciler) Reconcile(ctx context.Context, req ctrl.R
 		_, err := nad.GetNADWithName(ctx, helper, netAtt, instance.Namespace)
 		if err != nil {
 			if errors.IsNotFound(err) {
+				Log.Info(fmt.Sprintf("network-attachment-definition %s not found", netAtt))
 				instance.Status.Conditions.Set(condition.FalseCondition(
 					condition.NetworkAttachmentsReadyCondition,
 					condition.RequestedReason,
 					condition.SeverityInfo,
 					condition.NetworkAttachmentsReadyWaitingMessage,
 					netAtt))
-				return ctrl.Result{RequeueAfter: time.Second * 10}, fmt.Errorf("network-attachment-definition %s not found", netAtt)
+				return ctrl.Result{RequeueAfter: time.Second * 10}, nil
 			}
 			instance.Status.Conditions.Set(condition.FalseCondition(
 				condition.NetworkAttachmentsReadyCondition,
